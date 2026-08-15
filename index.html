@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pico · 互动编程乐园</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+</style>
+<style>/* ============================================================
+   Pico Visual Identity v0.2
+   实现即规范：token 唯一事实来源，效果见 visual-identity.html。
+   语义说明见 visual-identity.md。
+   所有共享选择器以 .pico- 前缀命名；World 局部样式一律
+   使用 pico-world-<playground-id> 前缀，不得覆盖本文件。
+   ============================================================ */
+
+/* ---------- 1. Design tokens ---------- */
+
+:root {
+  color-scheme: light dark; /* 原生控件（滑杆等）随主题 */
+
+  /* 色彩：中性纯白 + 墨色 + 一处 VS Code 紫 */
+  --pico-paper: #ffffff;            /* 页面底色，纯白 */
+  --pico-surface: #fafafa;          /* 面板底色，微灰与页面区分 */
+  --pico-ink: #161616;              /* 正文墨色，接近纯黑 */
+  --pico-ink-soft: #525252;         /* 次要文字 */
+  --pico-hairline: #d6d6d6;         /* 细线与边框 */
+  --pico-accent: #7c3aed;           /* 紫：当前行 / 关联 / 错误的唯一强调色 */
+  --pico-accent-deep: #6d28d9;      /* 紫 hover */
+  --pico-accent-wash: rgba(124, 58, 237, 0.09);  /* 紫淡染，用于行高亮 */
+  --pico-on-accent: #ffffff;         /* accent 上的文字 */
+  --pico-code-bg: #f6f6f6;          /* 代码区底色，随主题 */
+  --pico-code-ink: #161616;         /* 代码文字 */
+  --pico-code-dim: #9e9e9e;         /* 行号等弱化元素 */
+
+  /* 语法色：安静的低饱和套装，与紫 accent 不冲突 */
+  --pico-syn-key: #8250df;          /* 关键字 */
+  --pico-syn-str: #116329;          /* 字符串 */
+  --pico-syn-num: #0550ae;          /* 数字 */
+  --pico-syn-com: #6e7781;          /* 注释 */
+  --pico-syn-fn: #6639ba;           /* 函数名 */
+
+  /* 字体：LXGW WenKai Screen 为主，离线时优雅回退 */
+  --pico-font-text: "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --pico-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
+    Consolas, "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", monospace;
+
+  /* 字号：面向小朋友，宁大勿小，正文 18px */
+  --pico-size-xs: 13px;
+  --pico-size-sm: 15px;
+  --pico-size-code: 16px;
+  --pico-size-md: 18px;
+  --pico-size-lg: 22px;
+  --pico-size-xl: 30px;
+
+  /* 间距与形状：小圆角、几乎无阴影 */
+  --pico-space-1: 4px;
+  --pico-space-2: 8px;
+  --pico-space-3: 12px;
+  --pico-space-4: 16px;
+  --pico-space-5: 24px;
+  --pico-space-6: 40px;
+  --pico-radius: 6px;
+  --pico-radius-sm: 3px;
+  --pico-shadow: 0 1px 3px rgba(22, 22, 22, 0.08);
+  --pico-shadow-up: 0 -2px 10px rgba(22, 22, 22, 0.06);
+  --pico-btn-hi: rgba(255, 255, 255, 0.7);   /* 按钮顶部内高光 */
+  --pico-line: 1px solid var(--pico-hairline);
+}
+
+/* 深色 tokens：随系统主题，data-pico-theme 可手动覆盖 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-pico-theme="light"]) {
+    --pico-paper: #131316;
+    --pico-surface: #1c1c20;
+    --pico-ink: #f0f0f0;
+    --pico-ink-soft: #b3b3b3;
+    --pico-hairline: #4a4a52;
+    --pico-accent: #a78bfa;
+    --pico-accent-deep: #c4b5fd;
+    --pico-accent-wash: rgba(167, 139, 250, 0.16);
+    --pico-code-bg: #0f0f12;
+    --pico-code-ink: #eaeaea;
+    --pico-code-dim: #7a7a7a;
+    --pico-syn-key: #d2a8ff;
+    --pico-syn-str: #8ddb8c;
+    --pico-syn-num: #79c0ff;
+    --pico-syn-com: #8b949e;
+    --pico-syn-fn: #b392f0;
+    --pico-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --pico-on-accent: #22133d;
+    --pico-shadow-up: 0 -2px 10px rgba(0, 0, 0, 0.25);
+    --pico-btn-hi: rgba(255, 255, 255, 0.07);
+  }
+}
+:root[data-pico-theme="dark"] {
+  --pico-paper: #131316;
+  --pico-surface: #1c1c20;
+  --pico-ink: #f0f0f0;
+  --pico-ink-soft: #b3b3b3;
+  --pico-hairline: #4a4a52;
+  --pico-accent: #a78bfa;
+  --pico-accent-deep: #c4b5fd;
+  --pico-accent-wash: rgba(167, 139, 250, 0.16);
+  --pico-code-bg: #0f0f12;
+  --pico-code-ink: #eaeaea;
+  --pico-code-dim: #7a7a7a;
+  --pico-syn-key: #d2a8ff;
+  --pico-syn-str: #8ddb8c;
+  --pico-syn-num: #79c0ff;
+  --pico-syn-com: #8b949e;
+  --pico-syn-fn: #b392f0;
+  --pico-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --pico-shadow-up: 0 -2px 10px rgba(0, 0, 0, 0.25);
+  --pico-btn-hi: rgba(255, 255, 255, 0.07);
+  --pico-on-accent: #22133d;
+}
+
+/* ---------- 2. 基础 ---------- */
+
+.pico-root {
+  font-family: var(--pico-font-text);
+  font-size: var(--pico-size-md);
+  line-height: 1.7;
+  color: var(--pico-ink);
+  background: var(--pico-paper);
+}
+
+.pico-root ::selection {
+  background: var(--pico-accent-wash);
+}
+
+/* ---------- 3. 布局：代码侧 43 / 世界侧 57 / 底部运行栏 92px ---------- */
+
+.pico-shell {
+  display: grid;
+  grid-template-columns: 43fr 57fr;
+  grid-template-rows: 1fr 92px;
+  height: 100%;
+}
+
+.pico-shell--stacked { /* 窄屏回退：上下堆叠，运行栏置底 */
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 92px;
+}
+
+.pico-code,
+.pico-world {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.pico-code {
+  border-right: var(--pico-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.pico-world {
+  background: var(--pico-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- 4. 代码侧 ---------- */
+
+.pico-editor {
+  flex: 1;
+  min-height: 0;
+  background: var(--pico-code-bg);
+  color: var(--pico-code-ink);
+  font-family: var(--pico-font-mono);
+  font-size: var(--pico-size-code);
+  line-height: 1.8;
+  padding: var(--pico-space-4);
+}
+
+/* 当前行：左侧 2px 紫 + 极淡紫染，不加发光 */
+.pico-editor .pico-current-line {
+  display: block;
+  margin: 0 calc(-1 * var(--pico-space-4));
+  padding: 0 var(--pico-space-4);
+  border-left: 2px solid var(--pico-accent);
+  background: var(--pico-accent-wash);
+}
+
+/* 代码行与行号 */
+.pico-editor .pico-line { display: block; }
+
+.pico-editor .pico-ln {
+  display: inline-block;
+  min-width: 2ch;
+  margin-right: 24px;
+  text-align: right;
+  color: var(--pico-code-dim);
+  user-select: none;
+}
+
+/* 语法色（CodeMirror 主题应映射到同一批 token） */
+.pico-kw  { color: var(--pico-syn-key); }
+.pico-str { color: var(--pico-syn-str); }
+.pico-num { color: var(--pico-syn-num); }
+.pico-com { color: var(--pico-syn-com); }
+.pico-fn  { color: var(--pico-syn-fn); }
+
+/* I/O 区：无 I/O 时整块 display:none，不留空白 */
+.pico-io {
+  border-top: var(--pico-line);
+  background: var(--pico-surface);
+  box-shadow: var(--pico-shadow-up);
+  font-family: var(--pico-font-mono);
+  font-size: var(--pico-size-code);
+  padding: var(--pico-space-3) var(--pico-space-4);
+}
+
+/* 错误：细线 + 紫色文字，不是彩色卡片 */
+.pico-error {
+  color: var(--pico-accent);
+  padding-top: var(--pico-space-2);
+  margin-top: var(--pico-space-2);
+  border-top: var(--pico-line);
+}
+
+.pico-error code {
+  font-family: var(--pico-font-mono);
+  font-size: var(--pico-size-xs);
+  opacity: 0.85;
+}
+
+/* ---------- 5. 世界侧 ---------- */
+
+.pico-world-note { /* 说明文字靠上，不包围教具 */
+  padding: var(--pico-space-4);
+  font-size: var(--pico-size-sm);
+  color: var(--pico-ink-soft);
+}
+
+.pico-scene { /* 教具区域，视觉居中 */
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+/* 预览：细虚线轮廓 + 降透明度 + 文字标注，绝不只靠颜色区分 */
+.pico-preview {
+  outline: 1.5px dashed var(--pico-accent);
+  outline-offset: 3px;
+  opacity: 0.55;
+}
+
+.pico-preview-label {
+  font-size: var(--pico-size-xs);
+  color: var(--pico-accent);
+  letter-spacing: 0.1em;
+}
+
+/* ---------- 6. 运行与回放栏 ---------- */
+
+.pico-runbar {
+  grid-column: 1 / -1;
+  border-top: var(--pico-line);
+  background: var(--pico-surface);
+  box-shadow: var(--pico-shadow-up);
+  display: flex;
+  align-items: center;
+  gap: var(--pico-space-4);
+  padding: 0 var(--pico-space-4);
+}
+
+.pico-btn {
+  appearance: none;
+  font: inherit;
+  font-size: var(--pico-size-sm);
+  color: var(--pico-ink);
+  background: linear-gradient(180deg, var(--pico-surface), var(--pico-paper));
+  border: var(--pico-line);
+  border-radius: var(--pico-radius);
+  padding: var(--pico-space-2) var(--pico-space-4);
+  cursor: pointer;
+  box-shadow: var(--pico-shadow), inset 0 1px 0 var(--pico-btn-hi);
+  transition: background 0.15s, border-color 0.15s, color 0.15s,
+    box-shadow 0.15s, transform 0.1s;
+}
+
+.pico-btn:hover { border-color: var(--pico-ink-soft); }
+.pico-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.pico-btn:disabled { opacity: 0.4; cursor: default; }
+
+.pico-btn--primary {
+  background: linear-gradient(180deg, var(--pico-accent), var(--pico-accent-deep));
+  border-color: var(--pico-accent-deep);
+  color: var(--pico-on-accent);
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.pico-btn--primary:hover { filter: brightness(1.08); }
+
+.pico-btn--quiet { /* 回放步进等次级动作：不装饰 */
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.pico-btn--quiet:hover {
+  background: var(--pico-accent-wash);
+  border-color: var(--pico-hairline);
+}
+
+/* 文本框：input() 触发时出现在代码侧 */
+.pico-input {
+  appearance: none;
+  font-family: var(--pico-font-mono);
+  font-size: var(--pico-size-code);
+  color: var(--pico-ink);
+  background: var(--pico-surface);
+  border: var(--pico-line);
+  border-radius: var(--pico-radius);
+  padding: var(--pico-space-2) var(--pico-space-3);
+  box-shadow: inset 0 1px 2px rgba(22, 22, 22, 0.04);
+}
+
+.pico-input::placeholder { color: var(--pico-ink-soft); opacity: 0.7; }
+
+.pico-input:focus {
+  outline: none;
+  border-color: var(--pico-accent);
+  box-shadow: 0 0 0 3px var(--pico-accent-wash);
+}
+
+.pico-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pico-hairline);
+  cursor: pointer;
+}
+
+.pico-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--pico-accent);
+  border: 2px solid var(--pico-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease;
+}
+
+.pico-slider:hover::-webkit-slider-thumb { transform: scale(1.15); }
+.pico-slider:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+.pico-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--pico-accent);
+  border: 2px solid var(--pico-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease;
+}
+
+.pico-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pico-hairline);
+}
+
+.pico-slider:focus-visible {
+  outline: 2px solid var(--pico-accent);
+  outline-offset: 4px;
+}
+
+.pico-step {
+  font-family: var(--pico-font-mono);
+  font-size: var(--pico-size-sm);
+  color: var(--pico-ink-soft);
+  white-space: nowrap;
+}
+</style>
+<style>
+body {
+  background: var(--pico-paper);
+  color: var(--pico-ink);
+  font-family: var(--pico-font-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--pico-space-6) var(--pico-space-4);
+}
+main { width: 100%; max-width: 720px; }
+header { display: flex; align-items: baseline; gap: var(--pico-space-3); margin-bottom: var(--pico-space-5); }
+.logo { font-size: var(--pico-size-xl); font-weight: 700; }
+.logo b { color: var(--pico-accent); }
+.tagline { color: var(--pico-ink-soft); font-size: var(--pico-size-sm); }
+h1 { font-size: var(--pico-size-lg); margin-bottom: var(--pico-space-2); }
+.sub { color: var(--pico-ink-soft); font-size: var(--pico-size-sm); margin-bottom: var(--pico-space-5); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--pico-space-4); }
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--pico-surface);
+  border: var(--pico-line);
+  border-radius: var(--pico-radius);
+  padding: var(--pico-space-4);
+  box-shadow: var(--pico-shadow);
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  animation: rise 380ms ease both;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--pico-accent); box-shadow: 0 4px 12px rgba(22, 22, 22, 0.12); }
+.card-title { font-size: var(--pico-size-md); font-weight: 600; margin-bottom: var(--pico-space-1); }
+.card-id { font-family: var(--pico-font-mono); font-size: var(--pico-size-xs); color: var(--pico-ink-soft); margin-bottom: var(--pico-space-3); }
+.card-open { font-size: var(--pico-size-sm); color: var(--pico-accent); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+footer { margin-top: var(--pico-space-6); color: var(--pico-ink-soft); font-size: var(--pico-size-xs); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo">Pico<b>·</b>编程乐园</div>
+    <div class="tagline">互动式 Python Playground</div>
+  </header>
+  <h1>选择你想玩的实验</h1>
+  <p class="sub">共 1 个 playground · 生成于 2026/8/15 01:45:11</p>
+  <section class="grid">
+<a class="card" href="./tower-of-hanoi.html" style="animation-delay:0ms">
+  <div class="card-title">汉诺塔</div>
+  <div class="card-id">tower-of-hanoi</div>
+  <div class="card-open">打开 →</div>
+</a>
+  </section>
+  <footer><a href="https://github.com/lxc0629/learn-python" style="color: inherit">learn-python</a> · MIT License</footer>
+</main>
+</body>
+</html>
