@@ -9,7 +9,7 @@
 html, body { min-height: 100%; }
 </style>
 <style>/* ============================================================
-   Pico Visual Identity v0.3
+   Pico Visual Identity v0.6
    实现即规范；语义说明见 visual-identity.md。
    .pico-shell 是推荐骨架，不是 playground 的强制布局。
    所有共享选择器以 .pico- 前缀命名；World 局部样式一律
@@ -81,7 +81,7 @@ html, body { min-height: 100%; }
   --pico-shadow: 0 1px 3px rgba(32, 32, 34, .08);
   --pico-ease-out: cubic-bezier(.2, .8, .2, 1);
   --pico-duration-fast: 140ms;
-  --pico-duration-move: 360ms;
+  --pico-duration-move: 240ms;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -139,10 +139,12 @@ html, body { min-height: 100%; }
 
 .pico-root ::selection { background: var(--pico-accent-wash); }
 .pico-root button,
-.pico-root input { font: inherit; }
+.pico-root input,
+.pico-root select { font: inherit; }
 
 .pico-root button:focus-visible,
-.pico-root input:focus-visible {
+.pico-root input:focus-visible,
+.pico-root select:focus-visible {
   outline: 2px solid var(--pico-accent);
   outline-offset: 3px;
 }
@@ -151,7 +153,7 @@ html, body { min-height: 100%; }
 .pico-shell {
   display: grid;
   grid-template-columns: 43fr 57fr;
-  grid-template-rows: minmax(0, 1fr) 86px;
+  grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
   border: var(--pico-line);
   border-radius: var(--pico-radius);
@@ -190,7 +192,38 @@ html, body { min-height: 100%; }
   color: var(--pico-ink);
 }
 
+.pico-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pico-space-2);
+}
+
 /* 编辑器外观。CodeMirror 主题应映射到同一批 token。 */
+.pico-w-editor-host {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.pico-w-editor-host .cm-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+.pico-w-editor-host .cm-scroller {
+  overflow: auto;
+}
+
 .pico-editor {
   flex: 1;
   margin: 0;
@@ -260,6 +293,18 @@ html, body { min-height: 100%; }
 .pico-function:hover { border-color: color-mix(in srgb, var(--pico-accent) 28%, var(--pico-hairline)); background: color-mix(in srgb, var(--pico-accent-wash) 72%, var(--pico-surface)); }
 .pico-function:active { transform: translateY(1px); }
 
+.pico-status {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 4px 8px;
+  border: var(--pico-line);
+  border-radius: var(--pico-radius-sm);
+  color: var(--pico-ink-soft);
+  background: var(--pico-surface);
+  font: 500 var(--pico-size-xs)/1.2 var(--pico-font-ui);
+}
+
 /* input/output、错误与预览也是跨课程公共能力。 */
 .pico-io {
   padding: var(--pico-space-3) var(--pico-space-4);
@@ -267,6 +312,11 @@ html, body { min-height: 100%; }
   background: var(--pico-paper);
   font: var(--pico-size-md)/1.6 var(--pico-font-text);
 }
+
+.pico-io-row { min-height: 1.6em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pico-io-stderr { color: var(--pico-accent-deep); }
+.pico-io-input { display: flex; align-items: center; gap: var(--pico-space-2); }
+.pico-io-input .pico-input { flex: 1; min-width: 0; }
 
 .pico-error {
   margin-top: var(--pico-space-2);
@@ -289,9 +339,8 @@ html, body { min-height: 100%; }
 
 /* 运行与回放 */
 .pico-runbar {
-  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: auto auto minmax(180px, 1fr) auto;
+  grid-template-columns: auto minmax(180px, 1fr) auto;
   align-items: center;
   gap: 14px;
   padding: 0 18px;
@@ -320,6 +369,12 @@ html, body { min-height: 100%; }
 .pico-btn--icon { width: 36px; padding: 0; font-size: 17px; }
 .pico-btn--quiet { border-color: transparent; background: transparent; }
 .pico-btn--quiet:hover { border-color: var(--pico-hairline); background: var(--pico-accent-wash); }
+.pico-btn--small {
+  min-height: 28px;
+  padding: 4px 10px;
+  font-size: var(--pico-size-sm);
+  border-radius: var(--pico-radius-sm);
+}
 .pico-btn:disabled { opacity: .42; cursor: default; }
 
 .pico-input {
@@ -433,22 +488,32 @@ html, body { min-height: 100%; }
 @media (max-width: 760px) {
   .vi-page { width: min(100% - 24px, 680px); }
   .vi-header { align-items: start; flex-direction: column; }
-  .pico-shell { grid-template-columns: 1fr; grid-template-rows: 360px 360px auto; }
+  .pico-shell { grid-template-columns: 1fr; grid-template-rows: minmax(360px, auto) minmax(480px, auto); }
   .pico-code { border-right: 0; border-bottom: var(--pico-line); }
-  .pico-runbar { grid-column: 1; grid-template-columns: 1fr auto; padding: 14px; }
-  .pico-timeline { grid-column: 1 / -1; grid-row: 2; }
+  .pico-runbar { grid-template-columns: auto minmax(0, 1fr) auto; padding: 14px; }
   .pico-step { justify-self: end; }
   .vi-demo-shell { height: auto; }
   .vi-swatches { grid-template-columns: repeat(3, 1fr); }
 }
 
+@media (pointer: coarse) {
+  .pico-btn,
+  .pico-btn--small,
+  .pico-btn--icon,
+  .pico-function,
+  .pico-select { min-height: 44px; }
+  .pico-slider { height: 44px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
+  .pico-root { scroll-behavior: auto; }
+  .pico-enter,
+  .pico-exit,
+  .pico-move,
+  .pico-scale,
+  .vi-motion { animation: none !important; transition: none !important; }
+  .pico-btn:active,
+  .pico-function:active { transform: none; }
 }
 </style>
 <style>
@@ -496,31 +561,36 @@ footer { margin-top: var(--pico-space-6); color: var(--pico-ink-soft); font-size
     <div class="tagline">互动式 Python Playground</div>
   </header>
   <h1>选择你想玩的实验</h1>
-  <p class="sub">共 5 个 playground · 生成于 2026/8/16 18:10:09</p>
+  <p class="sub">共 6 个 playground · 生成于 2026/8/23 16:33:57</p>
   <section class="grid">
-<a class="card" href="./bfs-dfs-graph-search.html" style="animation-delay:0ms">
-  <div class="card-title">BFS / DFS 图搜索</div>
-  <div class="card-id">bfs-dfs-graph-search</div>
+<a class="card" href="./ai-cloze-generator.html" style="animation-delay:0ms">
+  <div class="card-title">英语完形填空出题器：列表与大语言模型</div>
+  <div class="card-id">ai-cloze-generator</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./loop-canvas.html" style="animation-delay:40ms">
-  <div class="card-title">循环绘制图形</div>
-  <div class="card-id">loop-canvas</div>
+<a class="card" href="./cow-pasture-3d.html" style="animation-delay:40ms">
+  <div class="card-title">农场巡航：3D 空间与方向转向</div>
+  <div class="card-id">cow-pasture-3d</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./network-decision-routing.html" style="animation-delay:80ms">
-  <div class="card-title">网络决策路由</div>
-  <div class="card-id">network-decision-routing</div>
+<a class="card" href="./image-filter-studio.html" style="animation-delay:80ms">
+  <div class="card-title">像素画变色魔法：双层循环与图像处理</div>
+  <div class="card-id">image-filter-studio</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./sorting-algorithms.html" style="animation-delay:120ms">
-  <div class="card-title">排序算法</div>
-  <div class="card-id">sorting-algorithms</div>
-  <div class="card-open">打开 →</div>
-</a>
-<a class="card" href="./tower-of-hanoi.html" style="animation-delay:160ms">
-  <div class="card-title">汉诺塔</div>
+<a class="card" href="./tower-of-hanoi.html" style="animation-delay:120ms">
+  <div class="card-title">汉诺塔的递归魔法</div>
   <div class="card-id">tower-of-hanoi</div>
+  <div class="card-open">打开 →</div>
+</a>
+<a class="card" href="./turtle-fractal-tree.html" style="animation-delay:160ms">
+  <div class="card-title">海龟画板：几何旋转与魔法花朵</div>
+  <div class="card-id">turtle-fractal-tree</div>
+  <div class="card-open">打开 →</div>
+</a>
+<a class="card" href="./warehouse-logistics-ascii.html" style="animation-delay:200ms">
+  <div class="card-title">仓储物流机器人：二维网格与路径规划</div>
+  <div class="card-id">warehouse-logistics-ascii</div>
   <div class="card-open">打开 →</div>
 </a>
   </section>
