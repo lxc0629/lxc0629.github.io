@@ -8,13 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { min-height: 100%; }
 </style>
-<style>/* ============================================================
-   Pico Visual Identity v0.6
-   实现即规范；语义说明见 visual-identity.md。
-   .pico-shell 是推荐骨架，不是 playground 的强制布局。
-   所有共享选择器以 .pico- 前缀命名；World 局部样式一律
-   使用 pico-world-<playground-id> 前缀，不得覆盖本文件。
-   ============================================================ */
+<style>/* Pico VI：.pico-page + .pico-shell 为标准骨架；课程局部样式使用 pico-world-<id> 前缀。 */
 
 @font-face {
   font-family: "Pico WenKai 103";
@@ -45,6 +39,7 @@ html, body { min-height: 100%; }
   --pico-accent-deep: #5535da;
   --pico-accent-wash: #eeeaff;
   --pico-on-accent: #ffffff;
+  --pico-card-red: #b4233a;
   --pico-code-bg: #f7f7f5;
   --pico-code-ink: var(--pico-ink);
   --pico-code-dim: #a0a09d;
@@ -96,6 +91,7 @@ html, body { min-height: 100%; }
     --pico-accent-deep: #c4b5fd;
     --pico-accent-wash: rgba(167, 139, 250, .16);
     --pico-on-accent: #22133d;
+    --pico-card-red: #ff91a4;
     --pico-code-bg: #111113;
     --pico-code-dim: #7e7e86;
     --pico-syn-key: #d2a8ff;
@@ -118,6 +114,7 @@ html, body { min-height: 100%; }
   --pico-accent-deep: #c4b5fd;
   --pico-accent-wash: rgba(167, 139, 250, .16);
   --pico-on-accent: #22133d;
+  --pico-card-red: #ff91a4;
   --pico-code-bg: #111113;
   --pico-code-dim: #7e7e86;
   --pico-syn-key: #d2a8ff;
@@ -150,15 +147,27 @@ html, body { min-height: 100%; }
 }
 
 /* 公共讲义骨架 */
+.pico-page {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 18px;
+  background: var(--pico-paper);
+}
+
 .pico-shell {
   display: grid;
   grid-template-columns: 43fr 57fr;
   grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   border: var(--pico-line);
   border-radius: var(--pico-radius);
   background: var(--pico-surface-raised);
 }
+
+.pico-shell--world-only { grid-template-columns: minmax(0, 1fr); }
 
 .pico-code,
 .pico-world {
@@ -171,6 +180,13 @@ html, body { min-height: 100%; }
 .pico-code {
   border-right: var(--pico-line);
   background: var(--pico-code-bg);
+}
+
+.pico-editor {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .pico-panel-head {
@@ -224,58 +240,15 @@ html, body { min-height: 100%; }
   overflow: auto;
 }
 
-.pico-editor {
-  flex: 1;
-  margin: 0;
-  overflow: auto;
-  padding: 18px 0;
-  color: var(--pico-ink);
-  background: var(--pico-code-bg);
-  font: var(--pico-size-code)/1.8 var(--pico-font-mono);
-  tab-size: 4;
-}
-
-.pico-line {
-  display: block;
-  min-height: 1.8em;
-  padding-right: 18px;
-  border-left: 3px solid transparent;
-  white-space: pre;
-}
-
-.pico-current-line {
-  border-left-color: var(--pico-accent);
-  background: var(--pico-accent-wash);
-}
-
-.pico-ln {
-  display: inline-block;
-  width: 3.4em;
-  padding-right: var(--pico-space-4);
-  color: var(--pico-code-dim);
-  text-align: right;
-  user-select: none;
-}
-
-.pico-kw { color: var(--pico-syn-key); font-weight: 600; }
-.pico-fn { color: var(--pico-syn-fn); }
-.pico-str { color: var(--pico-syn-str); }
-.pico-num { color: var(--pico-syn-num); }
-.pico-com { color: var(--pico-syn-com); font-style: italic; }
-
+.pico-tools,
 .pico-functions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
   padding: var(--pico-space-3) var(--pico-space-4);
   border-top: var(--pico-line);
   background: var(--pico-surface);
-}
-
-.pico-world-note {
-  padding: var(--pico-space-4);
-  color: var(--pico-ink-soft);
-  font-size: var(--pico-size-sm);
 }
 
 .pico-function {
@@ -305,6 +278,16 @@ html, body { min-height: 100%; }
   font: 500 var(--pico-size-xs)/1.2 var(--pico-font-ui);
 }
 
+.pico-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pico-space-2);
+  padding: var(--pico-space-2) var(--pico-space-4);
+  border-bottom: var(--pico-line);
+  background: var(--pico-surface);
+}
+
 /* input/output、错误与预览也是跨课程公共能力。 */
 .pico-io {
   padding: var(--pico-space-3) var(--pico-space-4);
@@ -325,9 +308,6 @@ html, body { min-height: 100%; }
   color: var(--pico-accent-deep);
 }
 
-.pico-preview { opacity: .48; outline: 1.5px dashed var(--pico-accent); outline-offset: 3px; }
-.pico-preview-label { color: var(--pico-accent-deep); font: var(--pico-size-xs)/1 var(--pico-font-ui); }
-
 .pico-scene {
   position: relative;
   display: grid;
@@ -337,18 +317,12 @@ html, body { min-height: 100%; }
   overflow: hidden;
 }
 
-/* 运行与回放 */
-.pico-runbar {
-  display: grid;
-  grid-template-columns: auto minmax(180px, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  padding: 0 18px;
+.pico-trace {
+  flex-shrink: 0;
+  padding: 10px var(--pico-space-4);
   border-top: var(--pico-line);
   background: var(--pico-paper);
 }
-
-.pico-controls { display: flex; gap: 6px; }
 
 .pico-btn {
   min-height: 36px;
@@ -388,34 +362,6 @@ html, body { min-height: 100%; }
 
 .pico-input:focus { border-color: var(--pico-accent); }
 
-.pico-select {
-  min-height: 34px;
-  padding: 6px 34px 6px 11px;
-  appearance: none;
-  border: var(--pico-line);
-  border-radius: var(--pico-radius);
-  color: var(--pico-ink);
-  background-color: var(--pico-surface-raised);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--pico-ink-soft) 50%),
-    linear-gradient(135deg, var(--pico-ink-soft) 50%, transparent 50%);
-  background-position:
-    calc(100% - 16px) calc(50% - 2px),
-    calc(100% - 11px) calc(50% - 2px);
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-  font: 500 var(--pico-size-sm)/1.2 var(--pico-font-ui);
-  transition: border-color var(--pico-duration-fast), background-color var(--pico-duration-fast);
-}
-
-.pico-select:hover { border-color: color-mix(in srgb, var(--pico-ink-soft) 58%, var(--pico-hairline)); }
-.pico-select:focus { border-color: var(--pico-accent); outline: 2px solid var(--pico-accent-wash); outline-offset: 2px; }
-.pico-select:disabled { opacity: .48; cursor: default; }
-.pico-select option { color: var(--pico-ink); background: var(--pico-surface-raised); }
-.pico-timeline { display: grid; gap: 9px; }
-.pico-timeline-meta { display: flex; justify-content: space-between; color: var(--pico-ink-soft); font: 12px/1 var(--pico-font-ui); }
-
 .pico-slider {
   --pico-progress: 0%;
   width: 100%;
@@ -448,72 +394,507 @@ html, body { min-height: 100%; }
 .pico-slider::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid var(--pico-paper); border-radius: 50%; background: var(--pico-accent); }
 .pico-step { color: var(--pico-ink-soft); font: var(--pico-size-xs)/1 var(--pico-font-mono); white-space: nowrap; }
 
-/* 公共动效语义。课程只组合，不另起一套时长和缓动。 */
-.pico-enter { animation: pico-enter var(--pico-duration-move) var(--pico-ease-out) both; }
-.pico-exit { animation: pico-exit var(--pico-duration-fast) ease both; }
-.pico-move { transition: transform var(--pico-duration-move) var(--pico-ease-out); }
-.pico-scale { transition: transform var(--pico-duration-fast) var(--pico-ease-out); }
-.pico-scale[aria-current="true"] { transform: scale(1.05); }
-
-@keyframes pico-enter { from { opacity: 0; transform: translateY(8px); } }
-@keyframes pico-exit { to { opacity: 0; transform: translateY(-5px); } }
-
-/* 展示页专用，不属于公共 VI。 */
-.vi-page { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 72px; }
-.vi-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-bottom: 18px; border-bottom: var(--pico-line); }
-.vi-header h1 { margin: 0; font-size: 26px; line-height: 1.25; }
-.vi-header p { max-width: 42ch; margin: 0; color: var(--pico-ink-soft); font-size: var(--pico-size-sm); }
-.vi-kicker, .vi-section > h2 { margin: 0; color: var(--pico-ink-soft); font: 650 var(--pico-size-xs)/1 var(--pico-font-ui); letter-spacing: .06em; }
-.vi-kicker { margin-bottom: 5px; color: var(--pico-accent-deep); }
-.vi-section { margin-top: 44px; }
-.vi-section > h2 { margin-bottom: 16px; }
-.vi-demo-shell { height: 570px; }
-.vi-output { display: grid; gap: 9px; color: var(--pico-ink-soft); font: var(--pico-size-code)/1.5 var(--pico-font-mono); }
-.vi-output span { opacity: .5; }
-.vi-output span[aria-current="true"] { color: var(--pico-accent-deep); opacity: 1; }
-.vi-samples { display: grid; gap: 34px; }
-.vi-sample { padding-top: 14px; border-top: var(--pico-line); }
-.vi-sample h3 { margin: 0 0 16px; color: var(--pico-ink-soft); font: 650 var(--pico-size-xs)/1 var(--pico-font-ui); }
-.vi-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pico-space-3); }
-.vi-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--pico-space-3); }
-.vi-swatch { display: grid; gap: 6px; color: var(--pico-ink-soft); font: 11px/1.2 var(--pico-font-mono); }
-.vi-swatch::before { content: ""; height: 52px; border: var(--pico-line); border-radius: var(--pico-radius-sm); background: var(--swatch); }
-.vi-type-text { margin: 0; font-size: var(--pico-size-lg); }
-.vi-type-code { margin: 0; font: var(--pico-size-code)/1.6 var(--pico-font-mono); }
-.vi-io-demo { width: min(100%, 620px); border: var(--pico-line); border-radius: var(--pico-radius); overflow: hidden; }
-.vi-preview-shape { width: 82px; height: 28px; border-radius: var(--pico-radius); background: var(--pico-ink-soft); }
-.vi-motion { width: 64px; height: 32px; border: var(--pico-line); border-radius: var(--pico-radius); background: var(--pico-surface); animation: vi-motion 1.8s var(--pico-ease-out) infinite; }
-@keyframes vi-motion { 0%, 20% { opacity: 0; transform: translateY(8px) scale(.96); } 45%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-5px); } }
-
 @media (max-width: 760px) {
-  .vi-page { width: min(100% - 24px, 680px); }
-  .vi-header { align-items: start; flex-direction: column; }
+  .pico-page { min-height: 100%; height: auto; padding: 12px; }
   .pico-shell { grid-template-columns: 1fr; grid-template-rows: minmax(360px, auto) minmax(480px, auto); }
+  .pico-shell--world-only { grid-template-rows: minmax(480px, auto); }
   .pico-code { border-right: 0; border-bottom: var(--pico-line); }
-  .pico-runbar { grid-template-columns: auto minmax(0, 1fr) auto; padding: 14px; }
   .pico-step { justify-self: end; }
-  .vi-demo-shell { height: auto; }
-  .vi-swatches { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (pointer: coarse) {
   .pico-btn,
   .pico-btn--small,
   .pico-btn--icon,
-  .pico-function,
-  .pico-select { min-height: 44px; }
+  .pico-function { min-height: 44px; }
   .pico-slider { height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pico-root { scroll-behavior: auto; }
-  .pico-enter,
-  .pico-exit,
-  .pico-move,
-  .pico-scale,
-  .vi-motion { animation: none !important; transition: none !important; }
   .pico-btn:active,
   .pico-function:active { transform: none; }
+}
+
+/* 教学领域组件 */
+
+/* 1. 扑克卡牌系统 */
+.pico-card-row {
+  display: grid;
+  grid-template-columns: repeat(var(--pico-card-cols, 4), 1fr);
+  gap: var(--pico-card-gap, var(--pico-space-3));
+}
+
+.pico-card {
+  position: relative;
+  width: var(--pico-card-width, 100%);
+  aspect-ratio: var(--pico-card-ratio, 5 / 7);
+  min-height: var(--pico-card-min-h, 120px);
+  color: var(--pico-ink);
+  background: var(--pico-surface-raised);
+  border: var(--pico-line);
+  border-radius: var(--pico-radius);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  user-select: none;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: transform var(--pico-duration-fast) var(--pico-ease-out), border-color var(--pico-duration-fast) var(--pico-ease-out);
+  cursor: pointer;
+}
+
+.pico-card:hover:not(.pico-card--used) {
+  transform: translateY(-2px);
+  border-color: var(--pico-accent);
+}
+
+.pico-card--sm { --pico-card-min-h: 90px; padding: 6px 8px; }
+.pico-card--lg { --pico-card-min-h: 150px; padding: 12px 14px; }
+
+.pico-card--selected {
+  border: 2px solid var(--pico-accent);
+  transform: translateY(-2px);
+}
+
+.pico-card--red { color: var(--pico-card-red); }
+
+.pico-card-suit-icon {
+  font-family: Georgia, serif;
+  font-size: var(--pico-size-sm);
+  line-height: 1;
+}
+
+.pico-card-suit-icon--center {
+  align-self: center;
+  font-size: 38px;
+  margin: 0 auto;
+}
+
+.pico-card--matched {
+  border: 2px dashed var(--pico-accent);
+  background: var(--pico-accent-wash);
+}
+
+.pico-card--used {
+  opacity: 0.45;
+  background: var(--pico-surface);
+  cursor: not-allowed;
+}
+
+.pico-card--back {
+  color: var(--pico-on-accent);
+  background: var(--pico-accent-deep);
+  border: 2px solid var(--pico-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.pico-card-back-inner {
+  width: 100%;
+  height: 100%;
+  border: 1px solid currentColor;
+  border-radius: var(--pico-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pico-card-back-emblem {
+  font-family: var(--pico-font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: currentColor;
+  letter-spacing: 0.15em;
+}
+
+.pico-card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  gap: 2px;
+}
+
+.pico-card-corner-bottom {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+.pico-card-corner-val {
+  font-family: var(--pico-font-mono);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pico-card-state {
+  position: absolute;
+  top: var(--pico-space-2);
+  right: var(--pico-space-2);
+  color: var(--pico-accent-deep);
+  font-weight: 800;
+}
+
+/* Turtle 运行时输出 presentation attributes；公共 CSS 负责主题覆盖。 */
+.pico-turtle-view .pico-canvas-frame rect,
+.pico-turtle-view .pico-overlay-grid line { stroke: var(--pico-hairline); }
+.pico-turtle-view .pico-overlay-axes line { stroke: var(--pico-ink-soft); }
+.pico-turtle-view .pico-overlay-axes text,
+.pico-turtle-view .pico-overlay-axes circle { fill: var(--pico-ink-soft); }
+
+/* 2. 华容道与拟物推盘系统 */
+.pico-klotski-frame {
+  background: #78350f;
+  border: 6px solid #451a03;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: inline-block;
+}
+
+.pico-klotski-board-classic {
+  width: var(--pico-klotski-w, 240px);
+  height: var(--pico-klotski-h, 300px);
+  position: relative;
+  background: #fef3c7;
+  border-radius: 6px;
+  box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.pico-klotski-block {
+  position: absolute;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #ffffff;
+  user-select: none;
+  cursor: pointer;
+  transition: transform var(--pico-duration-fast) ease, box-shadow var(--pico-duration-fast) ease;
+  box-sizing: border-box;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.pico-klotski-block:hover {
+  transform: scale(1.02);
+  filter: brightness(1.06);
+}
+
+/* 固定尺寸与 KlotskiBoardView 默认 (240x300, 内距 12) 的计算结果一致：
+   1 单位 = 53px 宽 / 54px 高，2 单位 = 110px 宽 / 111px 高；组件会以内联样式覆盖 */
+.pico-block--caocao {
+  width: 110px;
+  height: 111px;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  border: 2px solid #f87171;
+  box-shadow: 0 4px 10px rgba(185, 28, 28, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  font-size: 18px;
+}
+
+.pico-block--horizontal {
+  width: 110px;
+  height: 54px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: 2px solid #60a5fa;
+  box-shadow: 0 4px 8px rgba(29, 78, 216, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.pico-block--vertical {
+  width: 53px;
+  height: 111px;
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  border: 2px solid #34d399;
+  box-shadow: 0 4px 8px rgba(4, 120, 87, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  writing-mode: vertical-lr;
+  letter-spacing: 0.2em;
+}
+
+.pico-block--pawn {
+  width: 53px;
+  height: 54px;
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+  border: 2px solid #fbbf24;
+  box-shadow: 0 3px 6px rgba(180, 83, 9, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.pico-number-slider-board {
+  display: grid;
+  grid-template-columns: repeat(var(--pico-slider-cols, 4), var(--pico-slider-size, 56px));
+  grid-template-rows: repeat(var(--pico-slider-rows, 4), var(--pico-slider-size, 56px));
+  gap: 8px;
+  background: #1e293b;
+  border: 6px solid #0f172a;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.pico-slider-tile {
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pico-font-mono);
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  box-shadow: 0 4px 0 #94a3b8, 0 6px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--pico-duration-fast) ease, box-shadow var(--pico-duration-fast) ease;
+}
+
+.pico-slider-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #94a3b8, 0 8px 14px rgba(0, 0, 0, 0.2);
+}
+
+.pico-slider-tile:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #94a3b8, 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.pico-slider-tile--empty {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px dashed rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* 3. 五子棋与围棋系统 */
+.pico-gobang-board {
+  position: relative;
+  width: var(--pico-gobang-size, 420px);
+  height: var(--pico-gobang-size, 420px);
+  background: radial-gradient(circle at 45% 45%, #fbe8c9 0%, #e6c594 65%, #cca56f 100%);
+  border: 5px solid #7c4a1e;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15), inset 0 1px 4px rgba(255, 255, 255, 0.6);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.pico-stone {
+  position: absolute;
+  width: var(--pico-stone-size, 22px);
+  height: var(--pico-stone-size, 22px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform var(--pico-duration-fast) ease, box-shadow var(--pico-duration-fast) ease;
+}
+
+.pico-stone:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.pico-stone--black {
+  background: radial-gradient(circle at 35% 30%, #64748b 0%, #1e293b 45%, #020617 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.pico-stone--white {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f8fafc 55%, #cbd5e1 100%);
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+}
+
+.pico-stone--last::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+/* 悬浮落子预览虚影 */
+.pico-stone--ghost {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* 键盘落子光标 */
+.pico-stone-cursor {
+  position: absolute;
+  width: 27px;
+  height: 27px;
+  border: 2px dashed rgba(109, 74, 255, 0.85);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.pico-gobang-board:focus-visible {
+  outline: 2px solid var(--pico-accent, #6d4aff);
+  outline-offset: 3px;
+}
+
+/* 胜利连线与端点 */
+.pico-gobang-win-line {
+  stroke: #ef4444;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  opacity: 0.9;
+}
+
+.pico-gobang-win-cap {
+  fill: #ef4444;
+  opacity: 0.9;
+}
+
+/* 4. 数独网格系统 */
+.pico-sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, var(--pico-sudoku-cell, 36px));
+  grid-template-rows: repeat(9, var(--pico-sudoku-cell, 36px));
+  border: 3px solid #0f172a;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  width: fit-content;
+}
+
+.pico-sudoku-cell {
+  border: 0.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pico-font-mono);
+  font-size: 17px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--pico-duration-fast) ease;
+}
+
+.pico-sudoku-cell:not(.pico-sudoku-cell--active):not(.pico-sudoku-cell--error):hover {
+  background: #eef2ff;
+}
+
+.pico-sudoku-cell:nth-child(3n) { border-right: 2.5px solid #0f172a; }
+.pico-sudoku-cell:nth-child(9n) { border-right: none; }
+.pico-sudoku-cell:nth-child(n+19):nth-child(-n+27),
+.pico-sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2.5px solid #0f172a;
+}
+
+.pico-sudoku-cell--fixed {
+  font-weight: 800;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.pico-sudoku-cell--user {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.pico-sudoku-cell--crosshair {
+  background: #f1f5f9;
+}
+
+.pico-sudoku-cell--active {
+  background: #dbeafe !important;
+  box-shadow: inset 0 0 0 2px #2563eb;
+}
+
+.pico-sudoku-cell--error {
+  background: #fee2e2 !important;
+  color: #b91c1c;
+}
+
+.pico-sudoku-board:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* 4.1 数独数字键盘 */
+.pico-sudoku-numpad {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pico-sudoku-num-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--pico-font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all var(--pico-duration-fast) ease;
+}
+
+.pico-sudoku-num-btn:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.pico-sudoku-num-btn:active {
+  transform: translateY(0);
+}
+
+.pico-sudoku-num-btn--erase {
+  width: auto;
+  padding: 0 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* 降低动态效果 */
+@media (prefers-reduced-motion: reduce) {
+  .pico-card,
+  .pico-klotski-block,
+  .pico-slider-tile,
+  .pico-stone {
+    transition: none;
+    transform: none !important;
+  }
+
+  .pico-card:hover:not(.pico-card--used),
+  .pico-slider-tile:hover {
+    transform: none !important;
+  }
+
+  .pico-slider-tile:active {
+    transform: none !important;
+    box-shadow: 0 4px 0 #94a3b8, 0 6px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .pico-klotski-block:hover {
+    transform: none;
+  }
 }
 </style>
 <style>
@@ -561,36 +942,36 @@ footer { margin-top: var(--pico-space-6); color: var(--pico-ink-soft); font-size
     <div class="tagline">互动式 Python Playground</div>
   </header>
   <h1>选择你想玩的实验</h1>
-  <p class="sub">共 6 个 playground · 生成于 2026/8/23 16:53:24</p>
+  <p class="sub">共 6 个 playground · 生成于 2026/8/24 15:51:28</p>
   <section class="grid">
-<a class="card" href="./ai-cloze-generator.html" style="animation-delay:0ms">
-  <div class="card-title">英语完形填空出题器：列表与大语言模型</div>
-  <div class="card-id">ai-cloze-generator</div>
+<a class="card" href="./ascii-coin-maze.html" style="animation-delay:0ms">
+  <div class="card-title">字符迷宫里的条件判断</div>
+  <div class="card-id">ascii-coin-maze</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./cow-pasture-3d.html" style="animation-delay:40ms">
-  <div class="card-title">农场巡航：3D 空间与方向转向</div>
-  <div class="card-id">cow-pasture-3d</div>
+<a class="card" href="./pixel-threshold-loop.html" style="animation-delay:40ms">
+  <div class="card-title">像素循环：把照片变成黑白画</div>
+  <div class="card-id">pixel-threshold-loop</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./image-filter-studio.html" style="animation-delay:80ms">
-  <div class="card-title">像素画变色魔法：双层循环与图像处理</div>
-  <div class="card-id">image-filter-studio</div>
-  <div class="card-open">打开 →</div>
-</a>
-<a class="card" href="./tower-of-hanoi.html" style="animation-delay:120ms">
+<a class="card" href="./tower-of-hanoi.html" style="animation-delay:80ms">
   <div class="card-title">汉诺塔的递归魔法</div>
   <div class="card-id">tower-of-hanoi</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./turtle-fractal-tree.html" style="animation-delay:160ms">
-  <div class="card-title">海龟画板：几何旋转与魔法花朵</div>
-  <div class="card-id">turtle-fractal-tree</div>
+<a class="card" href="./turtle-polygon-loop.html" style="animation-delay:120ms">
+  <div class="card-title">Turtle 多边形万花尺</div>
+  <div class="card-id">turtle-polygon-loop</div>
   <div class="card-open">打开 →</div>
 </a>
-<a class="card" href="./warehouse-logistics-ascii.html" style="animation-delay:200ms">
-  <div class="card-title">仓储物流机器人：二维网格与路径规划</div>
-  <div class="card-id">warehouse-logistics-ascii</div>
+<a class="card" href="./twenty-four-expression-tree.html" style="animation-delay:160ms">
+  <div class="card-title">24 点表达式计算树</div>
+  <div class="card-id">twenty-four-expression-tree</div>
+  <div class="card-open">打开 →</div>
+</a>
+<a class="card" href="./world3d-robot-route.html" style="animation-delay:200ms">
+  <div class="card-title">3D 网格机器人路线</div>
+  <div class="card-id">world3d-robot-route</div>
   <div class="card-open">打开 →</div>
 </a>
   </section>
