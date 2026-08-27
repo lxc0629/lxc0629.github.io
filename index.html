@@ -575,9 +575,6 @@ html, body { min-height: 100%; }
   display: flex;
   flex-direction: column;
   gap: var(--pico-space-2);
-  max-height: 12em;
-  overflow-y: auto;
-  scrollbar-width: thin;
   box-sizing: border-box;
   padding: var(--pico-space-3) var(--pico-space-4) var(--pico-space-4);
   border-top: var(--pico-line);
@@ -587,48 +584,16 @@ html, body { min-height: 100%; }
 
 .pico-io-console[hidden] { display: none; }
 
-/* 终端头：名字 + 程序状态；等待输入时状态点亮，提示但不打断 */
-.pico-io-console-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--pico-space-2);
-  padding-bottom: var(--pico-space-2);
-  border-bottom: var(--pico-line);
-}
-
-.pico-io-console-title {
-  font: 600 var(--pico-size-xs)/1.2 var(--pico-font-ui);
-  letter-spacing: 0.06em;
-  color: var(--pico-code-dim);
-}
-
-.pico-io-console-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font: 600 var(--pico-size-xs)/1.2 var(--pico-font-ui);
-  color: var(--pico-accent);
-}
-
-.pico-io-console-status:empty { display: none; }
-
-.pico-io-console-status::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--pico-accent);
-  box-shadow: 0 0 0 3px var(--pico-accent-wash);
-}
-
 .pico-io-console-lines {
   display: flex;
   flex-direction: column;
   gap: var(--pico-space-1);
+  max-height: 10em;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-/* 程序输出：一行等宽文本，主墨色；stderr 用错误色 */
+/* 程序输出 block：保留其中的换行；stderr 用错误色 */
 .pico-io-console .pico-io-row {
   min-height: 1.6em;
   white-space: pre-wrap;
@@ -636,7 +601,11 @@ html, body { min-height: 100%; }
   color: var(--pico-ink);
 }
 
-.pico-io-console .pico-io-stderr { color: var(--pico-hue-error-ink); }
+.pico-io-console .pico-io-stderr {
+  padding-left: var(--pico-space-2);
+  border-left: 2px solid var(--pico-hue-error-ink);
+  color: var(--pico-hue-error-ink);
+}
 
 /* 已提交的一次 input() 交换：❯ 强调色提示符 + 弱墨提示 + 主墨答案，
    一眼区分「程序问」和「你答」 */
@@ -668,8 +637,9 @@ html, body { min-height: 100%; }
   color: var(--pico-ink);
 }
 
-/* 等待中的输入行：用细线与上面的历史分开，像终端的下一行提示符 */
-.pico-io-console-lines:not(:empty) + .pico-io-input {
+/* 等待中的输入行：仍是 conversation 最后一行，但长输出滚动时固定在 viewport 底部 */
+.pico-io-row + .pico-io-input,
+.pico-io-exchange + .pico-io-input {
   margin-top: var(--pico-space-1);
   padding-top: var(--pico-space-2);
   border-top: var(--pico-line);
@@ -680,12 +650,21 @@ html, body { min-height: 100%; }
   align-items: center;
   gap: var(--pico-space-2);
   flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--pico-surface);
 }
 
 .pico-io-input-prompt {
   flex: 0 0 auto;
   white-space: pre-wrap;
   color: var(--pico-ink-soft);
+}
+
+.pico-io-input-hint {
+  flex: 0 0 auto;
+  color: var(--pico-code-dim);
 }
 
 /* 控制台里的输入框是终端行内字段：无边框无底色，聚焦时点出强调色下划线 */
@@ -708,7 +687,14 @@ html, body { min-height: 100%; }
   box-shadow: 0 1px 0 var(--pico-accent);
 }
 
-.pico-io-input .pico-btn { flex: 0 0 auto; }
+.pico-io-restart {
+  align-self: flex-end;
+  border: 0;
+  color: var(--pico-code-dim);
+  background: transparent;
+  font: 600 var(--pico-size-xs)/1.2 var(--pico-font-ui);
+  cursor: pointer;
+}
 
 .pico-turtle-view .pico-canvas-frame rect,
 .pico-turtle-view .pico-overlay-grid line { stroke: var(--pico-hairline); }
@@ -1302,7 +1288,7 @@ footer { margin-top: var(--pico-space-6); color: var(--pico-ink-soft); font-size
     <div class="tagline">互动式 Python Playground</div>
   </header>
   <h1>选择你想玩的实验</h1>
-  <p class="sub">共 6 个 playground · 生成于 2026/8/27 08:58:25</p>
+  <p class="sub">共 6 个 playground · 生成于 2026/8/27 13:10:43</p>
   <section class="grid">
 <a class="card" href="./ascii-coin-maze.html" style="animation-delay:0ms">
   <div class="card-title">字符迷宫里的条件判断</div>
