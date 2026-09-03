@@ -1295,7 +1295,8 @@
    顶部热区 hover 唤出；.is-open 点击固定（触屏入口）；.is-suppressed 点击
    收起后屏蔽 hover，指针离开热区解除。交互 JS 由宿主页面提供。
    收起时托盘收拢到恰好包住圆钮——内容右对齐、向左溢出被裁掉，圆钮常显
-   常可点；展开时自圆钮处向左弹出：右缘不动，max-width 增长把左缘推向左。 */
+   常可点；展开时自圆钮处向左弹出：右缘不动，max-width 增长把左缘推向左。
+   分组数量随页面动态增减，宽度不设固定值：热区与托盘跟随按钮总宽。 */
 .pico-banner-float {
   position: absolute;       /* 页面顶层：不受世界列 overflow 裁剪 */
   top: 14px;                /* 与世界卡顶对齐（页 padding 18 内再留 14） */
@@ -1303,7 +1304,9 @@
   z-index: 40;
   display: flex;
   justify-content: flex-end;
-  width: min(640px, calc(100% - 40px));  /* 热区 = 托盘展开宽度；世界列更窄时悬到编辑器上方 */
+  width: max-content;       /* 热区跟随按钮总宽 */
+  min-width: min(640px, calc(100% - 40px));  /* 收起时保住整条热区；世界列更窄时悬到编辑器上方 */
+  max-width: calc(100% - 40px);              /* 再宽不越出页面 */
   height: 56px;             /* 顶部热区：hover 任意位置唤出工具带 */
 }
 .pico-banner {
@@ -1343,7 +1346,7 @@
 }
 .pico-banner-float:hover:not(.is-suppressed) .pico-banner-controls,
 .pico-banner-float.is-open .pico-banner-controls {
-  max-width: 620px;
+  max-width: 100%;  /* 适应按钮总宽，只受热区（页面）约束 */
   border-color: color-mix(in srgb, var(--pico-hairline) 85%, transparent);
   background: color-mix(in srgb, var(--pico-surface-raised) 78%, transparent);
   backdrop-filter: saturate(180%) blur(20px);
