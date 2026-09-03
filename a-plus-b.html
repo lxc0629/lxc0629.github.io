@@ -37979,6 +37979,7 @@ _pico_result
         return a_plus_b(a - 1, b) + 1
     return b
 `;
+  var RUN_LIMITS = { timeoutMs: 3e3, maxTraceSteps: 2e3 };
   var CASES = {
     "case-1": [10, 20],
     "case-2": [15, 9]
@@ -38004,7 +38005,7 @@ _pico_result
   };
   var ExecutionState = class extends PicoState {
     value = {
-      kind: "running",
+      kind: "idle",
       submission: INITIAL_SUBMISSION,
       structure: []
     };
@@ -38030,10 +38031,25 @@ _pico_result
       onChange: (traceIndex) => this.position.set(traceIndex)
     });
     submit(input) {
+      if (this.autoRunTimer !== null) {
+        clearTimeout(this.autoRunTimer);
+        this.autoRunTimer = null;
+      }
       this.submission.submit(this.editor.text, input);
     }
+    autoRunTimer = null;
+    /** 编辑器静默 1s 后自动运行；编辑（含首次加载）不断重置计时。 */
+    autoRun = this.derive([this.editor.state], [], (_editorState) => {
+      if (this.autoRunTimer !== null) clearTimeout(this.autoRunTimer);
+      this.autoRunTimer = setTimeout(() => {
+        this.autoRunTimer = null;
+        const { mode, a, b: b2 } = this.submission.value;
+        this.submission.submit(this.editor.text, { mode, a, b: b2 });
+      }, 1e3);
+    });
     execute = this.derive([this.submission], [this.execution], async (submission) => {
       const snapshot = submission.value;
+      if (snapshot.revision === 0) return;
       const structure = programStructure(snapshot.source);
       this.execution.set({ kind: "running", submission: snapshot, structure });
       try {
@@ -38044,13 +38060,11 @@ print(__pico_answer)
 `,
           trace: { events: ["line", "return"], observe: { globals: true, locals: true } }
         });
-        this.execution.set({
-          kind: "done",
-          submission: snapshot,
-          structure,
-          result: await runProgram(files)
-        });
+        const result2 = await runProgram(files, RUN_LIMITS);
+        if (this.submission.value.revision !== snapshot.revision) return;
+        this.execution.set({ kind: "done", submission: snapshot, structure, result: result2 });
       } catch (error2) {
+        if (this.submission.value.revision !== snapshot.revision) return;
         this.execution.set({
           kind: "platform-error",
           submission: snapshot,
@@ -38196,6 +38210,7 @@ print(__pico_answer)
     ] });
   }
   function feedback(execution) {
+    if (execution.kind === "idle") return ["idle", "\u6539\u5B8C\u4EE3\u7801\u4F1A\u81EA\u52A8\u8FD0\u884C"];
     if (execution.kind === "running") return ["running", "\u8FD0\u884C\u4E2D\u2026"];
     if (execution.kind === "platform-error") return ["error", execution.message];
     if (execution.result.kind === "program-error") {
