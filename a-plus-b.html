@@ -37164,12 +37164,10 @@
     }
   };
   var Editor = class {
-    /** 代码编辑器的唯一响应式状态。 */
     state;
     constructor(text) {
       this.state = new EditorState2(text);
     }
-    /** state.text 的只读便捷视图。 */
     get text() {
       return this.state.text;
     }
@@ -37177,14 +37175,12 @@
       this.state.transition({ text });
       syncEditorText(this, text);
     }
-    /** 编辑器卡片元素。 */
     get element() {
       return editorElement(this);
     }
     setText(text) {
       this.replace(text);
     }
-    /** `scroll=false` 避免回放抢走学生正在编辑的视口。 */
     showLine(line, kind, scroll = true) {
       showEditorLine(this, line, kind, scroll);
     }
