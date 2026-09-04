@@ -14528,7 +14528,9 @@
       registerState(this, stateOf(value));
       return value;
     }
-    /** 注册派生；依赖图必须无环，每个输出最多有一个派生写者。 */
+    /** 注册派生；依赖图必须无环，每个输出最多有一个派生写者。
+     *  回调必须声明与 inputs 一致的参数（含 _ 前缀的未用参数）——
+     *  零参回调会让 TS 把输入元组推断成 []。 */
     derive(inputs, outputs, compute) {
       const derivation = new Derivation(inputs, outputs, compute);
       registerDerivation(this, derivation);
@@ -36160,6 +36162,9 @@ _pico_result
 .pico-trace-canvas { position: relative; min-height: 100%; }
 .pico-trace-cursor { position: absolute; z-index: 4; inset-block: 0; box-sizing: border-box; background: color-mix(in srgb, var(--pico-accent) 10%, transparent); border-inline: 1px solid color-mix(in srgb, var(--pico-accent) 45%, transparent); pointer-events: none; }
 
+/* \u521D\u59CB/\u7EC8\u6B62\u72B6\u6001\uFF1A\u65F6\u95F4\u8F74\u4E24\u7AEF\u7B2C 0 \u884C\u5904\u7684\u6DF1\u8272\u7EAF\u8272\u5757 */
+.pico-trace-bound { position: absolute; z-index: 3; top: 2px; height: 24px; box-sizing: border-box; border-radius: var(--pico-radius-sm); background: color-mix(in srgb, var(--pico-ink) 55%, transparent); pointer-events: none; }
+
 /* \u64AD\u653E\u952E\u7531\u9875\u9762\u6302\u8FDB Toolbar \u5206\u7EC4\uFF1B\u6309\u4F4F\u6A2A\u62D6\u4E34\u65F6\u524D\u8FDB/\u5012\u653E\u3002 */
 .pico-trace-controls { display: inline-flex; }
 .pico-trace-play { touch-action: none; }
@@ -36440,7 +36445,19 @@ _pico_result
       cursor.style.width = `${100 / this.viewSpan}%`;
       const maxRow = this.blocks.reduce((found, block) => Math.max(found, block.row), -1);
       this.canvas.style.height = `${maxRow * 28 + 30}px`;
-      this.canvas.replaceChildren(...nodes, cursor);
+      const bound = (index, label) => {
+        const element = node("div", "pico-trace-bound");
+        element.style.left = `${100 * (index - this.viewStart) / this.viewSpan}%`;
+        element.style.width = `${100 / this.viewSpan}%`;
+        element.title = label;
+        return element;
+      };
+      this.canvas.replaceChildren(
+        bound(0, "\u521D\u59CB\u72B6\u6001"),
+        ...nodes,
+        cursor,
+        bound(finalIndex, "\u7A0B\u5E8F\u7ED3\u675F")
+      );
       this.element.replaceChildren(this.canvas);
       this.updatePlay();
     }
@@ -37993,6 +38010,12 @@ _pico_result
     b: 20,
     revision: 0
   };
+  var InputState2 = class extends PicoState {
+    value = { mode: "case-1", freeA: "10", freeB: "20" };
+    set(value) {
+      this.transition({ value });
+    }
+  };
   var SubmissionState = class extends PicoState {
     value = INITIAL_SUBMISSION;
     submit(source, input) {
@@ -38025,6 +38048,7 @@ _pico_result
     id = "a-plus-b";
     title = "A + B Problem";
     editor = this.use(Editor, STARTER);
+    input = this.use(InputState2);
     submission = this.use(SubmissionState);
     execution = this.use(ExecutionState);
     position = this.use(PositionState);
@@ -38040,12 +38064,16 @@ _pico_result
       this.submission.submit(this.editor.text, input);
     }
     autoRunTimer = null;
-    /** 编辑器静默 1s 后自动运行；编辑（含首次加载）不断重置计时。 */
-    autoRun = this.derive([this.editor.state], [], (_editorState) => {
+    selectInput(value) {
+      this.input.set(value);
+    }
+    /** 编辑器或输入静默 1s 后自动运行；任何变化（含首次加载）都会重置计时。 */
+    autoRun = this.derive([this.editor, this.input], [], (_editor, _input) => {
       if (this.autoRunTimer !== null) clearTimeout(this.autoRunTimer);
       this.autoRunTimer = setTimeout(() => {
         this.autoRunTimer = null;
-        const { mode, a, b: b2 } = this.submission.value;
+        const { mode, freeA, freeB } = this.input.value;
+        const [a, b2] = mode === "free" ? [readNumber(freeA), readNumber(freeB)] : CASES[mode];
         this.submission.submit(this.editor.text, { mode, a, b: b2 });
       }, 1e3);
     });
@@ -38111,19 +38139,20 @@ print(__pico_answer)
       else this.editor.showLine(line, "execution", false);
     }
   };
-  function InputCard({ mode, onMode, freeA, onFreeA, freeB, onFreeB }) {
+  function InputCard({ value, onChange }) {
+    const { mode, freeA, freeB } = value;
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-input-card", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-card-body pico-ab-input-body", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-ab-input-title", children: "\u8F93\u5165" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-ab-input-modes", role: "group", "aria-label": "\u8F93\u5165\u6A21\u5F0F", children: ["case-1", "case-2", "free"].map((value) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-ab-input-modes", role: "group", "aria-label": "\u8F93\u5165\u6A21\u5F0F", children: ["case-1", "case-2", "free"].map((key) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
         "button",
         {
           type: "button",
           className: "pico-ghost-btn",
-          "aria-pressed": mode === value,
-          onClick: () => onMode(value),
-          children: value === "case-1" ? "10 + 20" : value === "case-2" ? "15 + 9" : "\u81EA\u7531"
+          "aria-pressed": mode === key,
+          onClick: () => onChange({ ...value, mode: key }),
+          children: key === "case-1" ? "10 + 20" : key === "case-2" ? "15 + 9" : "\u81EA\u7531"
         },
-        value
+        key
       )) }),
       mode === "free" && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "pico-ab-input-fields", children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
@@ -38136,7 +38165,7 @@ print(__pico_answer)
               min: "0",
               step: "1",
               value: freeA,
-              onChange: (event) => onFreeA(event.currentTarget.value)
+              onChange: (event) => onChange({ ...value, freeA: event.currentTarget.value })
             }
           )
         ] }),
@@ -38150,7 +38179,7 @@ print(__pico_answer)
               min: "0",
               step: "1",
               value: freeB,
-              onChange: (event) => onFreeB(event.currentTarget.value)
+              onChange: (event) => onChange({ ...value, freeB: event.currentTarget.value })
             }
           )
         ] })
@@ -38229,10 +38258,8 @@ print(__pico_answer)
   }
   function APlusBView({ model }) {
     const execution = usePicoState(model.execution).value;
+    const input = usePicoState(model.input).value;
     const [panels, setPanels] = (0, import_react3.useState)({ viz: true, output: true, trace: true });
-    const [mode, setMode] = (0, import_react3.useState)("case-1");
-    const [freeA, setFreeA] = (0, import_react3.useState)("10");
-    const [freeB, setFreeB] = (0, import_react3.useState)("20");
     const hosts = (0, import_react3.useMemo)(() => {
       const of = (element) => (node2) => {
         if (node2 !== null) node2.replaceChildren(element);
@@ -38244,11 +38271,6 @@ print(__pico_answer)
         controls: of(model.trace.controls)
       };
     }, [model]);
-    const running = execution.kind === "running";
-    const run = () => {
-      const [a, b2] = mode === "free" ? [readNumber(freeA), readNumber(freeB)] : CASES[mode];
-      model.submit({ mode, a, b: b2 });
-    };
     const toggle = (key) => {
       setPanels((value) => ({ ...value, [key]: !value[key] }));
     };
@@ -38258,16 +38280,6 @@ print(__pico_answer)
         Shell,
         {
           toolbar: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(Toolbar, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarGroup, { label: "\u8FD0\u884C", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-              "button",
-              {
-                type: "button",
-                className: "pico-ghost-btn pico-ghost-btn--primary",
-                disabled: running,
-                onClick: run,
-                children: running ? "\u8FD0\u884C\u4E2D\u2026" : "\u8FD0\u884C"
-              }
-            ) }),
             panels.trace && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { ref: hosts.controls }) }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ViewToggle, { active: panels.output, label: "\u8F93\u51FA", onChange: () => toggle("output") }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ViewToggle, { active: panels.trace, label: "\u8F68\u8FF9", onChange: () => toggle("trace") }),
@@ -38276,7 +38288,7 @@ print(__pico_answer)
           editor: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { ref: hosts.editor, style: { display: "contents" } }),
           children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-world", children: [
             panels.viz && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-viz-card", "data-view": "viz", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body pico-scene pico-ab-scene", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(APlusBScene, { execution }) }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(InputCard, { mode, onMode: setMode, freeA, onFreeA: setFreeA, freeB, onFreeB: setFreeB }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(InputCard, { value: input, onChange: (value) => model.selectInput(value) }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-dock", children: [
               panels.output && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body", ref: hosts.io }) }),
               panels.trace && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body", ref: hosts.trace }) })

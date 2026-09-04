@@ -14528,7 +14528,9 @@
       registerState(this, stateOf(value));
       return value;
     }
-    /** 注册派生；依赖图必须无环，每个输出最多有一个派生写者。 */
+    /** 注册派生；依赖图必须无环，每个输出最多有一个派生写者。
+     *  回调必须声明与 inputs 一致的参数（含 _ 前缀的未用参数）——
+     *  零参回调会让 TS 把输入元组推断成 []。 */
     derive(inputs, outputs, compute) {
       const derivation = new Derivation(inputs, outputs, compute);
       registerDerivation(this, derivation);
@@ -36084,6 +36086,9 @@
 .pico-trace-canvas { position: relative; min-height: 100%; }
 .pico-trace-cursor { position: absolute; z-index: 4; inset-block: 0; box-sizing: border-box; background: color-mix(in srgb, var(--pico-accent) 10%, transparent); border-inline: 1px solid color-mix(in srgb, var(--pico-accent) 45%, transparent); pointer-events: none; }
 
+/* \u521D\u59CB/\u7EC8\u6B62\u72B6\u6001\uFF1A\u65F6\u95F4\u8F74\u4E24\u7AEF\u7B2C 0 \u884C\u5904\u7684\u6DF1\u8272\u7EAF\u8272\u5757 */
+.pico-trace-bound { position: absolute; z-index: 3; top: 2px; height: 24px; box-sizing: border-box; border-radius: var(--pico-radius-sm); background: color-mix(in srgb, var(--pico-ink) 55%, transparent); pointer-events: none; }
+
 /* \u64AD\u653E\u952E\u7531\u9875\u9762\u6302\u8FDB Toolbar \u5206\u7EC4\uFF1B\u6309\u4F4F\u6A2A\u62D6\u4E34\u65F6\u524D\u8FDB/\u5012\u653E\u3002 */
 .pico-trace-controls { display: inline-flex; }
 .pico-trace-play { touch-action: none; }
@@ -36364,7 +36369,19 @@
       cursor.style.width = `${100 / this.viewSpan}%`;
       const maxRow = this.blocks.reduce((found, block) => Math.max(found, block.row), -1);
       this.canvas.style.height = `${maxRow * 28 + 30}px`;
-      this.canvas.replaceChildren(...nodes, cursor);
+      const bound = (index, label) => {
+        const element = node("div", "pico-trace-bound");
+        element.style.left = `${100 * (index - this.viewStart) / this.viewSpan}%`;
+        element.style.width = `${100 / this.viewSpan}%`;
+        element.title = label;
+        return element;
+      };
+      this.canvas.replaceChildren(
+        bound(0, "\u521D\u59CB\u72B6\u6001"),
+        ...nodes,
+        cursor,
+        bound(finalIndex, "\u7A0B\u5E8F\u7ED3\u675F")
+      );
       this.element.replaceChildren(this.canvas);
       this.updatePlay();
     }
