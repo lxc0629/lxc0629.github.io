@@ -942,10 +942,8 @@
   --pico-syn-str: light-dark(#1f7a5c, #7ee2b0);
   --pico-syn-num: light-dark(#a36118, #f0c375);
   --pico-syn-com: light-dark(#767784, #8a8a98);
-  /* 高度：静置卡片（贴地细影 + 大半径弥散）与悬浮件（更远更散）分两档 */
-  --pico-shadow:
-    0 1px 2px light-dark(rgba(32, 32, 34, 0.07), rgba(0, 0, 0, 0.5)),
-    0 12px 32px -10px light-dark(rgba(32, 32, 34, 0.18), rgba(0, 0, 0, 0.55));
+  /* 高度：静置卡片（简单右下投影）与悬浮件（更远更散）分两档 */
+  --pico-shadow: 4px 6px 16px light-dark(rgba(32, 32, 34, 0.16), rgba(0, 0, 0, 0.55));
   --pico-shadow-float:
     0 2px 8px light-dark(rgba(32, 32, 34, 0.10), rgba(0, 0, 0, 0.55)),
     0 24px 56px -16px light-dark(rgba(32, 32, 34, 0.22), rgba(0, 0, 0, 0.6));
@@ -956,6 +954,7 @@
     "Fira Code", ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
     Consolas, "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", monospace;
+  --pico-size-2xs: 12px;
   --pico-size-xs: 13px;
   --pico-size-sm: 15px;
   --pico-size-code: 16px;
@@ -1061,8 +1060,6 @@
   flex-direction: column;
 }
 
-.pico-world { overflow: hidden; }
-
 /* 编辑器外观。CodeMirror 主题应映射到同一批 token。 */
 .pico-w-editor-host {
   display: flex;
@@ -1104,10 +1101,7 @@
   border: 1px solid color-mix(in srgb, var(--pico-hairline) 72%, transparent);
   border-radius: 14px;
   background: color-mix(in srgb, var(--pico-surface-raised) 96%, transparent);
-  /* 顶缘内发光：顶光打在玻璃边上的那条微光，替代渐变提亮 */
-  box-shadow:
-    var(--pico-shadow),
-    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.05));
+  box-shadow: var(--pico-shadow);
   overflow: hidden;
   transition:
     opacity 200ms var(--pico-ease-out),
@@ -1256,17 +1250,6 @@
   outline-offset: 2px;
 }
 .pico-ghost-btn--icon { width: 28px; padding: 0; }
-.pico-ghost-btn--primary {
-  background: var(--pico-accent);
-  color: var(--pico-on-accent);
-}
-.pico-ghost-btn--primary:hover:not(:disabled) {
-  background: var(--pico-accent-deep);
-  color: var(--pico-on-accent);
-}
-.pico-ghost-btn--primary:active:not(:disabled) {
-  background: var(--pico-accent-dark);
-}
 
 /* 拟物渐变按钮：遗留基元，仅 trace-explorer / codemirror 在用；新代码用 ghost。 */
 .pico-btn {
@@ -1418,7 +1401,7 @@
   border-radius: 8px;
   background: transparent;
   color: var(--pico-ink-soft);
-  font: 600 var(--pico-size-xs)/1 var(--pico-font-ui);
+  font: 600 var(--pico-size-2xs)/1 var(--pico-font-ui);
   cursor: pointer;
   transition: background var(--pico-duration-fast), color var(--pico-duration-fast);
 }
@@ -1443,16 +1426,6 @@
 .pico-topbar .pico-ghost-btn svg {
   width: 19px;
   height: 19px;
-}
-/* 主动作与用例段共用 28px 模数；实心底不因顶栏的大命中区显得臃肿。 */
-.pico-topbar .pico-ghost-btn--icon.pico-ghost-btn--primary {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-}
-.pico-topbar .pico-ghost-btn--icon.pico-ghost-btn--primary svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* ---------- 场景与错误 ---------- */
@@ -1554,13 +1527,13 @@
       <h1>选择一个 Playground</h1>
       <p class="index-intro">打开一个页面开始学习和实验。</p>
       <nav class="index-grid" aria-label="Playground 导航">
-<a class="pico-card index-card" href="./a-plus-b.html">
-  <strong>A + B Problem</strong>
-  <span>a-plus-b.html</span>
+<a class="pico-card index-card" href="./hanoi.html">
+  <strong>Tower of Hanoi</strong>
+  <span>hanoi.html</span>
 </a>
-<a class="pico-card index-card" href="./basic.html">
+<a class="pico-card index-card" href="./hello.html">
   <strong>Python Playground</strong>
-  <span>basic.html</span>
+  <span>hello.html</span>
 </a>
       </nav>
     </main>
