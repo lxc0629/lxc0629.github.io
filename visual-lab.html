@@ -994,7 +994,7 @@
 
 /* ---------- 骨架 ----------
    page 是唯一定位上下文（顶层悬浮组件挂它上面）；
-   shell 是纯布局网格：左编辑卡 | 可拖分隔条 | 右世界列，自身无边框无底色。 */
+   shell 由 Split 撑起：左编辑卡 | 可拖分隔条 | 右世界列，自身无边框无底色。 */
 .pico-page {
   position: relative;
   width: 100%;
@@ -1004,13 +1004,26 @@
   background: var(--pico-paper);
 }
 
-.pico-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 43fr) 7px minmax(0, 57fr);
-  grid-template-rows: minmax(0, 1fr);
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+.pico-shell { width: 100%; height: 100%; }
+
+/* Split 分割容器：面板按 px 锁定（flex-basis 在 .pico-pane 上），分割条即间距；
+   面板尺寸只随拖拽/开合/窗口缩放变化，内容变化在面板内滚动。 */
+.pico-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
+.pico-split--row { flex-direction: row; }
+.pico-split--column { flex-direction: column; }
+/* 拖拽跟手：拖动期间关掉卡片自身的尺寸过渡 */
+.pico-split[data-dragging="true"] .pico-card { transition: none; }
+.pico-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.pico-pane > * { flex: 1 1 0; min-width: 0; min-height: 0; }
+/* 宿主 div 只是挂载点（如编辑器自带的 .pico-card），里面的卡片同样要填满面板 */
+.pico-pane > * > .pico-card { flex: 1 1 0; min-width: 0; min-height: 0; }
+
+/* 重运行/切用例的内容换帧：宿主 remount 后自 0 淡入并微微上移 */
+.pico-swap {
+  transition: opacity 200ms var(--pico-ease-out), transform 200ms var(--pico-ease-out);
+}
+@starting-style {
+  .pico-swap { opacity: 0; transform: translateY(4px); }
 }
 
 .pico-code,
@@ -1521,7 +1534,8 @@
 /* ---------- 响应式与动效偏好 ---------- */
 @media (max-width: 760px) {
   .pico-page { min-height: 100%; height: auto; padding: 12px; }
-  .pico-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  /* 窄屏一律纵向堆叠：行分割翻转为列，竖分割条隐藏 */
+  .pico-split--row { flex-direction: column; }
   .pico-dock-divider--v { display: none; }
 }
 
@@ -1533,6 +1547,7 @@
   .pico-root { scroll-behavior: auto; }
   .pico-btn:active { transform: none; }
   .pico-card,
+  .pico-swap,
   .pico-toolbar-controls,
   .pico-toolbar-controls > *,
   .pico-toolbar-hint { transition: none; }
@@ -1674,7 +1689,7 @@
       function cloneAndReplaceKey(oldElement, newKey) {
         return ReactElement(oldElement.type, newKey, oldElement.props);
       }
-      function isValidElement(object) {
+      function isValidElement2(object) {
         return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
       }
       function escape(key) {
@@ -1741,7 +1756,7 @@
         if (invokeCallback)
           return callback = callback(children), invokeCallback = "" === nameSoFar ? "." + getElementKey(children, 0) : nameSoFar, isArrayImpl(callback) ? (escapedPrefix = "", null != invokeCallback && (escapedPrefix = invokeCallback.replace(userProvidedKeyEscapeRegex, "$&/") + "/"), mapIntoArray(callback, array, escapedPrefix, "", function(c) {
             return c;
-          })) : null != callback && (isValidElement(callback) && (callback = cloneAndReplaceKey(
+          })) : null != callback && (isValidElement2(callback) && (callback = cloneAndReplaceKey(
             callback,
             escapedPrefix + (null == callback.key || children && children.key === callback.key ? "" : ("" + callback.key).replace(
               userProvidedKeyEscapeRegex,
@@ -1826,7 +1841,7 @@
         }
         console.error(error);
       };
-      var Children2 = {
+      var Children3 = {
         map: mapChildren,
         forEach: function(children, forEachFunc, forEachContext) {
           mapChildren(
@@ -1850,7 +1865,7 @@
           }) || [];
         },
         only: function(children) {
-          if (!isValidElement(children))
+          if (!isValidElement2(children))
             throw Error(
               "React.Children.only expected to receive a single React element child."
             );
@@ -1858,7 +1873,7 @@
         }
       };
       exports.Activity = REACT_ACTIVITY_TYPE;
-      exports.Children = Children2;
+      exports.Children = Children3;
       exports.Component = Component;
       exports.Fragment = REACT_FRAGMENT_TYPE;
       exports.Profiler = REACT_PROFILER_TYPE;
@@ -1937,7 +1952,7 @@
       exports.forwardRef = function(render) {
         return { $$typeof: REACT_FORWARD_REF_TYPE, render };
       };
-      exports.isValidElement = isValidElement;
+      exports.isValidElement = isValidElement2;
       exports.lazy = function(ctor) {
         return {
           $$typeof: REACT_LAZY_TYPE,
@@ -14596,7 +14611,7 @@
 
   // src/libs/components/impl/debugger.ts
   var DEBUGGER_CSS = `
-.pico-debugger { gap: var(--pico-space-3); }
+.pico-debugger { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; gap: var(--pico-space-3); }
 .pico-debugger-section { display: flex; flex-direction: column; gap: var(--pico-space-1); }
 .pico-debugger-title { margin: 0; font: 600 var(--pico-size-xs)/1.2 var(--pico-font-ui); color: var(--pico-ink-soft); }
 .pico-debugger-frames, .pico-debugger-variables { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
@@ -15125,58 +15140,113 @@
     }
   };
 
-  // src/libs/components/impl/shell.tsx
+  // src/libs/components/impl/split.tsx
   var import_react = __toESM(require_react());
   var import_jsx_runtime = __toESM(require_jsx_runtime());
-  function Shell({ toolbar, editor, children }) {
-    const shell = (0, import_react.useRef)(null);
-    const dragging = (0, import_react.useRef)(false);
-    const [editorWidth, setEditorWidth] = (0, import_react.useState)(null);
-    const resize = (event) => {
-      if (!dragging.current || shell.current === null) return;
-      const rect = shell.current.getBoundingClientRect();
-      const maxEditorWidth = Math.max(240, rect.width - 320);
-      setEditorWidth(Math.min(Math.max(event.clientX - rect.left, 240), maxEditorWidth));
+  var DIVIDER = 7;
+  var MIN_PANE = 120;
+  function Split({ direction, minPane = MIN_PANE, className, children }) {
+    const panes = import_react.Children.toArray(children);
+    const container2 = (0, import_react.useRef)(null);
+    const drag = (0, import_react.useRef)(null);
+    const [sizes, setSizes] = (0, import_react.useState)(/* @__PURE__ */ new Map());
+    const keys = panes.map((pane, index) => ((0, import_react.isValidElement)(pane) ? pane.key : null) ?? `#${index}`);
+    const keyOf = keys.join("\0");
+    const axis = direction === "row" ? "width" : "height";
+    const available = () => {
+      const rect = container2.current?.getBoundingClientRect();
+      const box = rect === void 0 ? 0 : rect[direction === "row" ? "width" : "height"];
+      return Math.max(0, box - DIVIDER * Math.max(0, panes.length - 1));
     };
-    const finishResize = (event) => {
-      if (!dragging.current) return;
-      dragging.current = false;
+    (0, import_react.useLayoutEffect)(() => {
+      setSizes((current) => {
+        const total = available();
+        if (total <= 0 || panes.length === 0) return current;
+        const share = total / panes.length;
+        const next = new Map(keys.map((key) => [key, current.get(key) ?? share]));
+        const used = [...next.values()].reduce((sum, size) => sum + size, 0);
+        if (used <= 0) return next;
+        const factor = total / used;
+        if (Math.abs(factor - 1) < 1e-3) return next;
+        return new Map([...next].map(([key, size]) => [key, size * factor]));
+      });
+    }, [keyOf, direction]);
+    (0, import_react.useLayoutEffect)(() => {
+      const element = container2.current;
+      if (element === null) return;
+      let previous = element.getBoundingClientRect()[axis];
+      const observer = new ResizeObserver(() => {
+        const current = element.getBoundingClientRect()[axis];
+        const factor = previous > 0 ? current / previous : 1;
+        previous = current;
+        if (Math.abs(factor - 1) < 1e-3) return;
+        setSizes((map) => new Map([...map].map(([key, size]) => [key, size * factor])));
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    }, [direction]);
+    const pointerAxis = (event) => direction === "row" ? event.clientX : event.clientY;
+    const onDividerDown = (index) => (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      const a = sizes.get(keys[index]);
+      const b2 = sizes.get(keys[index + 1]);
+      if (a === void 0 || b2 === void 0) return;
+      event.currentTarget.dataset.dragging = "true";
+      if (container2.current !== null) container2.current.dataset.dragging = "true";
+      drag.current = { index, start: pointerAxis(event), a, b: b2 };
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+      }
+    };
+    const onDividerMove = (event) => {
+      const state = drag.current;
+      if (state === null) return;
+      const delta = pointerAxis(event) - state.start;
+      const span = state.a + state.b;
+      const a = Math.min(Math.max(state.a + delta, minPane), span - minPane);
+      const b2 = span - a;
+      setSizes((map) => new Map(map).set(keys[state.index], a).set(keys[state.index + 1], b2));
+    };
+    const onDividerFinish = (event) => {
+      if (drag.current === null) return;
+      drag.current = null;
       event.currentTarget.dataset.dragging = "false";
+      if (container2.current !== null) delete container2.current.dataset.dragging;
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pico-page", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    const dividerClass = direction === "row" ? "pico-dock-divider pico-dock-divider--v" : "pico-dock-divider";
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: container2, className: `pico-split pico-split--${direction}${className === void 0 ? "" : ` ${className}`}`, children: panes.map((pane, index) => {
+      const size = sizes.get(keys[index]);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pico-pane", style: size === void 0 ? void 0 : { flex: `0 0 ${size}px` }, children: pane }, keys[index]);
+    }).flatMap(
+      (pane, index) => index === panes.length - 1 ? [pane] : [pane, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "div",
         {
-          className: "pico-shell",
-          ref: shell,
-          style: editorWidth === null ? void 0 : { gridTemplateColumns: `minmax(0, ${editorWidth}px) 7px minmax(0, 1fr)` },
-          children: [
-            editor,
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-              "div",
-              {
-                className: "pico-dock-divider pico-dock-divider--v",
-                role: "separator",
-                "aria-orientation": "vertical",
-                onPointerDown: (event) => {
-                  if (event.button !== 0) return;
-                  event.preventDefault();
-                  dragging.current = true;
-                  event.currentTarget.dataset.dragging = "true";
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                },
-                onPointerMove: resize,
-                onPointerUp: finishResize,
-                onPointerCancel: finishResize
-              }
-            ),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pico-world", children })
-          ]
-        }
-      ),
+          className: dividerClass,
+          role: "separator",
+          "aria-orientation": direction === "row" ? "vertical" : "horizontal",
+          onPointerDown: onDividerDown(index),
+          onPointerMove: onDividerMove,
+          onPointerUp: onDividerFinish,
+          onPointerCancel: onDividerFinish
+        },
+        `divider-${index}`
+      )]
+    ) });
+  }
+
+  // src/libs/components/impl/shell.tsx
+  var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+  function Shell({ toolbar, editor, children }) {
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pico-page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(Split, { direction: "row", minPane: 240, className: "pico-shell", children: [
+        editor,
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "pico-world", children }, "world")
+      ] }),
       toolbar
     ] });
   }
@@ -15186,7 +15256,7 @@
 
   // src/libs/components/impl/theme.tsx
   var import_react2 = __toESM(require_react());
-  var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
   var themeListeners = /* @__PURE__ */ new Set();
   function currentTheme() {
     if (typeof document === "undefined") return "auto";
@@ -15203,19 +15273,19 @@
     for (const listener of themeListeners) listener();
   }
   var THEME_ICONS = {
-    auto: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { viewBox: "0 0 16 16", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "8", cy: "8", r: "5", fill: "none", stroke: "currentColor", strokeWidth: "1.6" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M8 3a5 5 0 0 1 0 10z", fill: "currentColor" })
+    auto: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "8", cy: "8", r: "5", fill: "none", stroke: "currentColor", strokeWidth: "1.6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 3a5 5 0 0 1 0 10z", fill: "currentColor" })
     ] }),
-    light: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "8", cy: "8", r: "3.2" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.7 3.7l1.1 1.1M11.2 11.2l1.1 1.1M12.3 3.7l-1.1 1.1M4.8 11.2l-1.1 1.1" })
+    light: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "8", cy: "8", r: "3.2" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.7 3.7l1.1 1.1M11.2 11.2l1.1 1.1M12.3 3.7l-1.1 1.1M4.8 11.2l-1.1 1.1" })
     ] }),
-    dark: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z" }) })
+    dark: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z" }) })
   };
   function ThemeControls() {
     const theme2 = (0, import_react2.useSyncExternalStore)(subscribeTheme, currentTheme, () => "auto");
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "pico-toolbar-group", role: "group", "aria-label": "\u4E3B\u9898", children: ["auto", "light", "dark"].map((value) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-toolbar-group", role: "group", "aria-label": "\u4E3B\u9898", children: ["auto", "light", "dark"].map((value) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
       "button",
       {
         type: "button",
@@ -15231,28 +15301,28 @@
   }
 
   // src/libs/components/impl/toolbar.tsx
-  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   function ToolbarSep() {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-toolbar-sep", "aria-hidden": "true" });
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-toolbar-sep", "aria-hidden": "true" });
   }
   function Toolbar({ children }) {
     const [open, setOpen] = (0, import_react3.useState)(false);
     const [suppressed, setSuppressed] = (0, import_react3.useState)(false);
     const groups = import_react3.Children.toArray(children);
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
       "div",
       {
         className: `pico-toolbar-float${open ? " is-open" : ""}${suppressed ? " is-suppressed" : ""}`,
         onPointerLeave: () => setSuppressed(false),
-        children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("header", { className: "pico-toolbar", "aria-label": "playground \u5DE5\u5177\u680F", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-toolbar-controls", children: [
-          groups.map((group, index) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_react3.Fragment, { children: [
-            index > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
+        children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("header", { className: "pico-toolbar", "aria-label": "playground \u5DE5\u5177\u680F", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-toolbar-controls", children: [
+          groups.map((group, index) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_react3.Fragment, { children: [
+            index > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarSep, {}),
             group
           ] }, index)),
-          groups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ThemeControls, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          groups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarSep, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ThemeControls, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarSep, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "button",
             {
               className: "pico-toolbar-hint",
@@ -15266,10 +15336,10 @@
                   return !value;
                 });
               },
-              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", width: "15", height: "15", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M2.5 5h4.5M11.8 5h1.7M2.5 11h1.7M8.8 11h4.7" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "9.7", cy: "5", r: "1.7" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "6.3", cy: "11", r: "1.7" })
+              children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { viewBox: "0 0 16 16", width: "15", height: "15", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M2.5 5h4.5M11.8 5h1.7M2.5 11h1.7M8.8 11h4.7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { cx: "9.7", cy: "5", r: "1.7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { cx: "6.3", cy: "11", r: "1.7" })
               ] })
             }
           )
@@ -15278,26 +15348,26 @@
     );
   }
   function ToolbarGroup({ label, children }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-toolbar-group", role: label === void 0 ? void 0 : "group", "aria-label": label, children });
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-toolbar-group", role: label === void 0 ? void 0 : "group", "aria-label": label, children });
   }
   var VIEW_ICONS = {
-    output: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("rect", { x: "1.8", y: "2.8", width: "12.4", height: "10.4", rx: "2" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2" })
+    output: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("rect", { x: "1.8", y: "2.8", width: "12.4", height: "10.4", rx: "2" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2" })
     ] }),
-    debug: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "8", cy: "4", r: "1.8" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M6.4 5.5C5 6.1 4.2 7.3 4.2 8.9c0 2.2 1.6 4 3.8 4s3.8-1.8 3.8-4c0-1.6-.8-2.8-2.2-3.4" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 6.5v6.4M6.1 5.9L4 4.6M9.9 5.9L12 4.6M4.3 8.8H2.2M11.7 8.8h2.1M5.1 11.4l-1.9 1.5M10.9 11.4l1.9 1.5" })
+    debug: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { cx: "8", cy: "4", r: "1.8" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M6.4 5.5C5 6.1 4.2 7.3 4.2 8.9c0 2.2 1.6 4 3.8 4s3.8-1.8 3.8-4c0-1.6-.8-2.8-2.2-3.4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M8 6.5v6.4M6.1 5.9L4 4.6M9.9 5.9L12 4.6M4.3 8.8H2.2M11.7 8.8h2.1M5.1 11.4l-1.9 1.5M10.9 11.4l1.9 1.5" })
     ] }),
-    trace: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M3 3.5h10M5 8h8M7 12.5h6" }) }),
-    viz: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9z" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M2.5 4.9L8 8l5.5-3.1M8 8v6.2" })
+    trace: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M3 3.5h10M5 8h8M7 12.5h6" }) }),
+    viz: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9z" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: "M2.5 4.9L8 8l5.5-3.1M8 8v6.2" })
     ] })
   };
   function ToolbarToggle({ icon, pressed, title, onClick }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
       "button",
       {
         type: "button",
@@ -37716,10 +37786,10 @@
   }
   o(dt, "loadPyodide");
 
-  // src/libs/program/runner.ts
+  // src/libs/run/runner.ts
   var queue = Promise.resolve();
 
-  // src/libs/program/trace.ts
+  // src/libs/run/trace.ts
   function clone(value) {
     return structuredClone(value);
   }
@@ -37824,7 +37894,7 @@
     return freeze(state);
   }
 
-  // src/libs/program/index.ts
+  // src/libs/run/index.ts
   var Trace = class {
     initialState;
     steps;
@@ -37840,7 +37910,7 @@
   };
 
   // docs/visual-lab.tsx
-  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime());
   function programFor(n, size) {
     return `import turtle
 
@@ -37973,9 +38043,9 @@ polygon(${n}, ${size})
     );
   };
   function CaseBar({ model, active }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarGroup, { label: "\u7528\u4F8B", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "pico-toolbar-cases", role: "group", "aria-label": "\u6D4B\u8BD5\u7528\u4F8B", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-toolbar-cases-label", children: "\u7528\u4F8B" }),
-      CASES.map(([n], index) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarGroup, { label: "\u7528\u4F8B", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "pico-toolbar-cases", role: "group", "aria-label": "\u6D4B\u8BD5\u7528\u4F8B", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pico-toolbar-cases-label", children: "\u7528\u4F8B" }),
+      CASES.map(([n], index) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
         "button",
         {
           type: "button",
@@ -38004,21 +38074,21 @@ polygon(${n}, ${size})
     const turtleAt = vertices[drawn % n];
     const next = vertices[(drawn + 1) % n];
     const heading2 = Math.atan2(next.y - turtleAt.y, next.x - turtleAt.x) * 180 / Math.PI;
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { className: "pico-vl-canvas", viewBox: "0 0 480 320", role: "img", "aria-label": "turtle \u753B\u591A\u8FB9\u5F62", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("defs", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("pattern", { id: "pico-vl-dots", width: "20", height: "20", patternUnits: "userSpaceOnUse", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { cx: "1", cy: "1", r: "1", fill: "var(--pico-ink-soft)", opacity: "0.35" }) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("rect", { x: "4", y: "4", width: "472", height: "312", rx: "10", fill: "var(--pico-paper)", stroke: "var(--pico-line)" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("rect", { x: "4", y: "4", width: "472", height: "312", rx: "10", fill: "url(#pico-vl-dots)" }),
-        path !== "" && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("path", { d: path, fill: "none", stroke: "var(--pico-accent)", strokeWidth: "3", strokeLinecap: "round" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { cx: center.x, cy: center.y, r: "5", fill: "none", stroke: "var(--pico-ink-soft)", strokeWidth: "1.5" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("g", { transform: `translate(${turtleAt.x} ${turtleAt.y}) rotate(${heading2})`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("circle", { r: "7", fill: "var(--pico-accent)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("line", { x1: "0", y1: "0", x2: "12", y2: "0", stroke: "var(--pico-accent)", strokeWidth: "2.5", strokeLinecap: "round" })
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("svg", { className: "pico-vl-canvas", viewBox: "0 0 480 320", role: "img", "aria-label": "turtle \u753B\u591A\u8FB9\u5F62", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("defs", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("pattern", { id: "pico-vl-dots", width: "20", height: "20", patternUnits: "userSpaceOnUse", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "1", cy: "1", r: "1", fill: "var(--pico-ink-soft)", opacity: "0.35" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("rect", { x: "4", y: "4", width: "472", height: "312", rx: "10", fill: "var(--pico-paper)", stroke: "var(--pico-line)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("rect", { x: "4", y: "4", width: "472", height: "312", rx: "10", fill: "url(#pico-vl-dots)" }),
+        path !== "" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: path, fill: "none", stroke: "var(--pico-accent)", strokeWidth: "3", strokeLinecap: "round" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: center.x, cy: center.y, r: "5", fill: "none", stroke: "var(--pico-ink-soft)", strokeWidth: "1.5" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("g", { transform: `translate(${turtleAt.x} ${turtleAt.y}) rotate(${heading2})`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { r: "7", fill: "var(--pico-accent)" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("line", { x1: "0", y1: "0", x2: "12", y2: "0", stroke: "var(--pico-accent)", strokeWidth: "2.5", strokeLinecap: "round" })
         ] })
       ] }),
-      (state.stderr ?? "") !== "" && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-world-error", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-world-error-mark", children: "\u2715" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-world-error-label", children: "\u8FB9\u957F\u592A\u5927\uFF0C\u753B\u4E0D\u4E0A\u5566" })
+      (state.stderr ?? "") !== "" && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "pico-world-error", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pico-world-error-mark", children: "\u2715" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pico-world-error-label", children: "\u8FB9\u957F\u592A\u5927\uFF0C\u753B\u4E0D\u4E0A\u5566" })
       ] })
     ] });
   }
@@ -38043,30 +38113,28 @@ polygon(${n}, ${size})
     const toggle = (key) => {
       setPanels((value) => ({ ...value, [key]: !value[key] }));
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("style", { children: VISUAL_LAB_STYLE }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("style", { children: VISUAL_LAB_STYLE }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
         Shell,
         {
-          toolbar: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Toolbar, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(CaseBar, { model, active: caseIndex }),
-            panels.trace && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { ref: hosts.controls }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(ToolbarGroup, { label: "\u89C6\u56FE", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "output", pressed: panels.output, title: "\u8F93\u51FA", onClick: () => toggle("output") }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "debug", pressed: panels.debug, title: "\u53D8\u91CF", onClick: () => toggle("debug") }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "trace", pressed: panels.trace, title: "\u8F68\u8FF9", onClick: () => toggle("trace") }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "viz", pressed: panels.viz, title: "\u53EF\u89C6\u5316", onClick: () => toggle("viz") })
+          toolbar: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Toolbar, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(CaseBar, { model, active: caseIndex }),
+            panels.trace && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: hosts.controls }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(ToolbarGroup, { label: "\u89C6\u56FE", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarToggle, { icon: "output", pressed: panels.output, title: "\u8F93\u51FA", onClick: () => toggle("output") }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarToggle, { icon: "debug", pressed: panels.debug, title: "\u53D8\u91CF", onClick: () => toggle("debug") }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarToggle, { icon: "trace", pressed: panels.trace, title: "\u8F68\u8FF9", onClick: () => toggle("trace") }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarToggle, { icon: "viz", pressed: panels.viz, title: "\u53EF\u89C6\u5316", onClick: () => toggle("viz") })
             ] })
           ] }),
-          editor: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { ref: hosts.editor, style: { display: "contents" } }),
-          children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-vl-world", children: [
-            panels.viz && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-vl-viz", "data-view": "viz", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body pico-scene", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(TurtleScene, { trace: caseProgram.trace, traceIndex: position, n, size }) }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-vl-dock", children: [
-              panels.output && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body", ref: hosts.io }) }),
-              panels.debug && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "debug", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body", ref: hosts.vars }) }),
-              panels.trace && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body", ref: hosts.trace }) })
-            ] })
-          ] })
+          editor: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: hosts.editor, style: { display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 } }),
+          children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-vl-world", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Split, { direction: "column", children: [
+            panels.viz && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-vl-viz", "data-view": "viz", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body pico-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(TurtleScene, { trace: caseProgram.trace, traceIndex: position, n, size }) }, caseIndex) }, "viz"),
+            panels.output && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body pico-swap", ref: hosts.io }, caseIndex) }, "output"),
+            panels.debug && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "debug", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body pico-swap", ref: hosts.vars }, caseIndex) }, "debug"),
+            panels.trace && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-vl-panel", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body pico-swap", ref: hosts.trace }, caseIndex) }, "trace")
+          ] }, "world-split") })
         }
       )
     ] });
@@ -38074,7 +38142,7 @@ polygon(${n}, ${size})
   function mountVisualLab(container2) {
     const model = new VisualLabModel();
     const root = (0, import_client.createRoot)(container2);
-    root.render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VisualLabView, { model }));
+    root.render(/* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VisualLabView, { model }));
     void model.run();
     return root;
   }
@@ -38082,17 +38150,9 @@ polygon(${n}, ${size})
   if (container !== null) mountVisualLab(container);
   var VISUAL_LAB_STYLE = `
   .pico-vl-world { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: var(--pico-space-2); }
-  .pico-vl-viz { flex: 1 1 auto; min-height: 160px; }
   .pico-vl-viz .pico-card-body { padding: 0; }
   .pico-vl-canvas { display: block; width: 100%; height: 100%; }
-  /* \u5E95\u90E8 dock\uFF1A\u7EB5\u5411\u5806\u53E0\u7684\u5185\u5BB9\u9AD8\u5EA6\u9762\u677F\u2014\u2014\u8F93\u51FA\u51E0\u884C\u5361\u7247\u5C31\u591A\u9AD8\uFF0C\u5168\u91CF\u53EF\u89C1\u4E0D\u5185\u6EDA\uFF1B
-     viz \u8BA9\u51FA\u5269\u4F59\u7A7A\u95F4\u3002 */
-  .pico-vl-dock { display: flex; flex: 0 0 auto; flex-direction: column; gap: var(--pico-space-2); }
-  .pico-vl-dock:empty { display: none; }
-  .pico-vl-panel { flex: 0 0 auto; }
   .pico-vl-panel .pico-card-body { padding: var(--pico-space-2) var(--pico-space-3); }
-  .pico-vl-panel[data-view="debug"] .pico-card-body { max-height: 240px; overflow-y: auto; scrollbar-width: thin; }
-  .pico-vl-panel[data-view="trace"] .pico-card-body { height: 134px; }
 `;
 })();
 </script>
