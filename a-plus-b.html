@@ -1170,13 +1170,28 @@
   color: var(--pico-ink-soft);
   font: 600 var(--pico-size-xs)/1 var(--pico-font-ui);
   cursor: pointer;
-  transition: background var(--pico-duration-fast), color var(--pico-duration-fast);
+  position: relative;
+  isolation: isolate;
+  transition: color var(--pico-duration-fast);
+}
+/* 状态底（hover/active/按下）一律内缩药丸：命中区尺寸不变，键距不被底色撑开。
+   isolation 建栈，负 z 的 ::after 才不会被托盘底色盖掉。 */
+.pico-ghost-btn::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border-radius: 7px;
+  background: transparent;
+  transition: background var(--pico-duration-fast);
 }
 .pico-ghost-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--pico-ink) 9%, transparent);
   color: var(--pico-ink);
 }
-.pico-ghost-btn:active:not(:disabled) {
+.pico-ghost-btn:hover:not(:disabled)::after {
+  background: color-mix(in srgb, var(--pico-ink) 9%, transparent);
+}
+.pico-ghost-btn:active:not(:disabled)::after {
   background: color-mix(in srgb, var(--pico-ink) 15%, transparent);
 }
 .pico-ghost-btn:disabled {
@@ -1184,8 +1199,10 @@
   cursor: not-allowed;
 }
 .pico-ghost-btn[aria-pressed="true"] {
-  background: var(--pico-accent-wash);
   color: var(--pico-accent);
+}
+.pico-ghost-btn[aria-pressed="true"]::after {
+  background: var(--pico-accent-wash);
 }
 .pico-ghost-btn:focus-visible {
   outline: 2px solid var(--pico-accent);
@@ -1290,14 +1307,14 @@
   box-shadow: 0 0 0 3px var(--pico-accent-wash), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* ---------- 工具带（float banner）----------
+/* ---------- 工具带（float toolbar）----------
    页面顶层悬浮工具带（用例 | 运行 | 视图 | 主题 | 导出 | 圆钮），无标题。
    顶部热区 hover 唤出；.is-open 点击固定（触屏入口）；.is-suppressed 点击
    收起后屏蔽 hover，指针离开热区解除。交互 JS 由宿主页面提供。
    收起时托盘收拢到恰好包住圆钮——内容右对齐、向左溢出被裁掉，圆钮常显
    常可点；展开时自圆钮处向左弹出：右缘不动，max-width 增长把左缘推向左。
    分组数量随页面动态增减，宽度不设固定值：热区与托盘跟随按钮总宽。 */
-.pico-banner-float {
+.pico-toolbar-float {
   position: absolute;       /* 页面顶层：不受世界列 overflow 裁剪 */
   top: 14px;                /* 与世界卡顶对齐（页 padding 18 内再留 14） */
   right: 28px;              /* 托盘右缘 = 世界卡右缘内收 10px */
@@ -1309,11 +1326,11 @@
   max-width: calc(100% - 40px);              /* 再宽不越出页面 */
   height: 56px;             /* 顶部热区：hover 任意位置唤出工具带 */
 }
-.pico-banner {
+.pico-toolbar {
   display: flex;
   align-items: center;
 }
-.pico-banner-controls {
+.pico-toolbar-controls {
   display: flex;
   align-items: center;
   justify-content: flex-end;  /* 收起时内容贴右、溢出裁左，圆钮始终在可视区内 */
@@ -1336,16 +1353,16 @@
     box-shadow 200ms var(--pico-ease-out) 180ms,
     backdrop-filter 200ms var(--pico-ease-out) 180ms;
 }
-.pico-banner-controls > * { flex-shrink: 0; }
-.pico-banner-controls > :not(.pico-banner-hint) {
+.pico-toolbar-controls > * { flex-shrink: 0; }
+.pico-toolbar-controls > :not(.pico-toolbar-hint) {
   opacity: 0;
   visibility: hidden;
   transition:
     opacity 200ms var(--pico-ease-out) 180ms,
     visibility 200ms var(--pico-ease-out) 180ms;
 }
-.pico-banner-float:hover:not(.is-suppressed) .pico-banner-controls,
-.pico-banner-float.is-open .pico-banner-controls {
+.pico-toolbar-float:hover:not(.is-suppressed) .pico-toolbar-controls,
+.pico-toolbar-float.is-open .pico-toolbar-controls {
   /* 不能用 %：托盘宽依赖容器、容器又依赖托盘（循环），布局时 % 按 none 处理，
      容器瞬间跳到全宽，托盘在里面左对齐——变成向右滑出。max-content 随按钮
      总宽，interpolate-size 让 px → 关键字仍可过渡。 */
@@ -1359,15 +1376,15 @@
     inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.05));
   transition-delay: 0ms;
 }
-.pico-banner-float:hover:not(.is-suppressed) .pico-banner-controls > :not(.pico-banner-hint),
-.pico-banner-float.is-open .pico-banner-controls > :not(.pico-banner-hint) {
+.pico-toolbar-float:hover:not(.is-suppressed) .pico-toolbar-controls > :not(.pico-toolbar-hint),
+.pico-toolbar-float.is-open .pico-toolbar-controls > :not(.pico-toolbar-hint) {
   opacity: 1;
   visibility: visible;
   transition-delay: 0ms;
 }
 /* 常驻圆钮：托盘最后一个控件，收起时是托盘里唯一可见物；
    hover 预览之外，点击可固定/收起（触屏无 hover 的入口） */
-.pico-banner-hint {
+.pico-toolbar-hint {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1385,30 +1402,30 @@
   cursor: pointer;
   transition: color var(--pico-duration-fast), background var(--pico-duration-fast);
 }
-.pico-banner-hint:hover {
+.pico-toolbar-hint:hover {
   color: var(--pico-ink);
   background: color-mix(in srgb, var(--pico-surface-raised) 92%, transparent);
 }
-.pico-banner-float.is-open .pico-banner-hint {
+.pico-toolbar-float.is-open .pico-toolbar-hint {
   background: var(--pico-accent-wash);
   border-color: color-mix(in srgb, var(--pico-accent) 45%, transparent);
   color: var(--pico-accent);
 }
 
 /* 工具带内的控件分组 */
-.pico-banner-group {
+.pico-toolbar-group {
   display: flex;
   align-items: center;
   gap: 2px;
 }
-.pico-banner-sep {
+.pico-toolbar-sep {
   width: 1px;
   height: 20px;
   margin: 0 5px;
   background: var(--pico-hairline);
 }
 /* 测试用例：凹槽分段容器 + 标签，一眼可识别这是一组用例 */
-.pico-banner-cases {
+.pico-toolbar-cases {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -1416,12 +1433,12 @@
   border-radius: 12px;
   background: var(--pico-surface);
 }
-.pico-banner-cases-label {
+.pico-toolbar-cases-label {
   padding: 0 7px 0 9px;
   font: 600 12px/1 var(--pico-font-ui);
   color: var(--pico-ink-soft);
 }
-.pico-banner-case {
+.pico-toolbar-case {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1435,21 +1452,21 @@
   cursor: pointer;
   transition: background var(--pico-duration-fast), color var(--pico-duration-fast);
 }
-.pico-banner-case:hover {
+.pico-toolbar-case:hover {
   background: color-mix(in srgb, var(--pico-ink) 9%, transparent);
   color: var(--pico-ink);
 }
-.pico-banner-case[aria-pressed="true"] {
+.pico-toolbar-case[aria-pressed="true"] {
   background: var(--pico-accent-wash);
   color: var(--pico-accent);
 }
 /* 工具带里的键给小孩的命中区：38px、大一号图标 */
-.pico-banner .pico-ghost-btn--icon {
+.pico-toolbar .pico-ghost-btn--icon {
   width: 38px;
   height: 38px;
   border-radius: 11px;
 }
-.pico-banner .pico-ghost-btn svg {
+.pico-toolbar .pico-ghost-btn svg {
   width: 19px;
   height: 19px;
 }
@@ -1513,9 +1530,9 @@
   .pico-root { scroll-behavior: auto; }
   .pico-btn:active { transform: none; }
   .pico-card,
-  .pico-banner-controls,
-  .pico-banner-controls > *,
-  .pico-banner-hint { transition: none; }
+  .pico-toolbar-controls,
+  .pico-toolbar-controls > *,
+  .pico-toolbar-hint { transition: none; }
 }
 </style>
 </head>
@@ -14406,7 +14423,7 @@
   });
 
   // playgrounds/a-plus-b.generated.tsx
-  var import_react3 = __toESM(require_react());
+  var import_react5 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // src/core_impl.ts
@@ -14543,7 +14560,7 @@
   };
 
   // src/libs/components/index.tsx
-  var import_react2 = __toESM(require_react());
+  var import_react4 = __toESM(require_react());
 
   // node_modules/pyodide/pyodide.mjs
   var Q = Object.defineProperty;
@@ -15121,14 +15138,7 @@
     return state(value.initialState) !== void 0 && state(value.finalState) !== void 0 && Array.isArray(value.steps) && value.steps.every((item) => step(item)) ? value : void 0;
   }
   function error(value) {
-    if (!isRecord(value)) return void 0;
-    if (value.kind === "syntax-error") {
-      return typeof value.message === "string" && Number.isInteger(value.line) ? value : void 0;
-    }
-    if (value.kind === "runtime-error" || value.kind === "timeout") {
-      return typeof value.message === "string" && (value.line === null || Number.isInteger(value.line)) ? value : void 0;
-    }
-    return value.kind === "system-exit" && Number.isInteger(value.code) ? value : void 0;
+    return isRecord(value) && typeof value.message === "string" && (value.line === null || Number.isInteger(value.line)) ? value : void 0;
   }
   function deepFreeze(value) {
     if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
@@ -15143,13 +15153,14 @@
     if (!isRecord(value) || trace(value.trace) === void 0 || !Number.isInteger(value.returncode)) {
       throw new Error("Linker \u79C1\u6709\u534F\u8BAE\u8FD4\u56DE\u4E86\u65E0\u6548 RunResult");
     }
-    if (value.kind === "completed" && value.returncode === 0 && value.error === void 0) {
-      return deepFreeze(value);
+    const failed = value.error !== null && value.error !== void 0;
+    if (failed === (value.returncode === 0)) {
+      throw new Error("Linker \u79C1\u6709\u534F\u8BAE\u8FD4\u56DE\u4E86\u65E0\u6548 RunResult");
     }
-    if (value.kind === "program-error" && value.returncode !== 0 && error(value.error) !== void 0) {
-      return deepFreeze(value);
+    if (failed && error(value.error) === void 0) {
+      throw new Error("Linker \u79C1\u6709\u534F\u8BAE\u8FD4\u56DE\u4E86\u65E0\u6548 RunResult");
     }
-    throw new Error("Linker \u79C1\u6709\u534F\u8BAE\u8FD4\u56DE\u4E86\u65E0\u6548 RunResult");
+    return deepFreeze({ ...value, error: failed ? value.error : null });
   }
   async function execute(files, options) {
     const runtime = await pyodide();
@@ -36100,52 +36111,6 @@ _pico_result
     }
   };
 
-  // src/libs/components/impl/theme.tsx
-  var import_react = __toESM(require_react());
-  var import_jsx_runtime = __toESM(require_jsx_runtime());
-  var themeListeners = /* @__PURE__ */ new Set();
-  function currentTheme() {
-    if (typeof document === "undefined") return "auto";
-    const value = document.documentElement.dataset.picoTheme;
-    return value === "light" || value === "dark" ? value : "auto";
-  }
-  function subscribeTheme(listener) {
-    themeListeners.add(listener);
-    return () => themeListeners.delete(listener);
-  }
-  function setTheme(theme2) {
-    if (theme2 === "auto") delete document.documentElement.dataset.picoTheme;
-    else document.documentElement.dataset.picoTheme = theme2;
-    for (const listener of themeListeners) listener();
-  }
-  var THEME_ICONS = {
-    auto: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: "0 0 16 16", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "8", cy: "8", r: "5", fill: "none", stroke: "currentColor", strokeWidth: "1.6" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M8 3a5 5 0 0 1 0 10z", fill: "currentColor" })
-    ] }),
-    light: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "8", cy: "8", r: "3.2" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.7 3.7l1.1 1.1M11.2 11.2l1.1 1.1M12.3 3.7l-1.1 1.1M4.8 11.2l-1.1 1.1" })
-    ] }),
-    dark: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z" }) })
-  };
-  function ThemeControls() {
-    const theme2 = (0, import_react.useSyncExternalStore)(subscribeTheme, currentTheme, () => "auto");
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pico-banner-group", role: "group", "aria-label": "\u4E3B\u9898", children: ["auto", "light", "dark"].map((value) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-      "button",
-      {
-        type: "button",
-        className: "pico-ghost-btn pico-ghost-btn--icon",
-        "aria-pressed": theme2 === value,
-        title: value === "auto" ? "\u8DDF\u968F\u7CFB\u7EDF" : value === "light" ? "\u6D45\u8272" : "\u6DF1\u8272",
-        "aria-label": value === "auto" ? "\u8DDF\u968F\u7CFB\u7EDF\u4E3B\u9898" : value === "light" ? "\u6D45\u8272\u4E3B\u9898" : "\u6DF1\u8272\u4E3B\u9898",
-        onClick: () => setTheme(value),
-        children: THEME_ICONS[value]
-      },
-      value
-    )) });
-  }
-
   // src/libs/components/impl/trace.ts
   var TRACE_CSS = `
 .pico-trace-focus { position: relative; flex: 1; min-height: 0; overflow: hidden auto; border-radius: var(--pico-radius-sm); background: color-mix(in srgb, var(--pico-paper) 55%, transparent); scrollbar-width: thin; touch-action: none; user-select: none; cursor: ew-resize; }
@@ -36548,10 +36513,195 @@ _pico_result
     }
   };
 
-  // src/libs/components/index.tsx
+  // src/libs/components/impl/shell.tsx
+  var import_react = __toESM(require_react());
+  var import_jsx_runtime = __toESM(require_jsx_runtime());
+  function Shell({ toolbar, editor, children: children2 }) {
+    const shell = (0, import_react.useRef)(null);
+    const dragging = (0, import_react.useRef)(false);
+    const [editorWidth, setEditorWidth] = (0, import_react.useState)(null);
+    const resize = (event) => {
+      if (!dragging.current || shell.current === null) return;
+      const rect = shell.current.getBoundingClientRect();
+      const maxEditorWidth = Math.max(240, rect.width - 320);
+      setEditorWidth(Math.min(Math.max(event.clientX - rect.left, 240), maxEditorWidth));
+    };
+    const finishResize = (event) => {
+      if (!dragging.current) return;
+      dragging.current = false;
+      event.currentTarget.dataset.dragging = "false";
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pico-page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "div",
+        {
+          className: "pico-shell",
+          ref: shell,
+          style: editorWidth === null ? void 0 : { gridTemplateColumns: `minmax(0, ${editorWidth}px) 7px minmax(0, 1fr)` },
+          children: [
+            editor,
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "div",
+              {
+                className: "pico-dock-divider pico-dock-divider--v",
+                role: "separator",
+                "aria-orientation": "vertical",
+                onPointerDown: (event) => {
+                  if (event.button !== 0) return;
+                  event.preventDefault();
+                  dragging.current = true;
+                  event.currentTarget.dataset.dragging = "true";
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                },
+                onPointerMove: resize,
+                onPointerUp: finishResize,
+                onPointerCancel: finishResize
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pico-world", children: children2 })
+          ]
+        }
+      ),
+      toolbar
+    ] });
+  }
+
+  // src/libs/components/impl/toolbar.tsx
+  var import_react3 = __toESM(require_react());
+
+  // src/libs/components/impl/theme.tsx
+  var import_react2 = __toESM(require_react());
   var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+  var themeListeners = /* @__PURE__ */ new Set();
+  function currentTheme() {
+    if (typeof document === "undefined") return "auto";
+    const value = document.documentElement.dataset.picoTheme;
+    return value === "light" || value === "dark" ? value : "auto";
+  }
+  function subscribeTheme(listener) {
+    themeListeners.add(listener);
+    return () => themeListeners.delete(listener);
+  }
+  function setTheme(theme2) {
+    if (theme2 === "auto") delete document.documentElement.dataset.picoTheme;
+    else document.documentElement.dataset.picoTheme = theme2;
+    for (const listener of themeListeners) listener();
+  }
+  var THEME_ICONS = {
+    auto: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { viewBox: "0 0 16 16", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "8", cy: "8", r: "5", fill: "none", stroke: "currentColor", strokeWidth: "1.6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M8 3a5 5 0 0 1 0 10z", fill: "currentColor" })
+    ] }),
+    light: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "8", cy: "8", r: "3.2" }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.7 3.7l1.1 1.1M11.2 11.2l1.1 1.1M12.3 3.7l-1.1 1.1M4.8 11.2l-1.1 1.1" })
+    ] }),
+    dark: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z" }) })
+  };
+  function ThemeControls() {
+    const theme2 = (0, import_react2.useSyncExternalStore)(subscribeTheme, currentTheme, () => "auto");
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "pico-toolbar-group", role: "group", "aria-label": "\u4E3B\u9898", children: ["auto", "light", "dark"].map((value) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+      "button",
+      {
+        type: "button",
+        className: "pico-ghost-btn pico-ghost-btn--icon",
+        "aria-pressed": theme2 === value,
+        title: value === "auto" ? "\u8DDF\u968F\u7CFB\u7EDF" : value === "light" ? "\u6D45\u8272" : "\u6DF1\u8272",
+        "aria-label": value === "auto" ? "\u8DDF\u968F\u7CFB\u7EDF\u4E3B\u9898" : value === "light" ? "\u6D45\u8272\u4E3B\u9898" : "\u6DF1\u8272\u4E3B\u9898",
+        onClick: () => setTheme(value),
+        children: THEME_ICONS[value]
+      },
+      value
+    )) });
+  }
+
+  // src/libs/components/impl/toolbar.tsx
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+  function ToolbarSep() {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-toolbar-sep", "aria-hidden": "true" });
+  }
+  function Toolbar({ children: children2 }) {
+    const [open, setOpen] = (0, import_react3.useState)(false);
+    const [suppressed, setSuppressed] = (0, import_react3.useState)(false);
+    const groups = import_react3.Children.toArray(children2);
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      "div",
+      {
+        className: `pico-toolbar-float${open ? " is-open" : ""}${suppressed ? " is-suppressed" : ""}`,
+        onPointerLeave: () => setSuppressed(false),
+        children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("header", { className: "pico-toolbar", "aria-label": "playground \u5DE5\u5177\u680F", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-toolbar-controls", children: [
+          groups.map((group, index) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_react3.Fragment, { children: [
+            index > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
+            group
+          ] }, index)),
+          groups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ThemeControls, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarSep, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "button",
+            {
+              className: "pico-toolbar-hint",
+              type: "button",
+              "aria-expanded": open,
+              title: "\u5DE5\u5177\u680F",
+              "aria-label": "\u5C55\u5F00\u6216\u6536\u8D77\u5DE5\u5177\u680F",
+              onClick: () => {
+                setOpen((value) => {
+                  if (value) setSuppressed(true);
+                  return !value;
+                });
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", width: "15", height: "15", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M2.5 5h4.5M11.8 5h1.7M2.5 11h1.7M8.8 11h4.7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "9.7", cy: "5", r: "1.7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "6.3", cy: "11", r: "1.7" })
+              ] })
+            }
+          )
+        ] }) })
+      }
+    );
+  }
+  function ToolbarGroup({ label, children: children2 }) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-toolbar-group", role: label === void 0 ? void 0 : "group", "aria-label": label, children: children2 });
+  }
+  var VIEW_ICONS = {
+    output: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("rect", { x: "1.8", y: "2.8", width: "12.4", height: "10.4", rx: "2" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2" })
+    ] }),
+    debug: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "8", cy: "4", r: "1.8" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M6.4 5.5C5 6.1 4.2 7.3 4.2 8.9c0 2.2 1.6 4 3.8 4s3.8-1.8 3.8-4c0-1.6-.8-2.8-2.2-3.4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 6.5v6.4M6.1 5.9L4 4.6M9.9 5.9L12 4.6M4.3 8.8H2.2M11.7 8.8h2.1M5.1 11.4l-1.9 1.5M10.9 11.4l1.9 1.5" })
+    ] }),
+    trace: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M3 3.5h10M5 8h8M7 12.5h6" }) }),
+    viz: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9z" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M2.5 4.9L8 8l5.5-3.1M8 8v6.2" })
+    ] })
+  };
+  function ToolbarToggle({ icon, pressed, title, onClick }) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      "button",
+      {
+        type: "button",
+        className: "pico-ghost-btn pico-ghost-btn--icon",
+        "aria-pressed": pressed,
+        title,
+        "aria-label": `${title}\u89C6\u56FE`,
+        onClick,
+        children: VIEW_ICONS[icon]
+      }
+    );
+  }
+
+  // src/libs/components/index.tsx
   function usePicoState(state2) {
-    (0, import_react2.useSyncExternalStore)(state2.subscribe, state2.getSnapshot, state2.getSnapshot);
+    (0, import_react4.useSyncExternalStore)(state2.subscribe, state2.getSnapshot, state2.getSnapshot);
     return state2;
   }
   var TraceExplorer = class {
@@ -36584,106 +36734,6 @@ _pico_result
       this.#core.render(entries);
     }
   };
-  function Shell({ toolbar, editor, children: children2 }) {
-    const shell = (0, import_react2.useRef)(null);
-    const dragging = (0, import_react2.useRef)(false);
-    const [editorWidth, setEditorWidth] = (0, import_react2.useState)(null);
-    const resize = (event) => {
-      if (!dragging.current || shell.current === null) return;
-      const rect = shell.current.getBoundingClientRect();
-      const maxEditorWidth = Math.max(240, rect.width - 320);
-      setEditorWidth(Math.min(Math.max(event.clientX - rect.left, 240), maxEditorWidth));
-    };
-    const finishResize = (event) => {
-      if (!dragging.current) return;
-      dragging.current = false;
-      event.currentTarget.dataset.dragging = "false";
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
-    };
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pico-page", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
-        "div",
-        {
-          className: "pico-shell",
-          ref: shell,
-          style: editorWidth === null ? void 0 : { gridTemplateColumns: `minmax(0, ${editorWidth}px) 7px minmax(0, 1fr)` },
-          children: [
-            editor,
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-              "div",
-              {
-                className: "pico-dock-divider pico-dock-divider--v",
-                role: "separator",
-                "aria-orientation": "vertical",
-                onPointerDown: (event) => {
-                  if (event.button !== 0) return;
-                  event.preventDefault();
-                  dragging.current = true;
-                  event.currentTarget.dataset.dragging = "true";
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                },
-                onPointerMove: resize,
-                onPointerUp: finishResize,
-                onPointerCancel: finishResize
-              }
-            ),
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "pico-world", children: children2 })
-          ]
-        }
-      ),
-      toolbar
-    ] });
-  }
-  function BannerSep() {
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "pico-banner-sep", "aria-hidden": "true" });
-  }
-  function Toolbar({ children: children2 }) {
-    const [open, setOpen] = (0, import_react2.useState)(false);
-    const [suppressed, setSuppressed] = (0, import_react2.useState)(false);
-    const groups = import_react2.Children.toArray(children2);
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "div",
-      {
-        className: `pico-banner-float${open ? " is-open" : ""}${suppressed ? " is-suppressed" : ""}`,
-        onPointerLeave: () => setSuppressed(false),
-        children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("header", { className: "pico-banner", "aria-label": "playground \u5DE5\u5177\u680F", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pico-banner-controls", children: [
-          groups.map((group, index) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(import_react2.Fragment, { children: [
-            index > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(BannerSep, {}),
-            group
-          ] }, index)),
-          groups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(BannerSep, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ThemeControls, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(BannerSep, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            "button",
-            {
-              className: "pico-banner-hint",
-              type: "button",
-              "aria-expanded": open,
-              title: "\u5DE5\u5177\u680F",
-              "aria-label": "\u5C55\u5F00\u6216\u6536\u8D77\u5DE5\u5177\u680F",
-              onClick: () => {
-                setOpen((value) => {
-                  if (value) setSuppressed(true);
-                  return !value;
-                });
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { viewBox: "0 0 16 16", width: "15", height: "15", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("path", { d: "M2.5 5h4.5M11.8 5h1.7M2.5 11h1.7M8.8 11h4.7" }),
-                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "9.7", cy: "5", r: "1.7" }),
-                /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "6.3", cy: "11", r: "1.7" })
-              ] })
-            }
-          )
-        ] }) })
-      }
-    );
-  }
-  function ToolbarGroup({ label, children: children2 }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "pico-banner-group", role: label === void 0 ? void 0 : "group", "aria-label": label, children: children2 });
-  }
 
   // node_modules/@codemirror/commands/dist/index.js
   var toggleComment = (target) => {
@@ -37958,7 +38008,7 @@ _pico_result
   };
 
   // src/libs/linker/runtime.py
-  var runtime_default = 'import builtins\nimport contextlib\nimport io\nimport json\nimport os\nimport sys\nimport time\nimport traceback\n\n\n_MISSING = object()\n\n\ndef _json_value(value):\n    try:\n        encoded = json.dumps(value, allow_nan=False)\n    except (OverflowError, RecursionError, TypeError, ValueError):\n        return _MISSING\n    return json.loads(encoded)\n\n\ndef _variables(values):\n    result = {}\n    for name, value in values.items():\n        if name.startswith("__"):\n            continue\n        encoded = _json_value(value)\n        if encoded is not _MISSING:\n            result[name] = encoded\n    return result\n\n\ndef _source_frames(frame, source_filename):\n    frames = []\n    while frame is not None:\n        if frame.f_code.co_filename == source_filename:\n            frames.append(\n                {\n                    "name": frame.f_code.co_name,\n                    "locals": _variables(frame.f_locals),\n                }\n            )\n        frame = frame.f_back\n    frames.reverse()\n    return frames\n\n\ndef _snapshot(line, frame, environment, stdout, stderr, observe, source_filename):\n    state = {\n        "line": line,\n        "stdout": stdout.getvalue(),\n        "stderr": stderr.getvalue(),\n    }\n    if observe is not None and observe.get("globals"):\n        state["globals"] = _variables(environment)\n    if observe is not None and observe.get("locals"):\n        state["frames"] = _source_frames(frame, source_filename) if frame is not None else []\n    return state\n\n\ndef _frame_changes(before, after):\n    changes = []\n    before_names = [frame["name"] for frame in before]\n    after_names = [frame["name"] for frame in after]\n    if len(after) == len(before) + 1 and before_names == after_names[:-1]:\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(before) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        changes.append({"op": "append", "path": ["frames"], "value": after[-1]})\n        return changes\n    if len(before) == len(after) + 1 and before_names[:-1] == after_names:\n        changes.append({"op": "remove", "path": ["frames", -1]})\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(after) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        return changes\n    if len(before) != len(after) or before_names != after_names:\n        return [{"op": "put", "path": ["frames"], "value": after}]\n    for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n        frame_index = -1 if index == len(after) - 1 else index\n        changes.extend(\n            _changes(\n                old_frame["locals"],\n                new_frame["locals"],\n                ("frames", frame_index, "locals"),\n            )\n        )\n    return changes\n\n\ndef _changes(before, after, path=()):\n    if path == ("frames",) and isinstance(before, list) and isinstance(after, list):\n        return _frame_changes(before, after)\n    if isinstance(before, dict) and isinstance(after, dict):\n        changes = []\n        for key in sorted(before.keys() - after.keys()):\n            changes.append({"op": "remove", "path": [*path, key]})\n        for key in sorted(after.keys() - before.keys()):\n            changes.append({"op": "put", "path": [*path, key], "value": after[key]})\n        for key in sorted(before.keys() & after.keys()):\n            changes.extend(_changes(before[key], after[key], (*path, key)))\n        return changes\n    if before == after:\n        return []\n    if path in (("stdout",), ("stderr",)) and isinstance(before, str) and after.startswith(before):\n        return [{"op": "append", "path": list(path), "value": after[len(before) :]}]\n    return [{"op": "put", "path": list(path), "value": after}]\n\n\nclass _PicoTimeout(Exception):\n    pass\n\n\ndef _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps):\n    def trace(frame, event, _argument):\n        if deadline is not None and time.monotonic() >= deadline:\n            raise _PicoTimeout()\n        # single-step \u8BED\u4E49\uFF1A\u4E00\u6B65 = \u8C03\u8BD5\u5668\u505C\u5728\u5B66\u751F\u4EE3\u7801\u91CC\u7684\u843D\u70B9\u3002\n        # line \u4E8B\u4EF6\u505C\u5728\u5F53\u524D\u6E90\u7801\u5E27\uFF1Breturn \u4E8B\u4EF6\u505C\u5728\u843D\u70B9\u5E27\uFF08f_back\uFF09\u2014\u2014\u843D\u56DE\n        # driver/\u8FD0\u884C\u5E93\u7684\u8FD4\u56DE\u5BF9\u5B66\u751F\u4E0D\u53EF\u89C1\uFF0C\u4E0D\u6784\u6210\u6B65\uFF1Bcall \u4E8B\u4EF6\u4E0D\u662F\u6B65\uFF08\u8FDB\u5165\n        # \u51FD\u6570\u7531\u88AB\u8C03\u5E27\u7684\u9996\u4E2A line \u4E8B\u4EF6\u5448\u73B0\uFF09\u3002\n        step_frame = None\n        if event == "line" and event in events and frame.f_code.co_filename == source_filename:\n            step_frame = frame\n        elif event == "return" and event in events and frame.f_code.co_filename == source_filename:\n            target = frame.f_back\n            if target is not None and target.f_code.co_filename == source_filename:\n                step_frame = target\n        if (\n            step_frame is not None\n            and step_frame.f_lineno >= 1\n            and (max_steps is None or len(samples) < max_steps)\n        ):\n            samples.append(\n                _snapshot(\n                    step_frame.f_lineno,\n                    step_frame,\n                    environment,\n                    stdout,\n                    stderr,\n                    observe,\n                    source_filename,\n                )\n            )\n        return trace\n\n    return trace\n\n\ndef _source_line(exception, source_filename):\n    line = None\n    current = exception.__traceback__\n    while current is not None:\n        if current.tb_frame.f_code.co_filename == source_filename:\n            line = current.tb_lineno\n        current = current.tb_next\n    return line\n\n\ndef _is_program_exception(exception, source_filename):\n    if isinstance(exception, SyntaxError):\n        return exception.filename == source_filename\n    return _source_line(exception, source_filename) is not None\n\n\ndef _program_error(exception, source_filename, stderr):\n    if isinstance(exception, SyntaxError):\n        traceback.print_exception(exception, file=stderr)\n        return {\n            "returncode": 1,\n            "error": {\n                "kind": "syntax-error",\n                "message": str(exception),\n                "line": exception.lineno,\n            },\n        }\n    if isinstance(exception, SystemExit):\n        code = exception.code\n        if code is None or code == 0:\n            return {"returncode": 0, "error": None}\n        if not isinstance(code, int):\n            print(code, file=stderr)\n            code = 1\n        return {\n            "returncode": code,\n            "error": {"kind": "system-exit", "code": code},\n        }\n    traceback.print_exception(exception, file=stderr)\n    return {\n        "returncode": 1,\n        "error": {\n            "kind": "runtime-error",\n            "message": f"{type(exception).__name__}: {exception}",\n            "line": _source_line(exception, source_filename),\n        },\n    }\n\n\ndef _builtins_for(stdin_config, stdout):\n    values = vars(builtins).copy()\n    if stdin_config["kind"] != "js.prompt":\n        return values\n\n    def prompt_input(prompt=""):\n        from js import prompt as javascript_prompt\n\n        text = str(prompt)\n        stdout.write(text)\n        value = javascript_prompt(text)\n        if value is None:\n            raise EOFError\n        return str(value)\n\n    values["input"] = prompt_input\n    return values\n\n\ndef _trace_result(samples, initial_state, final_state):\n    steps = []\n    previous = initial_state\n    for sample in samples:\n        steps.append({"changes": _changes(previous, sample)})\n        previous = sample\n    return {\n        "initialState": initial_state,\n        "steps": steps,\n        "finalState": final_state,\n    }\n\n\ndef run(source_path, config_json):\n    config = json.loads(config_json)\n    trace_options = config["trace"]\n    events = frozenset(trace_options["events"])\n    observe = trace_options["observe"]\n    stdin_config = config["stdin"]\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    stdin = io.StringIO(stdin_config["value"]) if stdin_config["kind"] == "string" else io.StringIO()\n    source_filename = source_path\n    with open(source_path, encoding="utf-8", newline="") as source_file:\n        source = source_file.read()\n\n    environment = {\n        "__builtins__": _builtins_for(stdin_config, stdout),\n        "__file__": source_filename,\n        "__name__": "__main__",\n    }\n    limits = {"timeoutMs": None, "maxTraceSteps": None}\n    if os.path.exists("_pico_limits.json"):\n        with open("_pico_limits.json", encoding="utf-8") as limits_file:\n            limits.update(json.load(limits_file))\n    deadline = (\n        time.monotonic() + limits["timeoutMs"] / 1000\n        if limits["timeoutMs"] is not None\n        else None\n    )\n    max_steps = limits["maxTraceSteps"]\n    samples = []\n    tracer = _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps)\n    old_stdin = sys.stdin\n    outcome = None\n\n    try:\n        sys.stdin = stdin\n        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):\n            if config["prelude"]:\n                exec(compile(config["prelude"], "<pico-prelude>", "exec"), environment, environment)\n            initial_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n            try:\n                if events or deadline is not None:\n                    sys.settrace(tracer)\n                exec(compile(source, source_filename, "exec"), environment, environment)\n                if config["driver"]:\n                    exec(compile(config["driver"], "<pico-driver>", "exec"), environment, environment)\n            except _PicoTimeout as timeout:\n                outcome = {\n                    "returncode": 124,\n                    "error": {\n                        "kind": "timeout",\n                        "message": "\u7A0B\u5E8F\u8FD0\u884C\u8D85\u65F6",\n                        "line": _source_line(timeout, source_filename),\n                    },\n                }\n            except BaseException as exception:\n                if not _is_program_exception(exception, source_filename):\n                    raise\n                outcome = _program_error(exception, source_filename, stderr)\n            finally:\n                sys.settrace(None)\n    finally:\n        sys.stdin = old_stdin\n\n    if outcome is None:\n        outcome = {"returncode": 0, "error": None}\n    final_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n    trace = _trace_result(samples, initial_state, final_state)\n    if outcome["error"] is None:\n        result = {"kind": "completed", "trace": trace, "returncode": 0}\n    else:\n        result = {\n            "kind": "program-error",\n            "trace": trace,\n            "returncode": outcome["returncode"],\n            "error": outcome["error"],\n        }\n    return json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False)\n';
+  var runtime_default = 'import builtins\nimport contextlib\nimport io\nimport json\nimport os\nimport sys\nimport time\nimport traceback\n\n\n_MISSING = object()\n\n\ndef _json_value(value):\n    try:\n        encoded = json.dumps(value, allow_nan=False)\n    except (OverflowError, RecursionError, TypeError, ValueError):\n        return _MISSING\n    return json.loads(encoded)\n\n\ndef _variables(values):\n    result = {}\n    for name, value in values.items():\n        if name.startswith("__"):\n            continue\n        encoded = _json_value(value)\n        if encoded is not _MISSING:\n            result[name] = encoded\n    return result\n\n\ndef _source_frames(frame, source_filename):\n    frames = []\n    while frame is not None:\n        if frame.f_code.co_filename == source_filename:\n            frames.append(\n                {\n                    "name": frame.f_code.co_name,\n                    "locals": _variables(frame.f_locals),\n                }\n            )\n        frame = frame.f_back\n    frames.reverse()\n    return frames\n\n\ndef _snapshot(line, frame, environment, stdout, stderr, observe, source_filename):\n    state = {\n        "line": line,\n        "stdout": stdout.getvalue(),\n        "stderr": stderr.getvalue(),\n    }\n    if observe is not None and observe.get("globals"):\n        state["globals"] = _variables(environment)\n    if observe is not None and observe.get("locals"):\n        state["frames"] = _source_frames(frame, source_filename) if frame is not None else []\n    return state\n\n\ndef _frame_changes(before, after):\n    changes = []\n    before_names = [frame["name"] for frame in before]\n    after_names = [frame["name"] for frame in after]\n    if len(after) == len(before) + 1 and before_names == after_names[:-1]:\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(before) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        changes.append({"op": "append", "path": ["frames"], "value": after[-1]})\n        return changes\n    if len(before) == len(after) + 1 and before_names[:-1] == after_names:\n        changes.append({"op": "remove", "path": ["frames", -1]})\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(after) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        return changes\n    if len(before) != len(after) or before_names != after_names:\n        return [{"op": "put", "path": ["frames"], "value": after}]\n    for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n        frame_index = -1 if index == len(after) - 1 else index\n        changes.extend(\n            _changes(\n                old_frame["locals"],\n                new_frame["locals"],\n                ("frames", frame_index, "locals"),\n            )\n        )\n    return changes\n\n\ndef _changes(before, after, path=()):\n    if path == ("frames",) and isinstance(before, list) and isinstance(after, list):\n        return _frame_changes(before, after)\n    if isinstance(before, dict) and isinstance(after, dict):\n        changes = []\n        for key in sorted(before.keys() - after.keys()):\n            changes.append({"op": "remove", "path": [*path, key]})\n        for key in sorted(after.keys() - before.keys()):\n            changes.append({"op": "put", "path": [*path, key], "value": after[key]})\n        for key in sorted(before.keys() & after.keys()):\n            changes.extend(_changes(before[key], after[key], (*path, key)))\n        return changes\n    if before == after:\n        return []\n    if path in (("stdout",), ("stderr",)) and isinstance(before, str) and after.startswith(before):\n        return [{"op": "append", "path": list(path), "value": after[len(before) :]}]\n    return [{"op": "put", "path": list(path), "value": after}]\n\n\nclass _PicoTimeout(Exception):\n    pass\n\n\ndef _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps):\n    def trace(frame, event, _argument):\n        if deadline is not None and time.monotonic() >= deadline:\n            raise _PicoTimeout()\n        # single-step \u8BED\u4E49\uFF1A\u4E00\u6B65 = \u8C03\u8BD5\u5668\u505C\u5728\u5B66\u751F\u4EE3\u7801\u91CC\u7684\u843D\u70B9\u3002\n        # line \u4E8B\u4EF6\u505C\u5728\u5F53\u524D\u6E90\u7801\u5E27\uFF1Breturn \u4E8B\u4EF6\u505C\u5728\u843D\u70B9\u5E27\uFF08f_back\uFF09\u2014\u2014\u843D\u56DE\n        # driver/\u8FD0\u884C\u5E93\u7684\u8FD4\u56DE\u5BF9\u5B66\u751F\u4E0D\u53EF\u89C1\uFF0C\u4E0D\u6784\u6210\u6B65\uFF1Bcall \u4E8B\u4EF6\u4E0D\u662F\u6B65\uFF08\u8FDB\u5165\n        # \u51FD\u6570\u7531\u88AB\u8C03\u5E27\u7684\u9996\u4E2A line \u4E8B\u4EF6\u5448\u73B0\uFF09\u3002\n        step_frame = None\n        if event == "line" and event in events and frame.f_code.co_filename == source_filename:\n            step_frame = frame\n        elif event == "return" and event in events and frame.f_code.co_filename == source_filename:\n            target = frame.f_back\n            if target is not None and target.f_code.co_filename == source_filename:\n                step_frame = target\n        if (\n            step_frame is not None\n            and step_frame.f_lineno >= 1\n            and (max_steps is None or len(samples) < max_steps)\n        ):\n            samples.append(\n                _snapshot(\n                    step_frame.f_lineno,\n                    step_frame,\n                    environment,\n                    stdout,\n                    stderr,\n                    observe,\n                    source_filename,\n                )\n            )\n        return trace\n\n    return trace\n\n\ndef _source_line(exception, source_filename):\n    line = None\n    current = exception.__traceback__\n    while current is not None:\n        if current.tb_frame.f_code.co_filename == source_filename:\n            line = current.tb_lineno\n        current = current.tb_next\n    return line\n\n\ndef _is_program_exception(exception, source_filename):\n    if isinstance(exception, SyntaxError):\n        return exception.filename == source_filename\n    return _source_line(exception, source_filename) is not None\n\n\ndef _program_error(exception, source_filename, stderr):\n    if isinstance(exception, SyntaxError):\n        traceback.print_exception(exception, file=stderr)\n        return {\n            "returncode": 1,\n            "error": {"message": str(exception), "line": exception.lineno},\n        }\n    if isinstance(exception, SystemExit):\n        code = exception.code\n        if code is None or code == 0:\n            return {"returncode": 0, "error": None}\n        if not isinstance(code, int):\n            print(code, file=stderr)\n            code = 1\n        return {\n            "returncode": code,\n            "error": {"message": f"\u7A0B\u5E8F\u4EE5\u72B6\u6001\u7801 {code} \u9000\u51FA", "line": None},\n        }\n    traceback.print_exception(exception, file=stderr)\n    return {\n        "returncode": 1,\n        "error": {\n            "message": f"{type(exception).__name__}: {exception}",\n            "line": _source_line(exception, source_filename),\n        },\n    }\n\n\ndef _builtins_for(stdin_config, stdout):\n    values = vars(builtins).copy()\n    if stdin_config["kind"] != "js.prompt":\n        return values\n\n    def prompt_input(prompt=""):\n        from js import prompt as javascript_prompt\n\n        text = str(prompt)\n        stdout.write(text)\n        value = javascript_prompt(text)\n        if value is None:\n            raise EOFError\n        return str(value)\n\n    values["input"] = prompt_input\n    return values\n\n\ndef _trace_result(samples, initial_state, final_state):\n    steps = []\n    previous = initial_state\n    for sample in samples:\n        steps.append({"changes": _changes(previous, sample)})\n        previous = sample\n    return {\n        "initialState": initial_state,\n        "steps": steps,\n        "finalState": final_state,\n    }\n\n\ndef run(source_path, config_json):\n    config = json.loads(config_json)\n    trace_options = config["trace"]\n    events = frozenset(trace_options["events"])\n    observe = trace_options["observe"]\n    stdin_config = config["stdin"]\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    stdin = io.StringIO(stdin_config["value"]) if stdin_config["kind"] == "string" else io.StringIO()\n    source_filename = source_path\n    with open(source_path, encoding="utf-8", newline="") as source_file:\n        source = source_file.read()\n\n    environment = {\n        "__builtins__": _builtins_for(stdin_config, stdout),\n        "__file__": source_filename,\n        "__name__": "__main__",\n    }\n    limits = {"timeoutMs": None, "maxTraceSteps": None}\n    if os.path.exists("_pico_limits.json"):\n        with open("_pico_limits.json", encoding="utf-8") as limits_file:\n            limits.update(json.load(limits_file))\n    deadline = (\n        time.monotonic() + limits["timeoutMs"] / 1000\n        if limits["timeoutMs"] is not None\n        else None\n    )\n    max_steps = limits["maxTraceSteps"]\n    samples = []\n    tracer = _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps)\n    old_stdin = sys.stdin\n    outcome = None\n\n    try:\n        sys.stdin = stdin\n        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):\n            if config["prelude"]:\n                exec(compile(config["prelude"], "<pico-prelude>", "exec"), environment, environment)\n            initial_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n            try:\n                if events or deadline is not None:\n                    sys.settrace(tracer)\n                exec(compile(source, source_filename, "exec"), environment, environment)\n                if config["driver"]:\n                    exec(compile(config["driver"], "<pico-driver>", "exec"), environment, environment)\n            except _PicoTimeout as timeout:\n                outcome = {\n                    "returncode": 124,\n                    "error": {\n                        "message": "\u7A0B\u5E8F\u8FD0\u884C\u8D85\u65F6",\n                        "line": _source_line(timeout, source_filename),\n                    },\n                }\n            except BaseException as exception:\n                if not _is_program_exception(exception, source_filename):\n                    raise\n                outcome = _program_error(exception, source_filename, stderr)\n            finally:\n                sys.settrace(None)\n    finally:\n        sys.stdin = old_stdin\n\n    if outcome is None:\n        outcome = {"returncode": 0, "error": None}\n    final_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n    trace = _trace_result(samples, initial_state, final_state)\n    result = {"trace": trace, "returncode": outcome["returncode"], "error": outcome["error"]}\n    return json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False)\n';
 
   // src/libs/linker/impl.ts
   function linkProgramImpl(source, prelude, driver, trace2, stdin) {
@@ -37992,7 +38042,7 @@ _pico_result
   }
 
   // playgrounds/a-plus-b.generated.tsx
-  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   var STARTER = `def a_plus_b(a, b):
     if a > 0:
         return a_plus_b(a - 1, b) + 1
@@ -38130,8 +38180,8 @@ print(__pico_answer)
     renderEditorLine(result2, traceIndex) {
       if (result2 === null) return this.editor.clearLine();
       const atEnd = traceIndex === result2.trace.steps.length + 1;
-      const error2 = result2.kind === "program-error" ? result2.error : null;
-      if (atEnd && error2 !== null && error2.kind !== "system-exit" && error2.line !== null) {
+      const error2 = result2.error;
+      if (atEnd && error2 !== null && error2.line !== null) {
         return this.editor.showLine(error2.line, "error", false);
       }
       const line = stateAt(result2.trace, traceIndex).line;
@@ -38141,9 +38191,9 @@ print(__pico_answer)
   };
   function InputCard({ value, onChange }) {
     const { mode, freeA, freeB } = value;
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-input-card", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-card-body pico-ab-input-body", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-ab-input-title", children: "\u8F93\u5165" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pico-ab-input-modes", role: "group", "aria-label": "\u8F93\u5165\u6A21\u5F0F", children: ["case-1", "case-2", "free"].map((key) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-ab-input-card", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-card-body pico-ab-input-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-ab-input-title", children: "\u8F93\u5165" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pico-ab-input-modes", role: "group", "aria-label": "\u8F93\u5165\u6A21\u5F0F", children: ["case-1", "case-2", "free"].map((key) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
         "button",
         {
           type: "button",
@@ -38154,10 +38204,10 @@ print(__pico_answer)
         },
         key
       )) }),
-      mode === "free" && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "pico-ab-input-fields", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
+      mode === "free" && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "pico-ab-input-fields", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
           "a",
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "input",
             {
               className: "pico-input",
@@ -38169,9 +38219,9 @@ print(__pico_answer)
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
           "b",
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "input",
             {
               className: "pico-input",
@@ -38190,34 +38240,22 @@ print(__pico_answer)
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
   }
-  function ViewToggle({ active, label, onChange }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarGroup, { label: `${label}\u89C6\u56FE`, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-      "button",
-      {
-        type: "button",
-        className: "pico-ghost-btn",
-        "aria-pressed": active,
-        onClick: onChange,
-        children: label
-      }
-    ) });
-  }
   function APlusBScene({ execution }) {
     const { submission } = execution;
     const [kind, message] = feedback(execution);
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-expression", children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-ab-expression", children: [
         submission.a,
         " + ",
         submission.b,
         " = ",
         submission.a + submission.b
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-groups", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(BlockGroup, { label: "a", count: submission.a, color: "a" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(BlockGroup, { label: "b", count: submission.b, color: "b" })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-ab-groups", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(BlockGroup, { label: "a", count: submission.a, color: "a" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(BlockGroup, { label: "b", count: submission.b, color: "b" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-ab-feedback", "data-kind": kind, children: message })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-ab-feedback", "data-kind": kind, children: message })
     ] });
   }
   function BlockGroup({
@@ -38226,14 +38264,14 @@ print(__pico_answer)
     color
   }) {
     const shown = Math.min(Math.floor(count), 80);
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-group", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "pico-ab-label", children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-ab-group", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "pico-ab-label", children: [
         label,
         ":"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "pico-ab-blocks", children: [
-        Array.from({ length: shown }, (_2, index) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `pico-ab-block pico-ab-block--${color}` }, index)),
-        count > shown && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "pico-ab-more", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "pico-ab-blocks", children: [
+        Array.from({ length: shown }, (_2, index) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `pico-ab-block pico-ab-block--${color}` }, index)),
+        count > shown && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "pico-ab-more", children: [
           "\u2026 ",
           count
         ] })
@@ -38244,11 +38282,11 @@ print(__pico_answer)
     if (execution.kind === "idle") return ["idle", "\u6539\u5B8C\u4EE3\u7801\u4F1A\u81EA\u52A8\u8FD0\u884C"];
     if (execution.kind === "running") return ["running", "\u8FD0\u884C\u4E2D\u2026"];
     if (execution.kind === "platform-error") return ["error", execution.message];
-    if (execution.result.kind === "program-error") {
+    if (execution.result.error !== null) {
       const error2 = execution.result.error;
       return [
         "error",
-        error2.kind === "system-exit" ? `\u7A0B\u5E8F\u4EE5\u72B6\u6001\u7801 ${error2.code} \u9000\u51FA` : error2.message
+        error2.message
       ];
     }
     if (execution.submission.mode === "free") return ["free", "\u81EA\u7531\u8FD0\u884C\u5B8C\u6210"];
@@ -38259,8 +38297,8 @@ print(__pico_answer)
   function APlusBView({ model }) {
     const execution = usePicoState(model.execution).value;
     const input = usePicoState(model.input).value;
-    const [panels, setPanels] = (0, import_react3.useState)({ viz: true, output: true, trace: true });
-    const hosts = (0, import_react3.useMemo)(() => {
+    const [panels, setPanels] = (0, import_react5.useState)({ viz: true, output: true, trace: true });
+    const hosts = (0, import_react5.useMemo)(() => {
       const of = (element) => (node2) => {
         if (node2 !== null) node2.replaceChildren(element);
       };
@@ -38274,24 +38312,26 @@ print(__pico_answer)
     const toggle = (key) => {
       setPanels((value) => ({ ...value, [key]: !value[key] }));
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("style", { children: A_PLUS_B_STYLE }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("style", { children: A_PLUS_B_STYLE }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
         Shell,
         {
-          toolbar: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(Toolbar, { children: [
-            panels.trace && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { ref: hosts.controls }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ViewToggle, { active: panels.output, label: "\u8F93\u51FA", onChange: () => toggle("output") }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ViewToggle, { active: panels.trace, label: "\u8F68\u8FF9", onChange: () => toggle("trace") }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ViewToggle, { active: panels.viz, label: "\u53EF\u89C6\u5316", onChange: () => toggle("viz") })
+          toolbar: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Toolbar, { children: [
+            panels.trace && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { ref: hosts.controls }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(ToolbarGroup, { label: "\u89C6\u56FE", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "output", pressed: panels.output, title: "\u8F93\u51FA", onClick: () => toggle("output") }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "trace", pressed: panels.trace, title: "\u8F68\u8FF9", onClick: () => toggle("trace") }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ToolbarToggle, { icon: "viz", pressed: panels.viz, title: "\u53EF\u89C6\u5316", onClick: () => toggle("viz") })
+            ] })
           ] }),
-          editor: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { ref: hosts.editor, style: { display: "contents" } }),
-          children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-world", children: [
-            panels.viz && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-viz-card", "data-view": "viz", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body pico-scene pico-ab-scene", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(APlusBScene, { execution }) }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(InputCard, { value: input, onChange: (value) => model.selectInput(value) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pico-ab-dock", children: [
-              panels.output && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body", ref: hosts.io }) }),
-              panels.trace && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "pico-card-body", ref: hosts.trace }) })
+          editor: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { ref: hosts.editor, style: { display: "contents" } }),
+          children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-ab-world", children: [
+            panels.viz && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-ab-viz-card", "data-view": "viz", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body pico-scene pico-ab-scene", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(APlusBScene, { execution }) }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(InputCard, { value: input, onChange: (value) => model.selectInput(value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "pico-ab-dock", children: [
+              panels.output && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body", ref: hosts.io }) }),
+              panels.trace && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("section", { className: "pico-card pico-ab-panel", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "pico-card-body", ref: hosts.trace }) })
             ] })
           ] })
         }
@@ -38301,7 +38341,7 @@ print(__pico_answer)
   function mountAPlusB(container2) {
     const model = new APlusBModel();
     const root = (0, import_client.createRoot)(container2);
-    root.render(/* @__PURE__ */ (0, import_jsx_runtime3.jsx)(APlusBView, { model }));
+    root.render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(APlusBView, { model }));
     void model.run();
     return root;
   }
