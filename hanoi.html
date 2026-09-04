@@ -47007,7 +47007,6 @@ ${h2.join(`
       card.append(host);
       state2 = { card, host, view: createView(editor, host), applying: false };
       views.set(editor, state2);
-      Object.defineProperty(host, "__picoView", { value: state2.view });
     }
     return state2;
   }
