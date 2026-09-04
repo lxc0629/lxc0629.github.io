@@ -932,6 +932,8 @@
   --pico-flame-red: light-dark(#e87568, #913f38);
   --pico-flame-ink: light-dark(#3a190c, #fff1d1);
   --pico-code-bg: light-dark(#ffffff, #121217);
+  /* 执行行高亮底：比 accent-wash 更实，浅色下也清晰可辨（错误行复用 hue-error-bg） */
+  --pico-code-exec-bg: light-dark(rgba(124, 101, 255, 0.20), rgba(147, 120, 255, 0.16));
   /* 行号槽最小宽：数字右对齐，短文档也不贴边；代码列起点稳定 */
   --pico-editor-gutter: 56px;
   --pico-code-ink: var(--pico-ink);
@@ -46809,7 +46811,7 @@ ${h2.join(`
     ".tok-number": { color: "var(--pico-syn-num)" },
     ".tok-comment": { color: "var(--pico-syn-com)" },
     ".pico-line-exec": {
-      backgroundColor: "var(--pico-accent-wash)",
+      backgroundColor: "var(--pico-code-exec-bg)",
       boxShadow: "inset 2px 0 0 var(--pico-accent)"
     },
     ".pico-line-error": {
