@@ -37782,10 +37782,10 @@
   }
   o(dt, "loadPyodide");
 
-  // src/libs/run/runner.ts
+  // src/libs/runner/runner.ts
   var queue = Promise.resolve();
 
-  // src/libs/run/trace.ts
+  // src/libs/runner/trace.ts
   function clone(value) {
     return structuredClone(value);
   }
@@ -37890,7 +37890,7 @@
     return freeze(state);
   }
 
-  // src/libs/run/index.ts
+  // src/libs/runner/index.ts
   var Trace = class {
     initialState;
     steps;

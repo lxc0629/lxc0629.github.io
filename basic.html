@@ -37685,7 +37685,7 @@
   }
   o(dt, "loadPyodide");
 
-  // src/libs/run/runner.ts
+  // src/libs/runner/runner.ts
   var pyodidePromise;
   var queue = Promise.resolve();
   var runId = 0;
@@ -37845,7 +37845,7 @@ _pico_result
     return next;
   }
 
-  // src/libs/run/trace.ts
+  // src/libs/runner/trace.ts
   function clone(value) {
     return structuredClone(value);
   }
@@ -37950,7 +37950,7 @@ _pico_result
     return freeze(state2);
   }
 
-  // src/libs/run/index.ts
+  // src/libs/runner/index.ts
   function runProgram(files, options) {
     return runProgramImpl(files, options);
   }
