@@ -37985,6 +37985,9 @@ _pico_result
   }
 
   // src/libs/run/index.ts
+  function runProgram(files, options) {
+    return runProgramImpl(files, options);
+  }
   var Trace = class {
     initialState;
     steps;
@@ -37998,9 +38001,6 @@ _pico_result
       return stateAtImpl(this, traceIndex);
     }
   };
-  function runProgram(files, options) {
-    return runProgramImpl(files, options);
-  }
 
   // playgrounds/a-plus-b.generated.tsx
   var import_jsx_runtime5 = __toESM(require_jsx_runtime());
