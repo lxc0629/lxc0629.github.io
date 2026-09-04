@@ -37975,24 +37975,16 @@ got = input()
 print("Got", got)
 `;
   var RUN_OPTIONS = {
-    stdin: "",
+    stdin: { kind: "js.prompt" },
     trace: { events: ["line", "return"], observe: { globals: true, locals: true } },
     timeoutMs: 3e3,
     maxTraceSteps: 2e3
   };
-  var INITIAL_SUBMISSION = { source: STARTER, stdin: "", revision: 0 };
-  var InputState2 = class extends PicoState {
-    value = "";
-    set(value) {
-      this.transition({ value });
-    }
-  };
+  var INITIAL_SUBMISSION = { source: STARTER, revision: 0 };
   var SubmissionState = class extends PicoState {
     value = INITIAL_SUBMISSION;
-    submit(source, stdin) {
-      this.transition({
-        value: { source, stdin, revision: this.value.revision + 1 }
-      });
+    submit(source) {
+      this.transition({ value: { source, revision: this.value.revision + 1 } });
     }
   };
   var ExecutionState = class extends PicoState {
@@ -38011,7 +38003,6 @@ print("Got", got)
     id = "basic";
     title = "Python Playground";
     editor = this.use(Editor, STARTER);
-    input = this.use(InputState2);
     submission = this.use(SubmissionState);
     execution = this.use(ExecutionState);
     position = this.use(PositionState);
@@ -38019,27 +38010,16 @@ print("Got", got)
     trace = new TraceExplorer({
       onChange: (traceIndex) => this.position.set(traceIndex)
     });
-    selectInput(value) {
-      this.input.set(value);
+    submit() {
+      this.submission.submit(this.editor.text);
     }
-    autoRunTimer = null;
-    /** 编辑器或输入静默 1s 后自动运行；任何变化（含首次加载）都会重置计时。 */
-    autoRun = this.derive([this.editor, this.input], [], (_editor, _input) => {
-      if (this.autoRunTimer !== null) clearTimeout(this.autoRunTimer);
-      this.autoRunTimer = setTimeout(() => {
-        this.autoRunTimer = null;
-        this.submission.submit(this.editor.text, this.input.value);
-      }, 1e3);
-    });
     execute = this.derive([this.submission], [this.execution], async (submission) => {
       const snapshot = submission.value;
       if (snapshot.revision === 0) return;
       this.execution.set({ kind: "running", submission: snapshot });
       try {
-        const stdin = snapshot.stdin === "" ? "" : `${snapshot.stdin}
-`;
         const files = linkProgram(snapshot.source);
-        const result2 = await runProgram(files, { ...RUN_OPTIONS, stdin });
+        const result2 = await runProgram(files, RUN_OPTIONS);
         if (this.submission.value.revision !== snapshot.revision) return;
         this.execution.set({ kind: "done", submission: snapshot, result: result2 });
       } catch (error2) {
@@ -38086,23 +38066,8 @@ print("Got", got)
       else this.editor.showLine(line, "execution", false);
     }
   };
-  function InputCard({ value, onChange }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-basic-input", "data-view": "input", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "pico-card-body pico-basic-input-body", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pico-basic-input-title", children: "\u8F93\u5165" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-        "input",
-        {
-          className: "pico-input",
-          type: "text",
-          value,
-          placeholder: "\u7A0B\u5E8F input() \u4F1A\u8BFB\u5230\u7684\u5185\u5BB9",
-          onChange: (event) => onChange(event.currentTarget.value)
-        }
-      )
-    ] }) });
-  }
   function BasicView({ model }) {
-    const input = usePicoState(model.input).value;
+    const running = usePicoState(model.execution).value.kind === "running";
     const hosts = (0, import_react5.useMemo)(() => {
       const of = (element) => (node2) => {
         if (node2 !== null) node2.replaceChildren(element);
@@ -38119,11 +38084,22 @@ print("Got", got)
       /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
         Shell,
         {
-          toolbar: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Toolbar, { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: hosts.controls }) }) }),
+          toolbar: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Toolbar, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarGroup, { label: "\u8FD0\u884C", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "pico-ghost-btn pico-ghost-btn--primary",
+                disabled: running,
+                onClick: () => model.submit(),
+                children: running ? "\u8FD0\u884C\u4E2D\u2026" : "\u8FD0\u884C"
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ToolbarGroup, { label: "\u8F68\u8FF9\u56DE\u653E", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: hosts.controls }) })
+          ] }),
           editor: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: hosts.editor, style: { display: "contents" } }),
           children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "pico-basic-world", children: [
             /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-basic-trace", "data-view": "trace", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body", ref: hosts.trace }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(InputCard, { value: input, onChange: (value) => model.selectInput(value) }),
             /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("section", { className: "pico-card pico-basic-output", "data-view": "output", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "pico-card-body", ref: hosts.io }) })
           ] })
         }
