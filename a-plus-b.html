@@ -1346,7 +1346,10 @@
 }
 .pico-banner-float:hover:not(.is-suppressed) .pico-banner-controls,
 .pico-banner-float.is-open .pico-banner-controls {
-  max-width: 100%;  /* 适应按钮总宽，只受热区（页面）约束 */
+  /* 不能用 %：托盘宽依赖容器、容器又依赖托盘（循环），布局时 % 按 none 处理，
+     容器瞬间跳到全宽，托盘在里面左对齐——变成向右滑出。max-content 随按钮
+     总宽，interpolate-size 让 px → 关键字仍可过渡。 */
+  max-width: max-content;
   border-color: color-mix(in srgb, var(--pico-hairline) 85%, transparent);
   background: color-mix(in srgb, var(--pico-surface-raised) 78%, transparent);
   backdrop-filter: saturate(180%) blur(20px);
@@ -36022,7 +36025,6 @@ _pico_result
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-gutter: stable;
 }
 
 /* \u7A0B\u5E8F\u8F93\u51FA block\uFF1A\u4FDD\u7559\u5176\u4E2D\u7684\u6362\u884C\uFF1Bstderr \u7528\u9519\u8BEF\u8272 */
