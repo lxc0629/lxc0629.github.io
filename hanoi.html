@@ -47941,6 +47941,12 @@ _pico_result
       this.transition({ value });
     }
   };
+  var SceneState = class extends PicoState {
+    value = { result: null, traceIndex: 0 };
+    set(value) {
+      this.transition({ value });
+    }
+  };
   var HanoiModel = class extends Playground {
     id = "hanoi";
     title = "Tower of Hanoi";
@@ -47948,6 +47954,7 @@ _pico_result
     submission = this.use(SubmissionState);
     execution = this.use(ExecutionState);
     position = this.use(PositionState);
+    scene = this.use(SceneState);
     testCase = this.use(CaseState);
     terminal = new Terminal({ onLine: () => {
     } });
@@ -48000,13 +48007,14 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
     });
     display = this.derive(
       [this.execution, this.position, this.testCase, this.editor],
-      [],
+      [this.scene],
       (execution, position, testCase, editor) => {
         const n = Number(testCase.value);
         const matchesCurrent = execution.value.submission.source === editor.text && execution.value.submission.n === n;
         const result2 = matchesCurrent && execution.value.kind === "done" ? execution.value.result : null;
         const trace2 = result2?.trace ?? null;
         const traceIndex = trace2 === null ? 0 : Math.min(position.value, trace2.steps.length + 1);
+        this.scene.set({ result: result2, traceIndex });
         const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(editor.text));
         this.debugger.render(trace2, controlFlow, traceIndex);
         const terminalState = trace2?.at(traceIndex);
@@ -48099,13 +48107,11 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
     return `M ${x1} ${ARROW_Y} Q ${midX} ${ARROW_LIFT}, ${x2} ${ARROW_Y}`;
   }
   function HanoiScene({
-    execution,
-    position,
+    scene,
     n
   }) {
-    const result2 = execution.kind === "done" ? execution.result : null;
-    const trace2 = result2?.trace ?? null;
-    const traceIndex = trace2 === null ? 0 : Math.min(position, trace2.steps.length + 1);
+    const trace2 = scene.result?.trace ?? null;
+    const traceIndex = scene.traceIndex;
     const beforeState = trace2?.at(Math.max(0, traceIndex - 1));
     const state2 = trace2?.at(traceIndex);
     const before = hanoiWorld(beforeState?.stdout ?? "", n);
@@ -48177,7 +48183,7 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
   }
   function HanoiView({ model }) {
     const execution = usePicoState(model.execution).value;
-    const tracePosition = usePicoState(model.position).value;
+    const scene = usePicoState(model.scene).value;
     const testCase = usePicoState(model.testCase).value;
     const n = Number(testCase);
     const hosts = (0, import_react6.useMemo)(() => {
@@ -48219,7 +48225,7 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
               icon: "viz",
               title: "\u53EF\u89C6\u5316",
               flush: true,
-              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { execution, position: tracePosition, n }) }, execution.submission.revision)
+              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { scene, n }) }, execution.submission.revision)
             },
             {
               key: "output",
