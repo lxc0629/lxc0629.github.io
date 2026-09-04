@@ -47789,15 +47789,16 @@ _pico_result
     }
     return value;
   }
-  function child(container2, segment) {
-    if (Array.isArray(container2)) {
-      if (!Number.isInteger(segment)) throw new TypeError("\u6570\u7EC4\u8DEF\u5F84\u5FC5\u987B\u4F7F\u7528\u6574\u6570\u7D22\u5F15");
-      const index = segment === -1 ? container2.length - 1 : segment;
-      if (typeof index !== "number" || index < 0 || index >= container2.length) {
-        throw new RangeError(`\u6570\u7EC4\u8DEF\u5F84\u8D8A\u754C: ${String(segment)}`);
-      }
-      return container2[index];
+  function arrayIndex(array, key) {
+    if (!Number.isInteger(key)) throw new TypeError("\u6570\u7EC4\u8DEF\u5F84\u5FC5\u987B\u4F7F\u7528\u6574\u6570\u7D22\u5F15");
+    const index = key === -1 ? array.length - 1 : key;
+    if (typeof index !== "number" || index < 0 || index >= array.length) {
+      throw new RangeError(`\u6570\u7EC4\u8DEF\u5F84\u8D8A\u754C: ${String(key)}`);
     }
+    return index;
+  }
+  function child(container2, segment) {
+    if (Array.isArray(container2)) return container2[arrayIndex(container2, segment)];
     if (container2 !== null && typeof container2 === "object" && typeof segment === "string") {
       if (!Object.hasOwn(container2, segment)) throw new Error(`\u72B6\u6001\u8DEF\u5F84\u4E0D\u5B58\u5728: ${segment}`);
       return container2[segment];
@@ -47812,14 +47813,6 @@ _pico_result
   function parentAt(root, path) {
     if (path.length === 0) throw new Error("StateChange path \u4E0D\u80FD\u4E3A\u7A7A");
     return { parent: valueAt(root, path.slice(0, -1)), key: path[path.length - 1] };
-  }
-  function arrayIndex(array, key) {
-    if (!Number.isInteger(key)) throw new TypeError("\u6570\u7EC4\u8DEF\u5F84\u5FC5\u987B\u4F7F\u7528\u6574\u6570\u7D22\u5F15");
-    const index = key === -1 ? array.length - 1 : key;
-    if (typeof index !== "number" || index < 0 || index >= array.length) {
-      throw new RangeError(`\u6570\u7EC4\u8DEF\u5F84\u8D8A\u754C: ${String(key)}`);
-    }
-    return index;
   }
   function put(root, path, value) {
     const { parent, key } = parentAt(root, path);
