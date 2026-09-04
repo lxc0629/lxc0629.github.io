@@ -24102,6 +24102,8 @@ ${h2.join(`
             if (name2 !== null) frames.push(name2);
           } else if (change2.op === "remove" && change2.path.length === 2 && change2.path[1] === -1) {
             frames.pop();
+          } else if (change2.op === "put" && change2.path.length === 1) {
+            frames = (Array.isArray(change2.value) ? change2.value : []).map(frameName).filter((name2) => name2 !== null);
           } else if (change2.op === "put" && change2.path.length === 3 && change2.path[2] === "name" && typeof change2.value === "string") {
             const rawIndex = change2.path[1];
             const index = rawIndex === -1 ? frames.length - 1 : rawIndex;
