@@ -47063,9 +47063,6 @@ ${h2.join(`
     get element() {
       return editorElement(this);
     }
-    setText(text) {
-      this.replace(text);
-    }
     showLine(line, kind, scroll = true) {
       showEditorLine(this, line, kind, scroll);
     }
@@ -48083,17 +48080,6 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
   function isPeg(value) {
     return value === "A" || value === "B" || value === "C";
   }
-  function parseMoveLine(line) {
-    const match = /^([ABC]) -> ([ABC])$/.exec(line);
-    if (match === null) return null;
-    const from = match[1];
-    const to = match[2];
-    if (!isPeg(from) || !isPeg(to)) return null;
-    return { from, to };
-  }
-  function moveLines(stdout) {
-    return stdout.split("\n").map((line) => line.trim()).filter((line) => parseMoveLine(line) !== null);
-  }
   function diskTopY(index) {
     return FLOOR - (index + 1) * DISK_H - index * DISK_GAP;
   }
@@ -48121,34 +48107,13 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
     const result2 = execution.kind === "done" ? execution.result : null;
     const trace2 = result2?.trace ?? null;
     const traceIndex = trace2 === null ? 0 : Math.min(position, trace2.steps.length + 1);
-    const beforeIndex = Math.max(0, traceIndex - 1);
-    const beforeState = trace2?.at(beforeIndex);
+    const beforeState = trace2?.at(Math.max(0, traceIndex - 1));
     const state2 = trace2?.at(traceIndex);
-    const beforeStdout = beforeState?.stdout ?? "";
-    const stdout = state2?.stdout ?? "";
-    const before = hanoiWorld(beforeStdout, n);
-    const pegs = {
-      A: [...before.pegs.A],
-      B: [...before.pegs.B],
-      C: [...before.pegs.C]
-    };
-    let error2 = before.error;
-    let lastMove = null;
-    const printed = moveLines(stdout).slice(moveLines(beforeStdout).length);
-    for (const line of printed) {
-      if (error2 !== null) break;
-      const parsed = parseMoveLine(line);
-      if (parsed === null) continue;
-      const disk = pegs[parsed.from].at(-1);
-      const targetTop = pegs[parsed.to].at(-1);
-      if (disk === void 0 || targetTop !== void 0 && disk > targetTop) {
-        error2 = line;
-        break;
-      }
-      pegs[parsed.from] = pegs[parsed.from].slice(0, -1);
-      pegs[parsed.to] = [...pegs[parsed.to], disk];
-      lastMove = { disk, from: parsed.from, to: parsed.to };
-    }
+    const before = hanoiWorld(beforeState?.stdout ?? "", n);
+    const world = hanoiWorld(state2?.stdout ?? "", n);
+    const lastMove = world.moves.length > before.moves.length ? world.moves.at(-1) ?? null : null;
+    const error2 = world.error;
+    const pegs = world.pegs;
     const stepEvent = trace2 !== null && traceIndex >= 1 && traceIndex <= trace2.steps.length ? trace2.steps[traceIndex - 1].event : null;
     const call = stepEvent === "call" ? hanoiCall(state2) : null;
     let displayPegs = pegs;
