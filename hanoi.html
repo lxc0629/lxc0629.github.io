@@ -48036,22 +48036,19 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
     const pegs = initialPegs(n);
     const moves = [];
     let error2 = null;
-    const lines = stdout.split("\n").map((line) => line.trim()).filter((line) => line !== "");
-    for (const line of lines) {
+    for (const line of stdout.split("\n").map((line2) => line2.trim())) {
       if (error2 !== null) break;
-      const match = /^([ABC]) -> ([ABC])$/.exec(line);
-      if (match === null) continue;
-      const from = match[1];
-      const to = match[2];
-      const disk = pegs[from].at(-1);
-      const targetTop = pegs[to].at(-1);
+      const parsed = parseMoveLine(line);
+      if (parsed === null) continue;
+      const disk = pegs[parsed.from].at(-1);
+      const targetTop = pegs[parsed.to].at(-1);
       if (disk === void 0 || targetTop !== void 0 && disk > targetTop) {
         error2 = line;
-        break;
+        continue;
       }
-      pegs[from] = pegs[from].slice(0, -1);
-      pegs[to] = [...pegs[to], disk];
-      moves.push({ disk, from, to });
+      pegs[parsed.from] = pegs[parsed.from].slice(0, -1);
+      pegs[parsed.to] = [...pegs[parsed.to], disk];
+      moves.push({ disk, from: parsed.from, to: parsed.to });
     }
     return { pegs, moves, error: error2 };
   }
@@ -48073,6 +48070,14 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
   ];
   function isPeg(value) {
     return value === "A" || value === "B" || value === "C";
+  }
+  function parseMoveLine(line) {
+    const match = /^([ABC]) -> ([ABC])$/.exec(line);
+    if (match === null) return null;
+    const from = match[1];
+    const to = match[2];
+    if (!isPeg(from) || !isPeg(to)) return null;
+    return { from, to };
   }
   function diskTopY(index) {
     return FLOOR - (index + 1) * DISK_H - index * DISK_GAP;
