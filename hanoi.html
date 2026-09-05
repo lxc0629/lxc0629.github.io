@@ -45982,8 +45982,9 @@ ${h2.join(`
       /* 行号槽最小宽：短文档行号也不贴边；右对齐靠默认样式 */
       minWidth: "var(--pico-editor-gutter)",
       padding: "0 var(--pico-space-1) 0 var(--pico-space-4)",
-      fontFamily: "var(--pico-font-ui)",
-      fontSize: "calc(var(--pico-size-code) - 2px)"
+      /* 与代码同字体同字号（line-height 同继承 1.8）：行内盒度量一致，基线天然对齐 */
+      fontFamily: "var(--pico-font-mono)",
+      fontSize: "var(--pico-size-code)"
     },
     /* 行号列拉满槽宽：数字贴向代码一侧，行号与代码间距即槽右衬 + 元素右衬 */
     ".cm-lineNumbers": { flexGrow: "1" },
