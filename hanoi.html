@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="./pico.svg" type="image/svg+xml">
-  <title>Tower of Hanoi</title>
+  <title>hanoi</title>
   <style>* { box-sizing: border-box; margin: 0; padding: 0; } html, body { height: 100%; }</style>
   <style>/* LXGW WenKai Screen [4] */
 @font-face {
@@ -48134,15 +48134,18 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
   function HanoiScene({
     result: result2,
     position,
+    source,
     n
   }) {
     const state2 = position?.state;
-    const before = hanoiWorld(position?.previous.stdout ?? "", n);
     const world = hanoiWorld(state2?.stdout ?? "", n);
-    const lastMove = world.moves.length > before.moves.length ? world.moves.at(-1) ?? null : null;
     const error2 = world.error;
     const pegs = world.pegs;
-    const call = position?.event === "call" ? hanoiCall(state2) : null;
+    const line = state2?.line ?? null;
+    const lineText = line === null ? "" : source.split("\n")[line - 1] ?? "";
+    const trace2 = result2?.trace ?? null;
+    const next = position?.traceIndex ?? 0;
+    const call = position?.event === "stmt" && /^\s*hanoi\(/.test(lineText) && trace2 !== null && trace2.steps[next]?.event === "call" ? hanoiCall(trace2.at(next + 1)) : null;
     let displayPegs = pegs;
     let virtualTarget = null;
     let virtualMoved = [];
@@ -48158,8 +48161,9 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
         virtualMoved = moved;
       }
     }
-    const showCall = call !== null && error2 === null;
-    const showPrint = lastMove !== null && error2 === null;
+    const topFrame2 = state2?.frames?.at(-1);
+    const printPeg = position?.event === "stmt" && /^\s*print\(/.test(lineText) && topFrame2?.name === "hanoi" && typeof topFrame2.locals.src === "string" && isPeg(topFrame2.locals.src) && error2 === null ? topFrame2.locals.src : null;
+    const printDisk = printPeg !== null ? pegs[printPeg].at(-1) : void 0;
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("svg", { className: "pico-hanoi-svg", viewBox: "0 0 440 240", role: "img", "aria-label": "\u6C49\u8BFA\u5854", preserveAspectRatio: "xMidYMid meet", children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("defs", { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("marker", { id: "pico-hanoi-arrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "5", markerHeight: "5", orient: "auto-start-reverse", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("path", { d: "M 0 0 L 10 5 L 0 10 z", className: "pico-hanoi-arrow-head" }) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("rect", { className: "pico-hanoi-base", x: "16", y: BASE_Y - 4, width: "408", height: "8", rx: "4" }),
@@ -48167,7 +48171,7 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("rect", { className: "pico-hanoi-peg", x: PEG_X[peg] - 5, y: PEG_TOP, width: "10", height: BASE_Y - PEG_TOP, rx: "5" }),
         displayPegs[peg].map((disk, index) => {
           const width = 20 + disk * 14;
-          const isVirtual = virtualTarget === peg && virtualMoved.includes(disk);
+          const isVirtual = virtualTarget === peg && virtualMoved.includes(disk) || printPeg === peg && disk === printDisk;
           const className = isVirtual ? "pico-hanoi-disk pico-hanoi-disk--virtual" : "pico-hanoi-disk";
           return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "rect",
@@ -48184,19 +48188,11 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
           );
         })
       ] }, peg)),
-      showCall && call !== null && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      call !== null && error2 === null && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
         "path",
         {
           className: "pico-hanoi-move",
           d: callArrowPath(call.from, call.to),
-          markerEnd: "url(#pico-hanoi-arrow)"
-        }
-      ),
-      showPrint && lastMove !== null && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        "path",
-        {
-          className: "pico-hanoi-move",
-          d: callArrowPath(lastMove.from, lastMove.to),
           markerEnd: "url(#pico-hanoi-arrow)"
         }
       ),
@@ -48251,7 +48247,7 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
               icon: "viz",
               title: "\u53EF\u89C6\u5316",
               flush: true,
-              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { result: result2, position, n }) }, execution.submission.revision)
+              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { result: result2, position, source: execution.submission.source, n }) }, execution.submission.revision)
             },
             {
               key: "output",
@@ -48272,6 +48268,7 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
   }
   function mountHanoi(container2) {
     const model = new HanoiModel();
+    document.title = model.title;
     const root = (0, import_client.createRoot)(container2);
     root.render(/* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiView, { model }));
     void model.run();

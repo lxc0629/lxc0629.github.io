@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="./pico.svg" type="image/svg+xml">
-  <title>Python Playground</title>
+  <title>hello</title>
   <style>* { box-sizing: border-box; margin: 0; padding: 0; } html, body { height: 100%; }</style>
   <style>/* LXGW WenKai Screen [4] */
 @font-face {
@@ -48123,6 +48123,7 @@ print("Got", got)
   }
   function mountHello(container2) {
     const model = new HelloModel();
+    document.title = model.title;
     const root = (0, import_client.createRoot)(container2);
     root.render(/* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HelloView, { model }));
     void model.run();
