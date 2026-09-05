@@ -45977,6 +45977,8 @@ ${h2.join(`
       backgroundColor: "var(--pico-code-bg)",
       color: "var(--pico-code-dim)",
       border: "none",
+      /* 行号不可选中：宿主为编辑文本重开了 user-select，行号要关回去 */
+      userSelect: "none",
       /* 行号槽最小宽：短文档行号也不贴边；右对齐靠默认样式 */
       minWidth: "var(--pico-editor-gutter)",
       padding: "0 var(--pico-space-1) 0 var(--pico-space-4)",
