@@ -104,6 +104,9 @@
   color: var(--pico-ink);
   background: var(--pico-paper);
   font: var(--pico-size-md)/1.65 var(--pico-font-text);
+  /* UI 文案默认不可选中（顶栏、按钮、面板标签）；可复制文本在编辑器宿主重新打开 */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .pico-root ::selection { background: var(--pico-accent-wash); }
@@ -177,6 +180,8 @@
   min-width: 0;
   position: relative;
   overflow: hidden;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .pico-w-editor-host .cm-editor {
@@ -332,8 +337,6 @@
   gap: var(--pico-space-2);
   font: 600 var(--pico-size-sm)/1 var(--pico-font-ui);
   color: var(--pico-ink);
-  user-select: none;
-  -webkit-user-select: none;
 }
 .pico-topbar-logo { display: block; width: 22px; height: 22px; flex: 0 0 auto; }
 /* 页面标题（课程名）：品牌右侧，发丝线分隔，过长省略。 */
@@ -48123,7 +48126,8 @@ _pico_result
         background: resolveToken("--pico-code-bg", "background-color"),
         foreground: resolveToken("--pico-code-ink", "color"),
         cursor: resolveToken("--pico-accent", "color"),
-        selectionBackground: resolveToken("--pico-accent-wash", "background-color"),
+        selectionBackground: resolveToken("--pico-accent-glow", "background-color"),
+        // wash 在浅色终端底上不可辨
         extendedAnsi
       };
     };
