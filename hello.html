@@ -45914,10 +45914,11 @@ ${h2.join(`
   var editorTheme = EditorView.theme({
     "&": { height: "100%", backgroundColor: "var(--pico-code-bg)", color: "var(--pico-code-ink)" },
     "&.cm-focused": { outline: "none" },
-    /* 光标：drawSelection 画的 DOM 光标，baseTheme 默认 1.2px 黑线。本主题挂载在
-       baseTheme 之后、同特异性即胜出；改 accent 圆角竖条与终端光标同源。 */
+    /* 光标：drawSelection 画的 DOM 光标，baseTheme 默认 1.2px 黑线（不随主题变白）。
+       本主题挂载在 baseTheme 之后、同特异性即胜出；跟随代码墨色（浅黑深白），
+       2px 圆角竖条比原生细线厚实。 */
     ".cm-cursor, .cm-dropCursor": {
-      borderLeft: "2px solid var(--pico-accent)",
+      borderLeft: "2px solid var(--pico-code-ink)",
       borderRadius: "2px"
     },
     /* CM 自绘选区底色：baseTheme 的 &light/&dark 五类选择器更深，!important（写在值里，
@@ -47580,6 +47581,9 @@ ${val.stack}`;
     }
     return pyodidePromise;
   }
+  function warmupProgramImpl() {
+    return pyodide().then(() => void 0, () => void 0);
+  }
   function projectCopy(files) {
     if (!Object.hasOwn(files, "main.py")) throw new Error("Files \u7F3A\u5C11 main.py");
     const project = {};
@@ -47757,6 +47761,9 @@ _pico_result
   // src/libs/runner/index.ts
   function runProgram(files, options) {
     return runProgramImpl(files, options);
+  }
+  function warmupProgram() {
+    return warmupProgramImpl();
   }
   var Trace = class {
     initialState;
@@ -48187,6 +48194,7 @@ _pico_result
       edit.current = onEdit;
     }, [onEdit]);
     (0, import_react9.useEffect)(() => {
+      void warmupProgram();
       const storageKey = typeof window === "undefined" ? null : `pico:editor:${window.location.pathname}`;
       let saved = null;
       try {
