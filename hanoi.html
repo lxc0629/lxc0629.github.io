@@ -48093,6 +48093,13 @@ _pico_result
       if (this.#empty !== null) this.#empty.hidden = this.#hasActivity;
     }
   };
+  function toXtermColor(value) {
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (ctx === null) return value;
+    ctx.fillStyle = "#abcdef";
+    ctx.fillStyle = value;
+    return ctx.fillStyle === "#abcdef" && value.toLowerCase() !== "#abcdef" ? value : ctx.fillStyle;
+  }
   function resolveToken(token, property) {
     const probe = document.createElement("span");
     probe.style.setProperty(property, `var(${token})`);
@@ -48132,9 +48139,8 @@ _pico_result
         background: resolveToken("--pico-code-bg", "background-color"),
         foreground: resolveToken("--pico-code-ink", "color"),
         cursor: resolveToken("--pico-accent", "color"),
-        /* 选择底必须传不透明纯色：xterm 解析不了 color-mix 序列化的 color(srgb … / a)，
-           半透明一律静默回落白色默认；不透明色它自己按 0.3 换算（xterm #2737）。 */
-        selectionBackground: resolveToken("--pico-accent", "color"),
+        /* 选中底与编辑器同款 accent-wash：半透明须经 toXtermColor 规格化成 rgba() */
+        selectionBackground: toXtermColor(resolveToken("--pico-accent-wash", "background-color")),
         extendedAnsi
       };
     };
