@@ -53,6 +53,8 @@
   --pico-code-bg: var(--pico-surface-raised);
   /* 执行行高亮底：比 accent-wash 更实，浅色下也清晰可辨（错误行复用 hue-error-bg） */
   --pico-code-exec-bg: color-mix(in srgb, var(--pico-accent) 18%, transparent);
+  /* 选中底：编辑器与终端共用；wash 的 12% 在白底上近乎不可见，提到执行行同档 */
+  --pico-code-select-bg: color-mix(in srgb, var(--pico-accent) 18%, transparent);
   /* 行号槽最小宽：数字右对齐，短文档也不贴边；代码列起点稳定 */
   --pico-editor-gutter: 56px;
   --pico-code-ink: var(--pico-ink);
@@ -109,7 +111,7 @@
   -webkit-user-select: none;
 }
 
-.pico-root ::selection { background: var(--pico-accent-wash); }
+.pico-root ::selection { background: var(--pico-code-select-bg); }
 .pico-root button,
 .pico-root input,
 .pico-root select { font: inherit; }
@@ -45962,8 +45964,8 @@ ${h2.join(`
       borderRadius: "2px"
     },
     /* CM 自绘选区底色：baseTheme 的 &light/&dark 五类选择器更深，!important（写在值里，
-       style-mod 不认 ! 属性前缀）压过它，与原生 ::selection 同源。 */
-    ".cm-selectionBackground": { background: "var(--pico-accent-wash) !important" },
+       style-mod 不认 ! 属性前缀）压过它，与终端选中底共用 --pico-code-select-bg。 */
+    ".cm-selectionBackground": { background: "var(--pico-code-select-bg) !important" },
     ".cm-scroller": {
       fontFamily: "var(--pico-font-mono)",
       fontSize: "var(--pico-size-code)",
@@ -48094,11 +48096,10 @@ _pico_result
     }
   };
   function toXtermColor(value) {
-    const ctx = document.createElement("canvas").getContext("2d");
-    if (ctx === null) return value;
-    ctx.fillStyle = "#abcdef";
-    ctx.fillStyle = value;
-    return ctx.fillStyle === "#abcdef" && value.toLowerCase() !== "#abcdef" ? value : ctx.fillStyle;
+    const m = value.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s+\/\s+([\d.]+%?))?\)$/);
+    if (m === null) return value;
+    const alpha = m[4] === void 0 ? 1 : m[4].endsWith("%") ? Number.parseFloat(m[4]) / 100 : Number.parseFloat(m[4]);
+    return `rgba(${Math.round(Number.parseFloat(m[1]) * 255)}, ${Math.round(Number.parseFloat(m[2]) * 255)}, ${Math.round(Number.parseFloat(m[3]) * 255)}, ${alpha})`;
   }
   function resolveToken(token, property) {
     const probe = document.createElement("span");
@@ -48139,8 +48140,8 @@ _pico_result
         background: resolveToken("--pico-code-bg", "background-color"),
         foreground: resolveToken("--pico-code-ink", "color"),
         cursor: resolveToken("--pico-accent", "color"),
-        /* 选中底与编辑器同款 accent-wash：半透明须经 toXtermColor 规格化成 rgba() */
-        selectionBackground: toXtermColor(resolveToken("--pico-accent-wash", "background-color")),
+        /* 选中底与编辑器共用 --pico-code-select-bg：computed 是 color(srgb … / a)，须换算成 rgba() */
+        selectionBackground: toXtermColor(resolveToken("--pico-code-select-bg", "background-color")),
         extendedAnsi
       };
     };

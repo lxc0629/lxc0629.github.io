@@ -52,6 +52,8 @@
   --pico-code-bg: var(--pico-surface-raised);
   /* 执行行高亮底：比 accent-wash 更实，浅色下也清晰可辨（错误行复用 hue-error-bg） */
   --pico-code-exec-bg: color-mix(in srgb, var(--pico-accent) 18%, transparent);
+  /* 选中底：编辑器与终端共用；wash 的 12% 在白底上近乎不可见，提到执行行同档 */
+  --pico-code-select-bg: color-mix(in srgb, var(--pico-accent) 18%, transparent);
   /* 行号槽最小宽：数字右对齐，短文档也不贴边；代码列起点稳定 */
   --pico-editor-gutter: 56px;
   --pico-code-ink: var(--pico-ink);
@@ -108,7 +110,7 @@
   -webkit-user-select: none;
 }
 
-.pico-root ::selection { background: var(--pico-accent-wash); }
+.pico-root ::selection { background: var(--pico-code-select-bg); }
 .pico-root button,
 .pico-root input,
 .pico-root select { font: inherit; }
