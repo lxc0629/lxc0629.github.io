@@ -352,6 +352,11 @@
   text-overflow: ellipsis;
 }
 
+/* 空间不足的两级收窄（TopBar 按实测溢出置 data-fit）：先藏课程名，再藏品牌字 */
+.pico-topbar[data-fit="no-title"] .pico-topbar-title,
+.pico-topbar[data-fit="no-brand"] .pico-topbar-title { display: none; }
+.pico-topbar[data-fit="no-brand"] .pico-topbar-brand-text { display: none; }
+
 /* 工具带内的控件分组 */
 .pico-toolbar-group {
   display: flex;

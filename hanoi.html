@@ -353,6 +353,11 @@
   text-overflow: ellipsis;
 }
 
+/* 空间不足的两级收窄（TopBar 按实测溢出置 data-fit）：先藏课程名，再藏品牌字 */
+.pico-topbar[data-fit="no-title"] .pico-topbar-title,
+.pico-topbar[data-fit="no-brand"] .pico-topbar-title { display: none; }
+.pico-topbar[data-fit="no-brand"] .pico-topbar-brand-text { display: none; }
+
 /* 工具带内的控件分组 */
 .pico-toolbar-group {
   display: flex;
@@ -23080,7 +23085,7 @@ ${h2.join(`
           },
           children: [
             /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("img", { className: "pico-topbar-logo", src: "./pico.svg", alt: "", "aria-hidden": "true" }),
-            brand,
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pico-topbar-brand-text", children: brand }),
             /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { className: "pico-brand-chevron", viewBox: "0 0 12 12", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "m3 4.5 3 3 3-3", fill: "none", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" }) })
           ]
         }
@@ -23201,7 +23206,24 @@ ${h2.join(`
   }
   function TopBarImpl({ brand, name: name2, onResetEditor, groups }) {
     const list = groups ?? [];
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("header", { className: "pico-topbar", "aria-label": "playground \u5DE5\u5177\u680F", children: [
+    const bar = (0, import_react6.useRef)(null);
+    const fit = () => {
+      const el2 = bar.current;
+      if (el2 === null) return;
+      for (const state2 of ["wide", "no-title", "no-brand"]) {
+        el2.dataset.fit = state2;
+        if (el2.scrollWidth <= el2.clientWidth + 1) break;
+      }
+    };
+    (0, import_react6.useEffect)(fit);
+    (0, import_react6.useEffect)(() => {
+      const el2 = bar.current;
+      if (el2 === null || typeof ResizeObserver === "undefined") return;
+      const observer = new ResizeObserver(fit);
+      observer.observe(el2);
+      return () => observer.disconnect();
+    }, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("header", { ref: bar, className: "pico-topbar", "aria-label": "playground \u5DE5\u5177\u680F", children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pico-topbar-left", children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandMenu, { brand: brand ?? "Pico Playground", onResetEditor }),
         name2 !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-topbar-title", children: name2 })
