@@ -23868,8 +23868,8 @@ ${h2.join(`
         for (const d of order) {
           const prev = lastVersions.get(d);
           if (prev !== void 0 && d.inputs.every((s15, i2) => versionOf(stateOf3(s15)) === prev[i2])) continue;
-          lastVersions.set(d, d.inputs.map((s15) => versionOf(stateOf3(s15))));
           await d.compute(...d.inputs);
+          lastVersions.set(d, d.inputs.map((s15) => versionOf(stateOf3(s15))));
         }
       } catch (e) {
         console.error(e);
@@ -24280,18 +24280,23 @@ ${h2.join(`
     canvas = node("div", "pico-trace-canvas");
     render(trace2, controlFlow, traceIndex) {
       const structures = controlFlow ?? NO_STRUCTURES;
-      const changed = trace2 !== this.cachedTrace || structures !== this.cachedControlFlow;
+      const traceChanged = trace2 !== this.cachedTrace;
+      const structuresChanged = structures !== this.cachedControlFlow;
+      const landed = this.traceIndex;
       this.trace = trace2;
-      if (changed) {
+      if (traceChanged) {
         this.stopTransport();
         this.scrubPop.hidden = true;
         this.scrubPop.remove();
         this.scrubSection = 0;
         this.cachedTrace = trace2;
+      }
+      if (traceChanged || structuresChanged) {
         this.cachedControlFlow = structures;
         this.blocks = trace2 === null ? [] : flameBlocks(structures, trace2);
       }
-      this.traceIndex = trace2 === null ? 0 : Math.max(1, clamp(trace2, traceIndex));
+      const landing = traceIndex ?? (traceChanged ? maxIndex(trace2) : this.traceIndex);
+      this.traceIndex = trace2 === null ? 0 : Math.max(1, clamp(trace2, landing));
       this.empty.hidden = trace2 !== null;
       this.diff.hidden = trace2 === null;
       this.player.hidden = trace2 === null;
@@ -24299,7 +24304,7 @@ ${h2.join(`
       if (trace2 === null || this.traceIndex >= maxIndex(trace2)) this.stopTransport();
       this.paint();
       this.paintDiff();
-      this.emit();
+      if (traceChanged || this.traceIndex !== landed) this.emit();
     }
     /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
     emit() {
@@ -24311,6 +24316,7 @@ ${h2.join(`
       const step2 = this.traceIndex >= 1 && this.traceIndex <= trace2.steps.length ? trace2.steps[this.traceIndex - 1] : null;
       return {
         traceIndex: this.traceIndex,
+        atEnd: this.traceIndex === maxIndex(trace2),
         event: step2?.event ?? null,
         state: trace2.at(this.traceIndex),
         previous: trace2.at(Math.max(0, this.traceIndex - 1))
@@ -24608,7 +24614,10 @@ ${h2.join(`
         if (this.#shownOut !== "") this.#emit(this.#shownOut);
         if (this.#shownErr !== "") this.#emit(this.#shownErr, "error");
         if (this.#accepting) this.#repaint();
-      }).catch((error2) => console.error("Terminal \u8868\u9762\u521D\u59CB\u5316\u5931\u8D25", error2));
+      }).catch((error2) => {
+        this.#pending = null;
+        console.error("Terminal \u8868\u9762\u521D\u59CB\u5316\u5931\u8D25", error2);
+      });
     }
     #emit(text, ink, replaceLine = false) {
       this.#surface?.write(text, { ink, replaceLine });
@@ -25099,6 +25108,7 @@ ${h2.join(`
     get element() {
       return this.#core.element;
     }
+    /** 推送事实。traceIndex 是新 trace 的显式落点：缺省落终点；同一 trace 重复推送保持光标。 */
     render(trace2, controlFlow, traceIndex) {
       this.#core.render(trace2, controlFlow, traceIndex);
     }
@@ -45752,6 +45762,7 @@ ${h2.join(`
     return Object.freeze(findings);
   }
   function controlFlowOf(source) {
+    if (syntaxErrorsOf(source).length > 0) return Object.freeze([]);
     const starts = lineStarts(source);
     const lineAt = (offset) => lineOf(starts, offset);
     function structuresWithin(node2) {
@@ -45790,13 +45801,6 @@ ${h2.join(`
       return Object.freeze(structures);
     }
     return structuresWithin(pythonLanguage.parser.parse(source).topNode);
-  }
-
-  // src/libs/analyzer/control.ts
-  function controlFlowOf2(files) {
-    const source = files["source.py"] ?? "";
-    if (syntaxErrorsOf(source).length > 0) return [];
-    return controlFlowOf(source);
   }
 
   // node_modules/@codemirror/commands/dist/index.js
@@ -47070,27 +47074,32 @@ ${h2.join(`
     constructor(text) {
       this.state = new EditorState2(stripTrailingNewline(text));
     }
+    /** 学生代码的规范形：末尾至多剥掉一个换行（CodeMirror 会把结尾 \n 渲染成多余空行）。 */
     get text() {
       return this.state.text;
     }
+    /** 整篇替换（同步 CodeMirror）；任何文档变化都会清除行高亮。 */
     replace(text) {
       const next = stripTrailingNewline(text);
       this.state.transition({ text: next });
       syncEditorText(this, next);
     }
+    /** 编辑器卡片（含 CodeMirror）；首次访问时惰性创建视图。 */
     get element() {
       return editorElement(this);
     }
+    /** 高亮一行（1 计）；编辑器聚焦输入时不滚动视口。高亮是纯视图状态，不进 Pico state。 */
     showLine(line, kind, scroll = true) {
       showEditorLine(this, line, kind, scroll);
     }
+    /** 清除行高亮。 */
     clearLine() {
       clearEditorLine(this);
     }
   };
 
   // src/libs/linker/runtime.py
-  var runtime_default = 'import builtins\nimport contextlib\nimport io\nimport json\nimport os\nimport sys\nimport time\nimport traceback\n\n\n_MISSING = object()\n\n\ndef _json_value(value):\n    try:\n        encoded = json.dumps(value, allow_nan=False)\n    except (OverflowError, RecursionError, TypeError, ValueError):\n        return _MISSING\n    return json.loads(encoded)\n\n\ndef _variables(values):\n    result = {}\n    for name, value in values.items():\n        if name.startswith("__"):\n            continue\n        encoded = _json_value(value)\n        if encoded is not _MISSING:\n            result[name] = encoded\n    return result\n\n\ndef _source_frames(frame, source_filename):\n    frames = []\n    while frame is not None:\n        if frame.f_code.co_filename == source_filename:\n            frames.append(\n                {\n                    "name": frame.f_code.co_name,\n                    "locals": _variables(frame.f_locals),\n                }\n            )\n        frame = frame.f_back\n    frames.reverse()\n    return frames\n\n\ndef _snapshot(line, frame, environment, stdout, stderr, observe, source_filename):\n    state = {\n        "line": line,\n        "stdout": stdout.getvalue(),\n        "stderr": stderr.getvalue(),\n    }\n    if observe is not None and observe.get("globals"):\n        state["globals"] = _variables(environment)\n    if observe is not None and observe.get("locals"):\n        state["frames"] = _source_frames(frame, source_filename) if frame is not None else []\n    return state\n\n\ndef _frame_changes(before, after):\n    changes = []\n    before_names = [frame["name"] for frame in before]\n    after_names = [frame["name"] for frame in after]\n    if len(after) == len(before) + 1 and before_names == after_names[:-1]:\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(before) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        changes.append({"op": "append", "path": ["frames"], "value": after[-1]})\n        return changes\n    if len(before) == len(after) + 1 and before_names[:-1] == after_names:\n        changes.append({"op": "remove", "path": ["frames", -1]})\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(after) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        return changes\n    if len(before) != len(after) or before_names != after_names:\n        return [{"op": "put", "path": ["frames"], "value": after}]\n    for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n        frame_index = -1 if index == len(after) - 1 else index\n        changes.extend(\n            _changes(\n                old_frame["locals"],\n                new_frame["locals"],\n                ("frames", frame_index, "locals"),\n            )\n        )\n    return changes\n\n\ndef _changes(before, after, path=()):\n    if path == ("frames",) and isinstance(before, list) and isinstance(after, list):\n        return _frame_changes(before, after)\n    if isinstance(before, dict) and isinstance(after, dict):\n        changes = []\n        for key in sorted(before.keys() - after.keys()):\n            changes.append({"op": "remove", "path": [*path, key]})\n        for key in sorted(after.keys() - before.keys()):\n            changes.append({"op": "put", "path": [*path, key], "value": after[key]})\n        for key in sorted(before.keys() & after.keys()):\n            changes.extend(_changes(before[key], after[key], (*path, key)))\n        return changes\n    if before == after:\n        return []\n    if path in (("stdout",), ("stderr",)) and isinstance(before, str) and after.startswith(before):\n        return [{"op": "append", "path": list(path), "value": after[len(before) :]}]\n    return [{"op": "put", "path": list(path), "value": after}]\n\n\nclass _PicoRunLimit(Exception):\n    """runner \u65BD\u52A0\u7684\u8FD0\u884C\u9650\u5236\u4E2D\u6B62\uFF08\u8D85\u65F6 / \u6B65\u6570\u8D85\u9650\uFF09\uFF0Cmessage \u76F4\u63A5\u9762\u5411\u5B66\u751F\u3002"""\n\n\nclass _PicoWaitingForInput(Exception):\n    """interactive stdin \u7F13\u51B2\u8017\u5C3D\uFF1A\u672C\u6B21\u8FD0\u884C\u505C\u5728 input()\uFF0C\u8C03\u7528\u65B9\u8865\u4E00\u884C\u540E\u4ECE\u5934\u91CD\u8DD1\u3002"""\n\n\ndef _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps):\n    def trace(frame, event, _argument):\n        if deadline[0] is not None and time.monotonic() >= deadline[0]:\n            raise _PicoRunLimit("\u7A0B\u5E8F\u8FD0\u884C\u8D85\u65F6")\n        # single-step \u8BED\u4E49\uFF1A\u4E00\u6B65 = \u8C03\u8BD5\u5668\u505C\u5728\u5B66\u751F\u4EE3\u7801\u91CC\u7684\u4E00\u4E2A\u843D\u70B9\u3002\n        # stmt \u505C\u5728\u5F53\u524D\u6E90\u7801\u5E27\uFF1Bcall \u505C\u5728\u88AB\u8C03\u6E90\u7801\u5E27\uFF08\u6A21\u5757\u5165\u53E3\u7B2C 0 \u884C\u4E0D\u6210\u6B65\uFF09\uFF1B\n        # return \u505C\u5728\u843D\u70B9\u5E27\uFF08f_back\uFF09\u2014\u2014\u843D\u56DE driver/\u8FD0\u884C\u5E93\u7684\u8FD4\u56DE\u5BF9\u5B66\u751F\u4E0D\u53EF\u89C1\uFF0C\u4E0D\u6784\u6210\u6B65\u3002\n        step_event = {"line": "stmt", "call": "call", "return": "return"}.get(event)\n        step_frame = None\n        if step_event in events and frame.f_code.co_filename == source_filename:\n            step_frame = frame\n            if step_event == "call" and frame.f_lineno < 1:\n                step_frame = None\n            elif step_event == "return":\n                landing = frame.f_back\n                if landing is None or landing.f_code.co_filename != source_filename:\n                    step_frame = None\n                else:\n                    step_frame = landing\n        if step_frame is not None:\n            if max_steps is not None and len(samples) >= max_steps:\n                raise _PicoRunLimit("\u7A0B\u5E8F\u6B65\u6570\u8D85\u8FC7\u4E0A\u9650")\n            samples.append(\n                (\n                    step_event,\n                    _snapshot(\n                        step_frame.f_lineno,\n                        step_frame,\n                        environment,\n                        stdout,\n                        stderr,\n                        observe,\n                        source_filename,\n                    ),\n                )\n            )\n        return trace\n\n    return trace\n\n\ndef _source_line(exception, source_filename):\n    line = None\n    current = exception.__traceback__\n    while current is not None:\n        if current.tb_frame.f_code.co_filename == source_filename:\n            line = current.tb_lineno\n        current = current.tb_next\n    return line\n\n\ndef _is_program_exception(exception, source_filename):\n    if isinstance(exception, SyntaxError):\n        return exception.filename == source_filename\n    return _source_line(exception, source_filename) is not None\n\n\ndef _program_error(exception, source_filename, stderr):\n    if isinstance(exception, SyntaxError):\n        traceback.print_exception(exception, file=stderr)\n        return {\n            "returncode": 1,\n            "error": {"message": str(exception), "line": exception.lineno},\n        }\n    if isinstance(exception, SystemExit):\n        code = exception.code\n        if code is None or code == 0:\n            return {"returncode": 0, "error": None}\n        if not isinstance(code, int):\n            print(code, file=stderr)\n            code = 1\n        return {\n            "returncode": code,\n            "error": {"message": f"\u7A0B\u5E8F\u4EE5\u72B6\u6001\u7801 {code} \u9000\u51FA", "line": None},\n        }\n    traceback.print_exception(exception, file=stderr)\n    return {\n        "returncode": 1,\n        "error": {\n            "message": f"{type(exception).__name__}: {exception}",\n            "line": _source_line(exception, source_filename),\n        },\n    }\n\n\ndef _builtins_for(stdin_config, stdout):\n    values = vars(builtins).copy()\n    if stdin_config["kind"] == "interactive":\n        # input() \u8BFB\u7F13\u51B2\u7684\u4E0B\u4E00\u884C\uFF1B\u8017\u5C3D\u5373\u4E2D\u6B62\u672C\u6B21\u8FD0\u884C\uFF08waiting\uFF09\uFF0Cprompt \u7167\u5E38\u56DE\u663E\uFF0C\n        # \u8BA9\u91CD\u8DD1\u540E\u7684 stdout \u4E0E\u771F\u7EC8\u7AEF\u4E00\u81F4\u3002\n        def interactive_input(prompt=""):\n            text = str(prompt)\n            stdout.write(text)\n            line = sys.stdin.readline()\n            if line == "":\n                raise _PicoWaitingForInput(text)\n            if not line.endswith("\\n"):\n                line += "\\n"\n            return line[:-1]\n\n        values["input"] = interactive_input\n    return values\n\n\ndef _trace_result(samples, initial_state, final_state):\n    steps = []\n    previous = initial_state\n    for event, sample in samples:\n        steps.append({"event": event, "changes": _changes(previous, sample)})\n        previous = sample\n    return {\n        "initialState": initial_state,\n        "steps": steps,\n        "finalState": final_state,\n    }\n\n\ndef run(source_path, config_json):\n    config = json.loads(config_json)\n    run_options = {}\n    if os.path.exists("_pico_run.json"):\n        with open("_pico_run.json", encoding="utf-8") as run_file:\n            run_options = json.load(run_file)\n    stdin_config = run_options.get("stdin") or {"kind": "string", "value": ""}\n    trace_options = run_options.get("trace") or {"events": [], "observe": None}\n    events = frozenset(trace_options["events"])\n    observe = trace_options["observe"]\n    deadline = [\n        time.monotonic() + run_options["timeoutMs"] / 1000\n        if run_options.get("timeoutMs") is not None\n        else None\n    ]\n    max_steps = run_options.get("maxTraceSteps")\n\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    stdin = io.StringIO(stdin_config["value"])\n    source_filename = source_path\n    with open(source_path, encoding="utf-8", newline="") as source_file:\n        source = source_file.read()\n\n    environment = {\n        "__builtins__": _builtins_for(stdin_config, stdout),\n        "__file__": source_filename,\n        "__name__": "__main__",\n    }\n    samples = []\n    tracer = _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps)\n    old_stdin = sys.stdin\n    outcome = None\n\n    try:\n        sys.stdin = stdin\n        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):\n            if config["prelude"]:\n                exec(compile(config["prelude"], "<pico-prelude>", "exec"), environment, environment)\n            initial_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n            try:\n                if events or deadline[0] is not None:\n                    sys.settrace(tracer)\n                exec(compile(source, source_filename, "exec"), environment, environment)\n                if config["driver"]:\n                    exec(compile(config["driver"], "<pico-driver>", "exec"), environment, environment)\n            except _PicoRunLimit as limit:\n                outcome = {\n                    "returncode": 124,\n                    "error": {\n                        "message": str(limit),\n                        "line": _source_line(limit, source_filename),\n                    },\n                }\n            except _PicoWaitingForInput as waiting:\n                outcome = {\n                    "returncode": 0,\n                    "error": None,\n                    "waiting": {"prompt": str(waiting)},\n                }\n            except BaseException as exception:\n                if not _is_program_exception(exception, source_filename):\n                    raise\n                outcome = _program_error(exception, source_filename, stderr)\n            finally:\n                sys.settrace(None)\n    finally:\n        sys.stdin = old_stdin\n\n    if outcome is None:\n        outcome = {"returncode": 0, "error": None}\n    final_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n    trace = _trace_result(samples, initial_state, final_state)\n    result = {\n        "trace": trace,\n        "returncode": outcome["returncode"],\n        "error": outcome["error"],\n        "waiting": outcome.get("waiting"),\n    }\n    return json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False)\n';
+  var runtime_default = 'import builtins\nimport contextlib\nimport io\nimport json\nimport os\nimport sys\nimport time\nimport traceback\n\n\n_MISSING = object()\n\n\ndef _json_value(value):\n    try:\n        encoded = json.dumps(value, allow_nan=False)\n    except (OverflowError, RecursionError, TypeError, ValueError):\n        return _MISSING\n    return json.loads(encoded)\n\n\ndef _variables(values):\n    result = {}\n    for name, value in values.items():\n        if name.startswith("__"):\n            continue\n        encoded = _json_value(value)\n        if encoded is not _MISSING:\n            result[name] = encoded\n    return result\n\n\ndef _source_frames(frame, source_filename):\n    frames = []\n    while frame is not None:\n        if frame.f_code.co_filename == source_filename:\n            frames.append(\n                {\n                    "name": frame.f_code.co_name,\n                    "locals": _variables(frame.f_locals),\n                }\n            )\n        frame = frame.f_back\n    frames.reverse()\n    return frames\n\n\ndef _snapshot(line, frame, environment, stdout, stderr, observe, source_filename):\n    state = {\n        "line": line,\n        "stdout": stdout.getvalue(),\n        "stderr": stderr.getvalue(),\n    }\n    if observe is not None and observe.get("globals"):\n        state["globals"] = _variables(environment)\n    if observe is not None and observe.get("locals"):\n        state["frames"] = _source_frames(frame, source_filename) if frame is not None else []\n    return state\n\n\ndef _frame_changes(before, after):\n    changes = []\n    before_names = [frame["name"] for frame in before]\n    after_names = [frame["name"] for frame in after]\n    if len(after) == len(before) + 1 and before_names == after_names[:-1]:\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(before) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        changes.append({"op": "append", "path": ["frames"], "value": after[-1]})\n        return changes\n    if len(before) == len(after) + 1 and before_names[:-1] == after_names:\n        changes.append({"op": "remove", "path": ["frames", -1]})\n        for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n            frame_index = -1 if index == len(after) - 1 else index\n            changes.extend(\n                _changes(old_frame["locals"], new_frame["locals"], ("frames", frame_index, "locals"))\n            )\n        return changes\n    if len(before) != len(after) or before_names != after_names:\n        return [{"op": "put", "path": ["frames"], "value": after}]\n    for index, (old_frame, new_frame) in enumerate(zip(before, after)):\n        frame_index = -1 if index == len(after) - 1 else index\n        changes.extend(\n            _changes(\n                old_frame["locals"],\n                new_frame["locals"],\n                ("frames", frame_index, "locals"),\n            )\n        )\n    return changes\n\n\ndef _changes(before, after, path=()):\n    if path == ("frames",) and isinstance(before, list) and isinstance(after, list):\n        return _frame_changes(before, after)\n    if isinstance(before, dict) and isinstance(after, dict):\n        changes = []\n        for key in sorted(before.keys() - after.keys()):\n            changes.append({"op": "remove", "path": [*path, key]})\n        for key in sorted(after.keys() - before.keys()):\n            changes.append({"op": "put", "path": [*path, key], "value": after[key]})\n        for key in sorted(before.keys() & after.keys()):\n            changes.extend(_changes(before[key], after[key], (*path, key)))\n        return changes\n    if before == after:\n        return []\n    if path in (("stdout",), ("stderr",)) and isinstance(before, str) and after.startswith(before):\n        return [{"op": "append", "path": list(path), "value": after[len(before) :]}]\n    return [{"op": "put", "path": list(path), "value": after}]\n\n\nclass _PicoRunLimit(BaseException):\n    """runner \u65BD\u52A0\u7684\u8FD0\u884C\u9650\u5236\u4E2D\u6B62\uFF08\u8D85\u65F6 / \u6B65\u6570\u8D85\u9650\uFF09\uFF0Cmessage \u76F4\u63A5\u9762\u5411\u5B66\u751F\u3002\n    \u7EE7\u627F BaseException\uFF1A\u5B66\u751F\u4EE3\u7801\u7684 except Exception \u4E0D\u80FD\u541E\u6389\u8FD0\u884C\u63A7\u5236\u6D41\u3002"""\n\n\nclass _PicoWaitingForInput(BaseException):\n    """interactive stdin \u7F13\u51B2\u8017\u5C3D\uFF1A\u672C\u6B21\u8FD0\u884C\u505C\u5728 input()\uFF0C\u8C03\u7528\u65B9\u8865\u4E00\u884C\u540E\u4ECE\u5934\u91CD\u8DD1\u3002"""\n\n\ndef _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps):\n    def trace(frame, event, _argument):\n        if deadline[0] is not None and time.monotonic() >= deadline[0]:\n            raise _PicoRunLimit("\u7A0B\u5E8F\u8FD0\u884C\u8D85\u65F6")\n        # single-step \u8BED\u4E49\uFF1A\u4E00\u6B65 = \u8C03\u8BD5\u5668\u505C\u5728\u5B66\u751F\u4EE3\u7801\u91CC\u7684\u4E00\u4E2A\u843D\u70B9\u3002\n        # stmt \u505C\u5728\u5F53\u524D\u6E90\u7801\u5E27\uFF1Bcall \u505C\u5728\u88AB\u8C03\u6E90\u7801\u5E27\uFF08\u6A21\u5757\u5165\u53E3\u7B2C 0 \u884C\u4E0D\u6210\u6B65\uFF09\uFF1B\n        # return \u505C\u5728\u843D\u70B9\u5E27\uFF08f_back\uFF09\u2014\u2014\u843D\u56DE driver/\u8FD0\u884C\u5E93\u7684\u8FD4\u56DE\u5BF9\u5B66\u751F\u4E0D\u53EF\u89C1\uFF0C\u4E0D\u6784\u6210\u6B65\u3002\n        step_event = {"line": "stmt", "call": "call", "return": "return"}.get(event)\n        step_frame = None\n        if step_event in events and frame.f_code.co_filename == source_filename:\n            step_frame = frame\n            if step_event == "call" and frame.f_lineno < 1:\n                step_frame = None\n            elif step_event == "return":\n                landing = frame.f_back\n                if landing is None or landing.f_code.co_filename != source_filename:\n                    step_frame = None\n                else:\n                    step_frame = landing\n        if step_frame is not None:\n            if max_steps is not None and len(samples) >= max_steps:\n                raise _PicoRunLimit("\u7A0B\u5E8F\u6B65\u6570\u8D85\u8FC7\u4E0A\u9650")\n            samples.append(\n                (\n                    step_event,\n                    _snapshot(\n                        step_frame.f_lineno,\n                        step_frame,\n                        environment,\n                        stdout,\n                        stderr,\n                        observe,\n                        source_filename,\n                    ),\n                )\n            )\n        return trace\n\n    return trace\n\n\ndef _source_line(exception, source_filename):\n    line = None\n    current = exception.__traceback__\n    while current is not None:\n        if current.tb_frame.f_code.co_filename == source_filename:\n            line = current.tb_lineno\n        current = current.tb_next\n    return line\n\n\ndef _is_program_exception(exception, source_filename):\n    if isinstance(exception, SyntaxError):\n        return exception.filename == source_filename\n    return _source_line(exception, source_filename) is not None\n\n\ndef _program_error(exception, source_filename, stderr):\n    if isinstance(exception, SyntaxError):\n        traceback.print_exception(exception, file=stderr)\n        return {\n            "returncode": 1,\n            "error": {"message": str(exception), "line": exception.lineno},\n        }\n    if isinstance(exception, SystemExit):\n        code = exception.code\n        if code is None or code == 0:\n            return {"returncode": 0, "error": None}\n        if not isinstance(code, int):\n            print(code, file=stderr)\n            code = 1\n        return {\n            "returncode": code,\n            "error": {"message": f"\u7A0B\u5E8F\u4EE5\u72B6\u6001\u7801 {code} \u9000\u51FA", "line": None},\n        }\n    traceback.print_exception(exception, file=stderr)\n    return {\n        "returncode": 1,\n        "error": {\n            "message": f"{type(exception).__name__}: {exception}",\n            "line": _source_line(exception, source_filename),\n        },\n    }\n\n\ndef _builtins_for(stdin_config, stdout):\n    values = vars(builtins).copy()\n    if stdin_config["kind"] == "interactive":\n        # input() \u8BFB\u7F13\u51B2\u7684\u4E0B\u4E00\u884C\uFF1B\u8017\u5C3D\u5373\u4E2D\u6B62\u672C\u6B21\u8FD0\u884C\uFF08waiting\uFF09\uFF0Cprompt \u7167\u5E38\u56DE\u663E\uFF0C\n        # \u8BA9\u91CD\u8DD1\u540E\u7684 stdout \u4E0E\u771F\u7EC8\u7AEF\u4E00\u81F4\u3002\n        def interactive_input(prompt=""):\n            text = str(prompt)\n            stdout.write(text)\n            line = sys.stdin.readline()\n            if line == "":\n                raise _PicoWaitingForInput(text)\n            if not line.endswith("\\n"):\n                line += "\\n"\n            return line[:-1]\n\n        values["input"] = interactive_input\n    return values\n\n\ndef _trace_result(samples, initial_state, final_state):\n    steps = []\n    previous = initial_state\n    for event, sample in samples:\n        steps.append({"event": event, "changes": _changes(previous, sample)})\n        previous = sample\n    return {\n        "initialState": initial_state,\n        "steps": steps,\n        "finalState": final_state,\n    }\n\n\ndef run(source_path, config_json):\n    config = json.loads(config_json)\n    run_options = {}\n    if os.path.exists("_pico_run.json"):\n        with open("_pico_run.json", encoding="utf-8") as run_file:\n            run_options = json.load(run_file)\n    stdin_config = run_options.get("stdin") or {"kind": "string", "value": ""}\n    trace_options = run_options.get("trace") or {"events": [], "observe": None}\n    events = frozenset(trace_options["events"])\n    observe = trace_options["observe"]\n    deadline = [\n        time.monotonic() + run_options["timeoutMs"] / 1000\n        if run_options.get("timeoutMs") is not None\n        else None\n    ]\n    max_steps = run_options.get("maxTraceSteps")\n\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    stdin = io.StringIO(stdin_config["value"])\n    source_filename = source_path\n    with open(source_path, encoding="utf-8", newline="") as source_file:\n        source = source_file.read()\n\n    environment = {\n        "__builtins__": _builtins_for(stdin_config, stdout),\n        "__file__": source_filename,\n        "__name__": "__main__",\n    }\n    samples = []\n    tracer = _trace(samples, events, observe, environment, stdout, stderr, source_filename, deadline, max_steps)\n    old_stdin = sys.stdin\n    outcome = None\n\n    try:\n        sys.stdin = stdin\n        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):\n            if config["prelude"]:\n                exec(compile(config["prelude"], "<pico-prelude>", "exec"), environment, environment)\n            initial_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n            try:\n                if events or deadline[0] is not None:\n                    sys.settrace(tracer)\n                exec(compile(source, source_filename, "exec"), environment, environment)\n                if config["driver"]:\n                    exec(compile(config["driver"], "<pico-driver>", "exec"), environment, environment)\n            except _PicoRunLimit as limit:\n                outcome = {\n                    "returncode": 124,\n                    "error": {\n                        "message": str(limit),\n                        "line": _source_line(limit, source_filename),\n                    },\n                }\n            except _PicoWaitingForInput as waiting:\n                outcome = {\n                    "returncode": 0,\n                    "error": None,\n                    "waiting": {"prompt": str(waiting)},\n                }\n            except BaseException as exception:\n                if not _is_program_exception(exception, source_filename):\n                    raise\n                outcome = _program_error(exception, source_filename, stderr)\n            finally:\n                sys.settrace(None)\n    finally:\n        sys.stdin = old_stdin\n\n    if outcome is None:\n        outcome = {"returncode": 0, "error": None}\n    final_state = _snapshot(None, None, environment, stdout, stderr, observe, source_filename)\n    trace = _trace_result(samples, initial_state, final_state)\n    result = {\n        "trace": trace,\n        "returncode": outcome["returncode"],\n        "error": outcome["error"],\n        "waiting": outcome.get("waiting"),\n    }\n    return json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False)\n';
 
   // src/libs/linker/impl.ts
   function linkProgramImpl(source, prelude, driver) {
@@ -47615,6 +47624,104 @@ ${h2.join(`
   }
   o2(dt2, "loadPyodide");
 
+  // src/libs/runner/trace.ts
+  function clone(value) {
+    return structuredClone(value);
+  }
+  function deepFreeze(value) {
+    if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+      Object.freeze(value);
+      for (const child2 of Object.values(value)) deepFreeze(child2);
+    }
+    return value;
+  }
+  function arrayIndex(array, key) {
+    if (!Number.isInteger(key)) throw new TypeError("\u6570\u7EC4\u8DEF\u5F84\u5FC5\u987B\u4F7F\u7528\u6574\u6570\u7D22\u5F15");
+    const index = key === -1 ? array.length - 1 : key;
+    if (typeof index !== "number" || index < 0 || index >= array.length) {
+      throw new RangeError(`\u6570\u7EC4\u8DEF\u5F84\u8D8A\u754C: ${String(key)}`);
+    }
+    return index;
+  }
+  function child(container2, segment) {
+    if (Array.isArray(container2)) return container2[arrayIndex(container2, segment)];
+    if (container2 !== null && typeof container2 === "object" && typeof segment === "string") {
+      if (!Object.hasOwn(container2, segment)) throw new Error(`\u72B6\u6001\u8DEF\u5F84\u4E0D\u5B58\u5728: ${segment}`);
+      return container2[segment];
+    }
+    throw new TypeError("\u72B6\u6001\u8DEF\u5F84\u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
+  }
+  function valueAt(root, path) {
+    let value = root;
+    for (const segment of path) value = child(value, segment);
+    return value;
+  }
+  function parentAt(root, path) {
+    if (path.length === 0) throw new Error("StateChange path \u4E0D\u80FD\u4E3A\u7A7A");
+    return { parent: valueAt(root, path.slice(0, -1)), key: path[path.length - 1] };
+  }
+  function put(root, path, value) {
+    const { parent, key } = parentAt(root, path);
+    if (Array.isArray(parent)) {
+      parent[arrayIndex(parent, key)] = clone(value);
+      return;
+    }
+    if (parent !== null && typeof parent === "object" && typeof key === "string") {
+      Object.defineProperty(parent, key, {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: clone(value)
+      });
+      return;
+    }
+    throw new TypeError("put path \u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
+  }
+  function append(root, path, value) {
+    const target = valueAt(root, path);
+    if (Array.isArray(target)) {
+      target.push(clone(value));
+      return;
+    }
+    if (typeof target === "string" && typeof value === "string") {
+      put(root, path, target + value);
+      return;
+    }
+    throw new TypeError("append \u53EA\u652F\u6301\u5B57\u7B26\u4E32\u62FC\u63A5\u6216\u6570\u7EC4\u672B\u5C3E\u8FFD\u52A0");
+  }
+  function remove2(root, path) {
+    const { parent, key } = parentAt(root, path);
+    if (Array.isArray(parent)) {
+      const index = arrayIndex(parent, key);
+      if (index !== parent.length - 1) throw new Error("\u6570\u7EC4\u53EA\u5141\u8BB8\u5220\u9664\u672B\u5C3E\u5143\u7D20");
+      parent.pop();
+      return;
+    }
+    if (parent !== null && typeof parent === "object" && typeof key === "string") {
+      if (!Object.hasOwn(parent, key)) throw new Error(`\u72B6\u6001\u8DEF\u5F84\u4E0D\u5B58\u5728: ${key}`);
+      delete parent[key];
+      return;
+    }
+    throw new TypeError("remove path \u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
+  }
+  function apply(root, change2) {
+    if (change2.op === "append") append(root, change2.path, change2.value);
+    else if (change2.op === "remove") remove2(root, change2.path);
+    else put(root, change2.path, change2.value);
+  }
+  function stateAtImpl(trace2, traceIndex) {
+    const finalIndex = trace2.steps.length + 1;
+    if (!Number.isInteger(traceIndex) || traceIndex < 0 || traceIndex > finalIndex) {
+      throw new RangeError(`traceIndex \u5FC5\u987B\u5728 0..${finalIndex} \u5185`);
+    }
+    if (traceIndex === finalIndex) return deepFreeze(clone(trace2.finalState));
+    const state2 = clone(trace2.initialState);
+    for (let i2 = 0; i2 < traceIndex; i2 += 1) {
+      for (const change2 of trace2.steps[i2].changes) apply(state2, change2);
+    }
+    return deepFreeze(state2);
+  }
+
   // src/libs/runner/runner.ts
   var pyodidePromise;
   var queue = Promise.resolve();
@@ -47711,13 +47818,6 @@ ${h2.join(`
   function waiting(value) {
     return isRecord(value) && typeof value.prompt === "string" ? { prompt: value.prompt } : null;
   }
-  function deepFreeze(value) {
-    if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-      Object.freeze(value);
-      for (const child2 of Object.values(value)) deepFreeze(child2);
-    }
-    return value;
-  }
   function result(serialized) {
     if (typeof serialized !== "string") throw new Error("Linker \u79C1\u6709\u534F\u8BAE\u6CA1\u6709\u8FD4\u56DE\u7ED3\u679C");
     const value = JSON.parse(serialized);
@@ -47787,109 +47887,13 @@ _pico_result
     }
   }
   function runProgramImpl(files, options) {
-    const project = projectCopy(files);
-    numericOptions(options);
-    const next = queue.then(() => execute(project, options));
+    const next = queue.then(() => {
+      const project = projectCopy(files);
+      numericOptions(options);
+      return execute(project, options);
+    });
     queue = next.then(() => void 0, () => void 0);
     return next;
-  }
-
-  // src/libs/runner/trace.ts
-  function clone(value) {
-    return structuredClone(value);
-  }
-  function freeze(value) {
-    if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-      Object.freeze(value);
-      for (const child2 of Object.values(value)) freeze(child2);
-    }
-    return value;
-  }
-  function arrayIndex(array, key) {
-    if (!Number.isInteger(key)) throw new TypeError("\u6570\u7EC4\u8DEF\u5F84\u5FC5\u987B\u4F7F\u7528\u6574\u6570\u7D22\u5F15");
-    const index = key === -1 ? array.length - 1 : key;
-    if (typeof index !== "number" || index < 0 || index >= array.length) {
-      throw new RangeError(`\u6570\u7EC4\u8DEF\u5F84\u8D8A\u754C: ${String(key)}`);
-    }
-    return index;
-  }
-  function child(container2, segment) {
-    if (Array.isArray(container2)) return container2[arrayIndex(container2, segment)];
-    if (container2 !== null && typeof container2 === "object" && typeof segment === "string") {
-      if (!Object.hasOwn(container2, segment)) throw new Error(`\u72B6\u6001\u8DEF\u5F84\u4E0D\u5B58\u5728: ${segment}`);
-      return container2[segment];
-    }
-    throw new TypeError("\u72B6\u6001\u8DEF\u5F84\u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
-  }
-  function valueAt(root, path) {
-    let value = root;
-    for (const segment of path) value = child(value, segment);
-    return value;
-  }
-  function parentAt(root, path) {
-    if (path.length === 0) throw new Error("StateChange path \u4E0D\u80FD\u4E3A\u7A7A");
-    return { parent: valueAt(root, path.slice(0, -1)), key: path[path.length - 1] };
-  }
-  function put(root, path, value) {
-    const { parent, key } = parentAt(root, path);
-    if (Array.isArray(parent)) {
-      parent[arrayIndex(parent, key)] = clone(value);
-      return;
-    }
-    if (parent !== null && typeof parent === "object" && typeof key === "string") {
-      Object.defineProperty(parent, key, {
-        configurable: true,
-        enumerable: true,
-        writable: true,
-        value: clone(value)
-      });
-      return;
-    }
-    throw new TypeError("put path \u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
-  }
-  function append(root, path, value) {
-    const target = valueAt(root, path);
-    if (Array.isArray(target)) {
-      target.push(clone(value));
-      return;
-    }
-    if (typeof target === "string" && typeof value === "string") {
-      put(root, path, target + value);
-      return;
-    }
-    throw new TypeError("append \u53EA\u652F\u6301\u5B57\u7B26\u4E32\u62FC\u63A5\u6216\u6570\u7EC4\u672B\u5C3E\u8FFD\u52A0");
-  }
-  function remove2(root, path) {
-    const { parent, key } = parentAt(root, path);
-    if (Array.isArray(parent)) {
-      const index = arrayIndex(parent, key);
-      if (index !== parent.length - 1) throw new Error("\u6570\u7EC4\u53EA\u5141\u8BB8\u5220\u9664\u672B\u5C3E\u5143\u7D20");
-      parent.pop();
-      return;
-    }
-    if (parent !== null && typeof parent === "object" && typeof key === "string") {
-      if (!Object.hasOwn(parent, key)) throw new Error(`\u72B6\u6001\u8DEF\u5F84\u4E0D\u5B58\u5728: ${key}`);
-      delete parent[key];
-      return;
-    }
-    throw new TypeError("remove path \u4E0E\u76EE\u6807\u6570\u636E\u7C7B\u578B\u4E0D\u5339\u914D");
-  }
-  function apply(root, change2) {
-    if (change2.op === "append") append(root, change2.path, change2.value);
-    else if (change2.op === "remove") remove2(root, change2.path);
-    else put(root, change2.path, change2.value);
-  }
-  function stateAtImpl(trace2, traceIndex) {
-    const finalIndex = trace2.steps.length + 1;
-    if (!Number.isInteger(traceIndex) || traceIndex < 0 || traceIndex > finalIndex) {
-      throw new RangeError(`traceIndex \u5FC5\u987B\u5728 0..${finalIndex} \u5185`);
-    }
-    if (traceIndex === finalIndex) return freeze(clone(trace2.finalState));
-    const state2 = clone(trace2.initialState);
-    for (let i2 = 0; i2 < traceIndex; i2 += 1) {
-      for (const change2 of trace2.steps[i2].changes) apply(state2, change2);
-    }
-    return freeze(state2);
   }
 
   // src/libs/runner/index.ts
@@ -47901,9 +47905,9 @@ _pico_result
     steps;
     finalState;
     constructor(fields) {
-      this.initialState = fields.initialState;
-      this.steps = fields.steps;
-      this.finalState = fields.finalState;
+      this.initialState = deepFreeze(fields.initialState);
+      this.steps = deepFreeze(fields.steps);
+      this.finalState = deepFreeze(fields.finalState);
     }
     at(traceIndex) {
       return stateAtImpl(this, traceIndex);
@@ -48049,13 +48053,13 @@ print("Got", got)
     syncViews() {
       const result2 = this.currentResult();
       const trace2 = result2?.trace ?? null;
-      const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(this.editor.text));
-      this.debugger.render(trace2, controlFlow, trace2 === null ? 0 : trace2.steps.length + 1);
+      const controlFlow = trace2 === null ? null : controlFlowOf(this.editor.text);
+      this.debugger.render(trace2, controlFlow);
       this.terminal.setAcceptingInput(this.mode.value === "free" && result2 !== null && result2.waiting !== null);
       this.invalidateViews();
     }
     renderEditorLine(result2, position) {
-      const atEnd = position.traceIndex === result2.trace.steps.length + 1;
+      const atEnd = position.atEnd;
       const error2 = result2.error;
       if (atEnd && error2 !== null && error2.line !== null) {
         return this.editor.showLine(error2.line, "error", false);
