@@ -24379,6 +24379,7 @@ ${h2.join(`
       }
       this.traceIndex = next;
       this.paint();
+      this.paintDiff();
       this.options.onChange(next);
       if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
     }
