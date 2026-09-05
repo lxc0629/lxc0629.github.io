@@ -45914,15 +45914,15 @@ ${h2.join(`
   var editorTheme = EditorView.theme({
     "&": { height: "100%", backgroundColor: "var(--pico-code-bg)", color: "var(--pico-code-ink)" },
     "&.cm-focused": { outline: "none" },
-    /* 光标：drawSelection 画的 DOM 光标，baseTheme 默认 1.2px 黑线（&light 恒生效，
-       编辑器不感知明暗主题）。改 accent 圆角竖条与终端光标同源；!important 压过
-       baseTheme 的 &light/&dark 变体。 */
+    /* 光标：drawSelection 画的 DOM 光标，baseTheme 默认 1.2px 黑线。本主题挂载在
+       baseTheme 之后、同特异性即胜出；改 accent 圆角竖条与终端光标同源。 */
     ".cm-cursor, .cm-dropCursor": {
-      "!borderLeft": "2px solid var(--pico-accent)",
+      borderLeft: "2px solid var(--pico-accent)",
       borderRadius: "2px"
     },
-    /* CM 自绘选区底色与原生 ::selection（--pico-accent-wash）保持同源。 */
-    ".cm-selectionBackground": { "!background": "var(--pico-accent-wash)" },
+    /* CM 自绘选区底色：baseTheme 的 &light/&dark 五类选择器更深，!important（写在值里，
+       style-mod 不认 ! 属性前缀）压过它，与原生 ::selection 同源。 */
+    ".cm-selectionBackground": { background: "var(--pico-accent-wash) !important" },
     ".cm-scroller": {
       fontFamily: "var(--pico-font-mono)",
       fontSize: "var(--pico-size-code)",
