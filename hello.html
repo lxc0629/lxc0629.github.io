@@ -48129,8 +48129,9 @@ _pico_result
         background: resolveToken("--pico-code-bg", "background-color"),
         foreground: resolveToken("--pico-code-ink", "color"),
         cursor: resolveToken("--pico-accent", "color"),
-        selectionBackground: resolveToken("--pico-accent-glow", "background-color"),
-        // wash 在浅色终端底上不可辨
+        /* 选择底必须传不透明纯色：xterm 解析不了 color-mix 序列化的 color(srgb … / a)，
+           半透明一律静默回落白色默认；不透明色它自己按 0.3 换算（xterm #2737）。 */
+        selectionBackground: resolveToken("--pico-accent", "color"),
         extendedAnsi
       };
     };
