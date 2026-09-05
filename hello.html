@@ -47913,48 +47913,46 @@ print("Got", got)
     { value: "case-2", label: "2", title: "\u7528\u4F8B 2\uFF1A\u8F93\u5165 Python" }
   ];
   var INITIAL_SUBMISSION = { source: STARTER, mode: "case-1", revision: 0, stdin: [] };
-  var SubmissionState = class extends PicoState {
-    value = INITIAL_SUBMISSION;
-    submit(source, mode) {
-      this.transition({ value: { source, mode, revision: this.value.revision + 1, stdin: [] } });
-    }
-    /** 补一行 stdin 并重跑：waiting 的运行由此推进，复用 revision 的过期守卫。 */
-    feed(line) {
-      const current = this.value;
-      this.transition({
-        value: { ...current, revision: current.revision + 1, stdin: [...current.stdin, line] }
-      });
-    }
-  };
   var ModeState = class extends PicoState {
     value = "case-1";
     set(mode) {
       this.transition({ value: mode });
     }
   };
-  var ExecutionState = class extends PicoState {
-    value = { kind: "idle", submission: INITIAL_SUBMISSION };
-    set(value) {
-      this.transition({ value });
-    }
-  };
   var HelloModel = class extends Playground {
     id = "hello";
     title = "Python Playground";
+    // PicoState 只承载最根本的事实：学生代码与用例选择；运行流水线由模型自持。
     editor = this.use(Editor, STARTER);
-    submission = this.use(SubmissionState);
-    execution = this.use(ExecutionState);
     mode = this.use(ModeState);
+    /** 自由输入已补喂的行；新的完整提交清空重来。 */
+    fed = [];
+    runId = 0;
+    /** 运行流水线的当前阶段；view 经 subscribeView 直读。 */
+    #execution = { kind: "idle", submission: INITIAL_SUBMISSION };
+    get execution() {
+      return this.#execution;
+    }
+    autoRunTimer = null;
+    viewListeners = /* @__PURE__ */ new Set();
     terminal = new Terminal({
       onLine: (line) => this.feedLine(line)
     });
     debugger = new Debugger({
       onChange: (traceIndex) => this.observe(traceIndex)
     });
+    /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
+    subscribeView = (listener) => {
+      this.viewListeners.add(listener);
+      return () => this.viewListeners.delete(listener);
+    };
+    invalidateViews() {
+      for (const listener of this.viewListeners) listener();
+    }
     runFree() {
       if (this.mode.value !== "free") return;
       this.terminal.reset();
-      this.submission.submit(this.editor.text, "free");
+      this.launch([]);
     }
     selectMode(mode) {
       this.terminal.reset();
@@ -47963,13 +47961,13 @@ print("Got", got)
     /** 自由输入在 waiting 时收到的补行；只认最新一次运行停在 input() 的状态。 */
     feedLine(line) {
       if (this.mode.value !== "free") return;
-      const execution = this.execution.value;
+      const execution = this.#execution;
       if (execution.kind !== "done" || execution.submission.mode !== "free" || execution.result.waiting === null) return;
-      this.submission.feed(line);
+      this.launch([...this.fed, line]);
     }
-    autoRunTimer = null;
-    /** 预设用例随 Editor/选择变化自动运行；自由输入保留显式 Play。 */
+    /** 预设用例随代码/选择变化自动运行；自由输入保留显式运行。 */
     autoRun = this.derive([this.editor, this.mode], [], (editor, mode) => {
+      this.syncViews();
       if (this.autoRunTimer !== null) clearTimeout(this.autoRunTimer);
       this.autoRunTimer = null;
       const selected = mode.value;
@@ -47979,35 +47977,46 @@ print("Got", got)
         this.autoRunTimer = null;
         if (this.mode.value !== selected || this.editor.text !== source) return;
         this.terminal.reset();
-        this.submission.submit(source, selected);
+        this.launch([]);
       }, 400);
     });
-    execute = this.derive([this.submission], [this.execution], async (submission) => {
-      const snapshot = submission.value;
-      if (snapshot.revision === 0) return;
-      this.execution.set({ kind: "running", submission: snapshot });
+    /** 发起一次运行：捕获当前代码/模式的快照并推进流水线。 */
+    launch(fed) {
+      this.fed = fed;
+      const submission = {
+        source: this.editor.text,
+        mode: this.mode.value,
+        revision: ++this.runId,
+        stdin: fed
+      };
+      this.#execution = { kind: "running", submission };
+      this.syncViews();
+      void this.execute(submission);
+    }
+    async execute(submission) {
       try {
-        const files = linkProgram(snapshot.source);
-        const stdin = snapshot.mode === "free" ? { kind: "interactive", value: snapshot.stdin.join("\n") } : CASES[snapshot.mode];
+        const files = linkProgram(submission.source);
+        const stdin = submission.mode === "free" ? { kind: "interactive", value: submission.stdin.join("\n") } : CASES[submission.mode];
         const result2 = await runProgram(files, { ...RUN_OPTIONS, stdin });
-        if (this.submission.value.revision !== snapshot.revision) return;
-        this.execution.set({ kind: "done", submission: snapshot, result: result2 });
+        if (this.runId !== submission.revision) return;
+        this.#execution = { kind: "done", submission, result: result2 };
       } catch (error2) {
-        if (this.submission.value.revision !== snapshot.revision) return;
-        this.execution.set({
+        if (this.runId !== submission.revision) return;
+        this.#execution = {
           kind: "platform-error",
-          submission: snapshot,
+          submission,
           message: error2 instanceof Error ? error2.message : String(error2)
-        });
+        };
       }
-    });
+      this.syncViews();
+    }
     /** 与当前代码/模式仍匹配的运行结果；否则 null（面板回空）。 */
     currentResult() {
-      const execution = this.execution.value;
+      const execution = this.#execution;
       const matches = execution.submission.mode === this.mode.value && execution.submission.source === this.editor.text;
       return matches && execution.kind === "done" ? execution.result : null;
     }
-    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图，不进 PicoState。 */
+    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图。 */
     observe(traceIndex) {
       const result2 = this.currentResult();
       if (result2 === null) return;
@@ -48017,21 +48026,19 @@ print("Got", got)
       }
       this.renderEditorLine(result2, traceIndex);
     }
-    display = this.derive(
-      [this.execution, this.mode, this.editor],
-      [],
-      (_execution, mode, editor) => {
-        const result2 = this.currentResult();
-        const trace2 = result2?.trace ?? null;
-        const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
-        const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(editor.text));
-        this.debugger.render(trace2, controlFlow, traceIndex);
-        const terminalState = trace2 === null ? null : trace2.at(traceIndex);
-        this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
-        this.terminal.setAcceptingInput(mode.value === "free" && result2 !== null && result2.waiting !== null);
-        this.renderEditorLine(result2, traceIndex);
-      }
-    );
+    /** 把当前事实推给各面板：过期结果清空，新运行抵达时光标停在终点。 */
+    syncViews() {
+      const result2 = this.currentResult();
+      const trace2 = result2?.trace ?? null;
+      const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
+      const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(this.editor.text));
+      this.debugger.render(trace2, controlFlow, traceIndex);
+      const terminalState = trace2 === null ? null : trace2.at(traceIndex);
+      this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
+      this.terminal.setAcceptingInput(this.mode.value === "free" && result2 !== null && result2.waiting !== null);
+      this.renderEditorLine(result2, traceIndex);
+      this.invalidateViews();
+    }
     renderEditorLine(result2, traceIndex) {
       if (result2 === null) return this.editor.clearLine();
       const atEnd = traceIndex === result2.trace.steps.length + 1;
@@ -48045,8 +48052,10 @@ print("Got", got)
     }
   };
   function HelloView({ model }) {
-    const execution = usePicoState(model.execution).value;
     const mode = usePicoState(model.mode).value;
+    const [, invalidate] = (0, import_react6.useState)(0);
+    (0, import_react6.useEffect)(() => model.subscribeView(() => invalidate((value) => value + 1)), [model]);
+    const execution = model.execution;
     const running = execution.kind === "running" && execution.submission.mode === mode;
     const runDisabled = running || mode !== "free";
     const runLabel = mode !== "free" ? "\u9884\u8BBE\u7528\u4F8B\u81EA\u52A8\u8FD0\u884C" : running ? "\u6B63\u5728\u8FD0\u884C" : "\u8FD0\u884C";

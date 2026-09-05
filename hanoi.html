@@ -47915,28 +47915,8 @@ _pico_result
     { value: "6", label: "6", title: "6 \u4E2A\u76D8\u5B50" }
   ];
   var INITIAL_SUBMISSION = { source: STARTER, n: 3, revision: 0 };
-  var SubmissionState = class extends PicoState {
-    value = INITIAL_SUBMISSION;
-    submit(source, n) {
-      this.transition({
-        value: { source, n, revision: this.value.revision + 1 }
-      });
-    }
-  };
   var CaseState = class extends PicoState {
     value = "3";
-    set(value) {
-      this.transition({ value });
-    }
-  };
-  var ExecutionState = class extends PicoState {
-    value = { kind: "idle", submission: INITIAL_SUBMISSION };
-    set(value) {
-      this.transition({ value });
-    }
-  };
-  var SceneState = class extends PicoState {
-    value = null;
     set(value) {
       this.transition({ value });
     }
@@ -47944,18 +47924,32 @@ _pico_result
   var HanoiModel = class extends Playground {
     id = "hanoi";
     title = "Tower of Hanoi";
+    // PicoState 只承载最根本的事实：学生代码与用例选择；运行流水线由模型自持。
     editor = this.use(Editor, STARTER);
-    submission = this.use(SubmissionState);
-    execution = this.use(ExecutionState);
-    scene = this.use(SceneState);
     testCase = this.use(CaseState);
+    runId = 0;
+    /** 运行流水线的当前阶段；view 经 subscribeView 直读。 */
+    #execution = { kind: "idle", submission: INITIAL_SUBMISSION };
+    get execution() {
+      return this.#execution;
+    }
     cursor = 0;
     cursorListeners = /* @__PURE__ */ new Set();
+    autoRunTimer = null;
+    viewListeners = /* @__PURE__ */ new Set();
     terminal = new Terminal({ onLine: () => {
     } });
     debugger = new Debugger({
       onChange: (traceIndex) => this.observe(traceIndex)
     });
+    /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
+    subscribeView = (listener) => {
+      this.viewListeners.add(listener);
+      return () => this.viewListeners.delete(listener);
+    };
+    invalidateViews() {
+      for (const listener of this.viewListeners) listener();
+    }
     /** 订阅光标广播（视图跟随可视化）；订阅即刻对齐当前值，返回退订。 */
     observeCursor(listener) {
       this.cursorListeners.add(listener);
@@ -47970,9 +47964,9 @@ _pico_result
       this.terminal.reset();
       this.testCase.set(value);
     }
-    autoRunTimer = null;
     /** 用例或代码变化后静默 400ms 自动运行。 */
     autoRun = this.derive([this.editor, this.testCase], [], (editor, testCase) => {
+      this.syncViews();
       if (this.autoRunTimer !== null) clearTimeout(this.autoRunTimer);
       this.autoRunTimer = null;
       const selected = testCase.value;
@@ -47981,62 +47975,64 @@ _pico_result
         this.autoRunTimer = null;
         if (this.testCase.value !== selected || this.editor.text !== source) return;
         this.terminal.reset();
-        this.submission.submit(source, Number(selected));
+        this.launch(source, Number(selected));
       }, 400);
     });
-    execute = this.derive([this.submission], [this.execution], async (submission) => {
-      const snapshot = submission.value;
-      if (snapshot.revision === 0) return;
-      this.execution.set({ kind: "running", submission: snapshot });
+    /** 发起一次运行：捕获当前代码/用例的快照并推进流水线。 */
+    launch(source, n) {
+      const submission = { source, n, revision: ++this.runId };
+      this.#execution = { kind: "running", submission };
+      this.syncViews();
+      void this.execute(submission);
+    }
+    async execute(submission) {
       try {
-        const files = linkProgram(snapshot.source, {
+        const files = linkProgram(submission.source, {
           driver: `
-__pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
+__pico_answer = hanoi(${submission.n}, "A", "C", "B")
 `
         });
         const result2 = await runProgram(files, RUN_OPTIONS);
-        if (this.submission.value.revision !== snapshot.revision) return;
-        this.execution.set({ kind: "done", submission: snapshot, result: result2 });
+        if (this.runId !== submission.revision) return;
+        this.#execution = { kind: "done", submission, result: result2 };
       } catch (error2) {
-        if (this.submission.value.revision !== snapshot.revision) return;
-        this.execution.set({
+        if (this.runId !== submission.revision) return;
+        this.#execution = {
           kind: "platform-error",
-          submission: snapshot,
+          submission,
           message: error2 instanceof Error ? error2.message : String(error2)
-        });
+        };
       }
-    });
+      this.syncViews();
+    }
     /** 与当前代码/用例仍匹配的运行结果；否则 null（回到初始塔）。 */
-    currentResult() {
-      const execution = this.execution.value;
+    result() {
+      const execution = this.#execution;
       const matches = execution.submission.source === this.editor.text && execution.submission.n === Number(this.testCase.value);
       return matches && execution.kind === "done" ? execution.result : null;
     }
-    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图，不进 PicoState。 */
+    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图。 */
     observe(traceIndex) {
-      const result2 = this.currentResult();
+      const result2 = this.result();
       if (result2 === null) return;
       const state2 = result2.trace.at(traceIndex);
       this.terminal.render(state2.stdout ?? "", state2.stderr ?? "");
       this.renderEditorLine(result2, traceIndex);
       this.publishCursor(traceIndex);
     }
-    display = this.derive(
-      [this.execution, this.testCase, this.editor],
-      [this.scene],
-      (_execution, _testCase, editor) => {
-        const result2 = this.currentResult();
-        const trace2 = result2?.trace ?? null;
-        const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
-        this.scene.set(result2);
-        const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(editor.text));
-        this.debugger.render(trace2, controlFlow, traceIndex);
-        const terminalState = trace2?.at(traceIndex);
-        this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
-        this.renderEditorLine(result2, traceIndex);
-        this.publishCursor(traceIndex);
-      }
-    );
+    /** 把当前事实推给各面板：过期结果清空，新运行抵达时光标停在终点。 */
+    syncViews() {
+      const result2 = this.result();
+      const trace2 = result2?.trace ?? null;
+      const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
+      const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(this.editor.text));
+      this.debugger.render(trace2, controlFlow, traceIndex);
+      const terminalState = trace2?.at(traceIndex);
+      this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
+      this.renderEditorLine(result2, traceIndex);
+      this.publishCursor(traceIndex);
+      this.invalidateViews();
+    }
     renderEditorLine(result2, traceIndex) {
       if (result2 === null) return this.editor.clearLine();
       const atEnd = traceIndex === result2.trace.steps.length + 1;
@@ -48197,10 +48193,12 @@ __pico_answer = hanoi(${snapshot.n}, "A", "C", "B")
     ] });
   }
   function HanoiView({ model }) {
-    const execution = usePicoState(model.execution).value;
-    const result2 = usePicoState(model.scene).value;
     const testCase = usePicoState(model.testCase).value;
     const n = Number(testCase);
+    const [, invalidate] = (0, import_react6.useState)(0);
+    (0, import_react6.useEffect)(() => model.subscribeView(() => invalidate((value) => value + 1)), [model]);
+    const execution = model.execution;
+    const result2 = model.result();
     const [traceIndex, setTraceIndex] = (0, import_react6.useState)(0);
     (0, import_react6.useEffect)(() => model.observeCursor(setTraceIndex), [model]);
     const hosts = (0, import_react6.useMemo)(() => {
