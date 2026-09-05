@@ -47938,25 +47938,18 @@ print("Got", got)
       this.transition({ value });
     }
   };
-  var PositionState = class extends PicoState {
-    value = 0;
-    set(value) {
-      this.transition({ value });
-    }
-  };
   var HelloModel = class extends Playground {
     id = "hello";
     title = "Python Playground";
     editor = this.use(Editor, STARTER);
     submission = this.use(SubmissionState);
     execution = this.use(ExecutionState);
-    position = this.use(PositionState);
     mode = this.use(ModeState);
     terminal = new Terminal({
       onLine: (line) => this.feedLine(line)
     });
     debugger = new Debugger({
-      onChange: (traceIndex) => this.position.set(traceIndex)
+      onChange: (traceIndex) => this.observe(traceIndex)
     });
     runFree() {
       if (this.mode.value !== "free") return;
@@ -48008,21 +48001,32 @@ print("Got", got)
         });
       }
     });
-    rewind = this.derive([this.execution], [this.position], (execution) => {
-      const result2 = execution.value.kind === "done" ? execution.value.result : null;
-      this.position.set(result2 === null ? 0 : result2.trace.steps.length + 1);
-    });
+    /** 与当前代码/模式仍匹配的运行结果；否则 null（面板回空）。 */
+    currentResult() {
+      const execution = this.execution.value;
+      const matches = execution.submission.mode === this.mode.value && execution.submission.source === this.editor.text;
+      return matches && execution.kind === "done" ? execution.result : null;
+    }
+    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图，不进 PicoState。 */
+    observe(traceIndex) {
+      const result2 = this.currentResult();
+      if (result2 === null) return;
+      if (this.mode.value !== "free") {
+        const state2 = result2.trace.at(traceIndex);
+        this.terminal.render(state2.stdout ?? "", state2.stderr ?? "");
+      }
+      this.renderEditorLine(result2, traceIndex);
+    }
     display = this.derive(
-      [this.execution, this.position, this.mode, this.editor],
+      [this.execution, this.mode, this.editor],
       [],
-      (execution, position, mode, editor) => {
-        const matchesCurrent = execution.value.submission.mode === mode.value && execution.value.submission.source === editor.text;
-        const result2 = matchesCurrent && execution.value.kind === "done" ? execution.value.result : null;
+      (_execution, mode, editor) => {
+        const result2 = this.currentResult();
         const trace2 = result2?.trace ?? null;
-        const traceIndex = trace2 === null ? 0 : Math.min(position.value, trace2.steps.length + 1);
+        const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
         const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(editor.text));
         this.debugger.render(trace2, controlFlow, traceIndex);
-        const terminalState = trace2 === null ? null : mode.value === "free" ? trace2.finalState : trace2.at(traceIndex);
+        const terminalState = trace2 === null ? null : trace2.at(traceIndex);
         this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
         this.terminal.setAcceptingInput(mode.value === "free" && result2 !== null && result2.waiting !== null);
         this.renderEditorLine(result2, traceIndex);
