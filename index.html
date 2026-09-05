@@ -895,21 +895,18 @@
    颜色 token 用 light-dark(浅, 深) 书写一次；非颜色 token 与主题无关。 */
 :root {
   color-scheme: light dark;
-  /* 解锁关键字尺寸插值：height: auto 可参与过渡，卡片开合时高度连续收放
-     （Chromium/Electron 129+、Safari 18.2+；不支持则高度瞬切，淡入淡出仍在） */
-  interpolate-size: allow-keywords;
-  --pico-paper: light-dark(#f2f3f7, #0b0b10);
-  --pico-surface: light-dark(#eceef4, #15151b);
-  --pico-surface-raised: light-dark(rgba(255, 255, 255, 0.9), rgba(28, 28, 36, 0.85));
-  --pico-ink: light-dark(#18181b, #f4f4f7);
-  --pico-ink-soft: light-dark(#646470, #a0a0ad);
-  --pico-hairline: light-dark(#dcdde4, #383844);
-  --pico-accent: light-dark(#7c65ff, #9378ff);
-  --pico-accent-deep: light-dark(#684bf5, #7c65ff);
-  --pico-accent-light: light-dark(#8d77ff, #b49bff);
-  --pico-accent-dark: light-dark(#583cd6, #684bf5);
-  --pico-accent-wash: light-dark(rgba(124, 101, 255, 0.10), rgba(147, 120, 255, 0.16));
-  --pico-accent-glow: light-dark(rgba(124, 101, 255, 0.32), rgba(147, 120, 255, 0.40));
+  --pico-paper: light-dark(#f8fafc, #0f172a);
+  --pico-surface: light-dark(#f1f5f9, #1e293b);
+  --pico-surface-raised: light-dark(#ffffff, #182338);
+  --pico-ink: light-dark(#0f172a, #f8fafc);
+  --pico-ink-soft: light-dark(#475569, #cbd5e1);
+  --pico-hairline: light-dark(#cbd5e1, #334155);
+  --pico-accent: #0ea5e9;
+  --pico-accent-deep: light-dark(#075985, #22d3ee);
+  --pico-accent-light: light-dark(#0284c7, #818cf8);
+  --pico-accent-dark: light-dark(#0c4a6e, #0284c7);
+  --pico-accent-wash: color-mix(in srgb, var(--pico-accent) 12%, transparent);
+  --pico-accent-glow: color-mix(in srgb, var(--pico-accent) 32%, transparent);
   --pico-on-accent: #ffffff;
   /* 语义色：结构回放标签与块（fn/loop/branch/error）；组件不得直接使用颜色字面量。 */
   --pico-hue-fn-bg: light-dark(#eef2ff, #1c1c32);
@@ -930,23 +927,20 @@
   --pico-flame-salmon: light-dark(#f79578, #a25342);
   --pico-flame-red: light-dark(#e87568, #913f38);
   --pico-flame-ink: light-dark(#3a190c, #fff1d1);
-  --pico-code-bg: light-dark(#ffffff, #121217);
+  --pico-code-bg: var(--pico-surface-raised);
   /* 执行行高亮底：比 accent-wash 更实，浅色下也清晰可辨（错误行复用 hue-error-bg） */
-  --pico-code-exec-bg: light-dark(rgba(124, 101, 255, 0.20), rgba(147, 120, 255, 0.16));
+  --pico-code-exec-bg: color-mix(in srgb, var(--pico-accent) 18%, transparent);
   /* 行号槽最小宽：数字右对齐，短文档也不贴边；代码列起点稳定 */
   --pico-editor-gutter: 56px;
   --pico-code-ink: var(--pico-ink);
-  --pico-code-dim: light-dark(#9da0aa, #767784);
-  --pico-syn-key: light-dark(#7c65ff, #b49bff);
-  --pico-syn-fn: light-dark(#5e49cf, #a38cf8);
+  --pico-code-dim: light-dark(#64748b, #94a3b8);
+  --pico-syn-key: var(--pico-accent);
+  --pico-syn-fn: light-dark(#4338ca, #818cf8);
   --pico-syn-str: light-dark(#1f7a5c, #7ee2b0);
   --pico-syn-num: light-dark(#a36118, #f0c375);
-  --pico-syn-com: light-dark(#767784, #8a8a98);
-  /* 高度：静置卡片（简单右下投影）与悬浮件（更远更散）分两档 */
-  --pico-shadow: 4px 6px 16px light-dark(rgba(32, 32, 34, 0.16), rgba(0, 0, 0, 0.55));
-  --pico-shadow-float:
-    0 2px 8px light-dark(rgba(32, 32, 34, 0.10), rgba(0, 0, 0, 0.55)),
-    0 24px 56px -16px light-dark(rgba(32, 32, 34, 0.22), rgba(0, 0, 0, 0.6));
+  --pico-syn-com: var(--pico-code-dim);
+  --pico-shadow: 0 1px 3px light-dark(rgb(15 23 42 / 0.06), rgb(0 0 0 / 0.18));
+  --pico-shadow-float: 0 12px 32px light-dark(rgb(15 23 42 / 0.14), rgb(0 0 0 / 0.32));
   --pico-font-text: "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --pico-font-ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -957,7 +951,7 @@
   --pico-size-2xs: 12px;
   --pico-size-xs: 13px;
   --pico-size-sm: 15px;
-  --pico-size-code: 16px;
+  --pico-size-code: 15px;
   --pico-size-md: 18px;
   --pico-size-lg: 22px;
   --pico-size-xl: 30px;
@@ -994,9 +988,7 @@
 .pico-root input,
 .pico-root select { font: inherit; }
 
-.pico-root button:focus-visible,
-.pico-root input:focus-visible,
-.pico-root select:focus-visible {
+.pico-root :focus-visible {
   outline: 2px solid var(--pico-accent);
   outline-offset: 3px;
 }
@@ -1014,16 +1006,11 @@
   background: var(--pico-paper);
 }
 
-.pico-shell { flex: 1; min-height: 0; padding: var(--pico-space-4); }
 
 /* ---------- Playground 骨架（PlaygroundShell）----------
    pg-main：左编辑卡 | 可拖比例分条 | 右面板列；比例锁 34–60% 由 JS 拖拽约束，
    面板全关时编辑卡 100%。面板卡统一签发（data-view 记身份），页面按它定制。 */
-.pico-pg-main { flex: 1; min-height: 0; padding: var(--pico-space-4); user-select: none; -webkit-user-select: none; }
-.pico-pg-main .pico-w-editor-host,
-.pico-pg-main .pico-w-editor-host *,
-.pico-pg-main .pico-term,
-.pico-pg-main .pico-term * { user-select: text; -webkit-user-select: text; }
+.pico-pg-main { flex: 1; min-height: 0; padding: var(--pico-space-4); }
 .pico-pg-main .pico-world { gap: var(--pico-space-2); }
 /* 编辑栏按比例锁定（内联 %），世界列吃剩余全部：min-width:0 免被内容撑开 */
 .pico-pg-main > .pico-world { flex: 1 1 0; min-width: 0; }
@@ -1037,8 +1024,6 @@
 .pico-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
 .pico-split--row { flex-direction: row; }
 .pico-split--column { flex-direction: column; }
-/* 拖拽跟手：拖动期间关掉卡片自身的尺寸过渡 */
-.pico-split[data-dragging="true"] .pico-card { transition: none; }
 .pico-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .pico-pane > * { flex: 1 1 0; min-width: 0; min-height: 0; }
 /* 宿主 div 只是挂载点（如编辑器自带的 .pico-card），里面的卡片同样要填满面板 */
@@ -1052,7 +1037,6 @@
   .pico-swap { opacity: 0; transform: translateY(4px); }
 }
 
-.pico-code,
 .pico-world {
   display: flex;
   min-width: 0;
@@ -1086,49 +1070,19 @@
   overflow: auto;
 }
 
-/* ---------- 卡片与分隔条 ----------
-   单层边框：所有面板都是 .pico-card，骨架不另画框。
-   开合动效：高度参与过渡（interpolate-size 解锁 auto 关键字），配合
-   overflow:hidden——退出时高度连续收拢、兄弟卡片跟着滑动补位，不再瞬跳；
-   display 走离散过渡（allow-discrete）到过渡末才翻 none；
-   进入用 @starting-style 从 0 高度起步（Chrome 117+ / Safari 17.5+ /
-   Firefox 129+）。 */
+/* ---------- 卡片与分隔条 ---------- */
 .pico-card {
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  border: 1px solid color-mix(in srgb, var(--pico-hairline) 72%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--pico-surface-raised) 96%, transparent);
+  border: var(--pico-line);
+  border-radius: 10px;
+  background: var(--pico-surface-raised);
   box-shadow: var(--pico-shadow);
   overflow: hidden;
-  transition:
-    opacity 200ms var(--pico-ease-out),
-    transform 200ms var(--pico-ease-out),
-    height 240ms var(--pico-ease-out),
-    border-width 240ms var(--pico-ease-out),
-    flex-grow 240ms var(--pico-ease-out),
-    flex-basis 240ms var(--pico-ease-out),
-    display 240ms var(--pico-ease-out) allow-discrete;
 }
-.pico-card[hidden] {
-  display: none;
-  height: 0;
-  min-height: 0;
-  border-width: 0;
-  opacity: 0;
-  transform: translateY(6px) scale(0.985);
-}
-@starting-style {
-  .pico-card:not([hidden]) {
-    height: 0;
-    min-height: 0;
-    border-width: 0;
-    opacity: 0;
-    transform: translateY(6px) scale(0.985);
-  }
-}
+.pico-card[hidden] { display: none; }
 
 /* 卡片内衬统一规则：内容卡一律 space-3 × space-4（12×16），页面不再各自覆写；
    场景卡（画布类内容自管留白）显式加 --flush 归零；编辑卡是满铺代码面，
@@ -1160,14 +1114,7 @@
   height: var(--pico-space-2);
   cursor: row-resize;
   touch-action: none;
-  transition:
-    flex-basis 240ms var(--pico-ease-out),
-    display 240ms var(--pico-ease-out) allow-discrete;
-}
-.pico-dock-divider[hidden] {
-  display: none;
-  flex-basis: 0;
-  height: 0;
+  user-select: none;
 }
 .pico-dock-divider::after {
   content: "";
@@ -1181,6 +1128,7 @@
   transition: background var(--pico-duration-fast);
 }
 .pico-dock-divider:hover::after,
+.pico-dock-divider:focus-visible::after,
 .pico-dock-divider[data-dragging="true"]::after {
   background: var(--pico-accent);
 }
@@ -1198,10 +1146,9 @@
   height: auto;
 }
 
-/* ---------- 按钮与输入 ---------- */
+/* ---------- 按钮 ---------- */
 
-/* 非侵入键（ghost）：无边框、静止时隐形、hover 中性灰底；主动作用实心强调变体。
-   全局按钮的默认选择。 */
+/* 按钮共用状态与尺寸。 */
 .pico-ghost-btn {
   display: inline-flex;
   align-items: center;
@@ -1216,28 +1163,13 @@
   color: var(--pico-ink-soft);
   font: 600 var(--pico-size-xs)/1 var(--pico-font-ui);
   cursor: pointer;
-  position: relative;
-  isolation: isolate;
-  transition: color var(--pico-duration-fast);
-}
-/* 状态底（hover/active/按下）一律内缩药丸：命中区尺寸不变，键距不被底色撑开。
-   isolation 建栈，负 z 的 ::after 才不会被托盘底色盖掉。 */
-.pico-ghost-btn::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  z-index: -1;
-  border-radius: 7px;
-  background: transparent;
-  transition: background var(--pico-duration-fast);
+  transition: color var(--pico-duration-fast), background var(--pico-duration-fast);
 }
 .pico-ghost-btn:hover:not(:disabled) {
   color: var(--pico-ink);
-}
-.pico-ghost-btn:hover:not(:disabled)::after {
   background: color-mix(in srgb, var(--pico-ink) 9%, transparent);
 }
-.pico-ghost-btn:active:not(:disabled)::after {
+.pico-ghost-btn:active:not(:disabled) {
   background: color-mix(in srgb, var(--pico-ink) 15%, transparent);
 }
 .pico-ghost-btn:disabled {
@@ -1246,120 +1178,22 @@
 }
 .pico-ghost-btn[aria-pressed="true"] {
   color: var(--pico-accent);
-}
-.pico-ghost-btn[aria-pressed="true"]::after {
   background: var(--pico-accent-wash);
-}
-.pico-ghost-btn:focus-visible {
-  outline: 2px solid var(--pico-accent);
-  outline-offset: 2px;
 }
 .pico-ghost-btn--icon { width: 28px; padding: 0; }
 
-/* 拟物渐变按钮：遗留基元，仅 trace-explorer / codemirror 在用；新代码用 ghost。 */
-.pico-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--pico-space-2);
-  min-height: 34px;
-  padding: 6px 14px;
-  border: 1px solid var(--pico-hairline);
-  border-radius: var(--pico-radius);
-  color: var(--pico-ink);
-  background: linear-gradient(180deg, var(--pico-surface-raised) 0%, var(--pico-surface) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  cursor: pointer;
-  font: 600 var(--pico-size-sm)/1 var(--pico-font-ui);
-  box-shadow:
-    0 1.5px 0 rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color var(--pico-duration-fast), background var(--pico-duration-fast), color var(--pico-duration-fast);
-  user-select: none;
-  box-sizing: border-box;
-}
-
-.pico-btn:hover {
-  border-color: var(--pico-accent-light);
-  color: var(--pico-accent);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 255, 0.85) 100%);
-  box-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.08),
-    0 4px 12px var(--pico-accent-wash);
-}
-
-.pico-btn:active {
-  transform: translateY(1.5px);
-  box-shadow: 0 0 0 transparent, inset 0 1.5px 2px rgba(0, 0, 0, 0.12);
-}
-
-.pico-btn--quiet {
-  border-color: transparent;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-  color: var(--pico-ink-soft);
-}
-
-.pico-btn--quiet:hover {
-  border-color: transparent;
-  background: var(--pico-accent-wash);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--pico-accent);
-  box-shadow: none;
-}
-
-.pico-btn--quiet:active {
-  transform: translateY(1px);
-  box-shadow: none;
-}
-
-.pico-btn:disabled {
-  opacity: .42;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.pico-input {
-  padding: var(--pico-space-2) var(--pico-space-3);
-  border: var(--pico-line);
-  border-radius: var(--pico-radius);
-  color: var(--pico-ink);
-  background: var(--pico-surface-raised);
-  font: var(--pico-size-code)/1.4 var(--pico-font-mono);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: border-color var(--pico-duration-fast), box-shadow var(--pico-duration-fast);
-}
-
-.pico-input:focus {
-  outline: none;
-  border-color: var(--pico-accent);
-  box-shadow: 0 0 0 3px var(--pico-accent-wash), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-/* ---------- 顶部栏（top bar）----------
-   常驻页面顶部的玻璃横条：左端留空，右端是工具带（用例 | 运行 | 视图 | 主题）。
-   苹果式材质：半透明底 + backdrop 提饱和模糊，自顶向下一道渐隐亮带、顶缘
-   一线内发光当"反光"，底缘发丝线收边；不做唤出/收起，任何时刻可见。 */
+/* ---------- 顶部栏 ---------- */
 .pico-topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: safe flex-end;
   gap: var(--pico-space-1);
-  height: 48px;
+  min-height: 48px;
+  flex-shrink: 0;
+  overflow-x: auto;
   padding: 0 var(--pico-space-4) 0 calc(var(--pico-space-4) + var(--pico-space-1));
-  border-bottom: 1px solid color-mix(in srgb, var(--pico-hairline) 80%, transparent);
-  background:
-    linear-gradient(light-dark(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.05)), transparent 65%),
-    color-mix(in srgb, var(--pico-surface-raised) 70%, transparent);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.06));
+  border-bottom: var(--pico-line);
+  background: var(--pico-surface-raised);
 }
 .pico-topbar > * { flex-shrink: 0; }
 /* 左端品牌位：文字或 Logo，auto 外边距把工具带推回右端；左右与工具带共用顶栏 padding。 */
@@ -1387,46 +1221,19 @@
   margin: 0 var(--pico-space-1);
   background: var(--pico-hairline);
 }
-/* 测试用例：数字段 + 自由输入图标，共享一个凹槽分段容器 */
-.pico-toolbar-cases {
+.pico-toolbar-choices {
   display: flex;
   align-items: center;
   gap: var(--pico-space-1);
   padding: 3px;
-  border-radius: 12px;
+  border-radius: var(--pico-radius);
   background: var(--pico-surface);
 }
-.pico-toolbar-case {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--pico-ink-soft);
-  font: 600 var(--pico-size-2xs)/1 var(--pico-font-ui);
-  cursor: pointer;
-  transition: background var(--pico-duration-fast), color var(--pico-duration-fast);
-}
-.pico-toolbar-case:hover {
-  background: color-mix(in srgb, var(--pico-ink) 9%, transparent);
-  color: var(--pico-ink);
-}
-.pico-toolbar-case[aria-pressed="true"] {
-  background: var(--pico-accent-wash);
-  color: var(--pico-accent);
-}
-.pico-toolbar-case--free svg { width: 16px; height: 16px; }
-/* 工具带里的键给小孩的命中区：34px、大一号图标；药丸再收 1px，键距更紧 */
+/* 顶栏图标按钮使用更大的命中区。 */
 .pico-topbar .pico-ghost-btn--icon {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-}
-.pico-topbar .pico-ghost-btn--icon::after {
-  inset: 3px;
 }
 .pico-topbar .pico-ghost-btn svg {
   width: 19px;
@@ -1443,59 +1250,21 @@
   overflow: hidden;
 }
 
-.pico-world-error {
-  position: absolute;
-  top: var(--pico-space-3);
-  right: var(--pico-space-3);
-  z-index: 4;
-  display: flex;
-  max-width: calc(100% - 2 * var(--pico-space-3));
-  align-items: center;
-  gap: var(--pico-space-2);
-  padding: 6px 10px;
-  border: 1px solid var(--pico-hue-error-strong);
-  border-radius: var(--pico-radius);
-  color: var(--pico-hue-error-ink);
-  background: var(--pico-hue-error-bg);
-  box-shadow: var(--pico-shadow);
-  pointer-events: none;
-  font: 600 var(--pico-size-xs)/1.2 var(--pico-font-ui);
-}
-
-.pico-world-error[hidden] { display: none; }
-
-.pico-world-error-mark {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  font-size: 15px;
-}
-
-.pico-world-error-label { overflow-wrap: anywhere; }
-
 /* ---------- 响应式与动效偏好 ---------- */
 @media (max-width: 760px) {
-  .pico-page { min-height: 100%; height: auto; }
-  .pico-shell, .pico-pg-main { padding: var(--pico-space-3); }
-  /* 比例分栏翻转为纵向后：内联 % 基准失效，面板改按内容自然堆叠 */
-  .pico-pg-main > .pico-pane { flex: 1 1 auto !important; }
+  .pico-pg-main { padding: var(--pico-space-3); gap: var(--pico-space-2); }
+  .pico-pg-main > .pico-pane { flex: 1 1 0 !important; }
   /* 窄屏一律纵向堆叠：行分割翻转为列，竖分割条隐藏 */
   .pico-split--row { flex-direction: column; }
   .pico-dock-divider--v { display: none; }
 }
 
 @media (pointer: coarse) {
-  .pico-btn { min-height: 44px; }
+  .pico-topbar .pico-ghost-btn { min-width: 44px; min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pico-root { scroll-behavior: auto; }
-  .pico-btn:active { transform: none; }
-  .pico-card,
   .pico-swap { transition: none; }
 }
 </style>
