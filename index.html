@@ -317,18 +317,35 @@
   background: var(--pico-surface-raised);
 }
 .pico-topbar > * { flex-shrink: 0; }
-/* 左端品牌位：文字或 Logo，auto 外边距把工具带推回右端；左右与工具带共用顶栏 padding。 */
+/* 左端：品牌菜单 + 页面标题，auto 外边距把工具带推回右端；左右与工具带共用顶栏 padding。 */
+.pico-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--pico-space-2);
+  margin-right: auto;
+  min-width: 0;
+}
 .pico-topbar-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--pico-space-2);
-  margin-right: auto;
   font: 600 var(--pico-size-sm)/1 var(--pico-font-ui);
   color: var(--pico-ink);
   user-select: none;
   -webkit-user-select: none;
 }
 .pico-topbar-logo { display: block; width: 22px; height: 22px; flex: 0 0 auto; }
+/* 页面标题（课程名）：品牌右侧，发丝线分隔，过长省略。 */
+.pico-topbar-title {
+  max-width: 32vw;
+  padding-left: var(--pico-space-3);
+  border-left: var(--pico-line);
+  font: 600 var(--pico-size-sm)/1.2 var(--pico-font-ui);
+  color: var(--pico-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* 工具带内的控件分组 */
 .pico-toolbar-group {
@@ -427,7 +444,7 @@
   <span>hanoi.html</span>
 </a>
 <a class="pico-card index-card" href="./hello.html">
-  <strong>Python Playground</strong>
+  <strong>Hello, Python!</strong>
   <span>hello.html</span>
 </a>
       </nav>

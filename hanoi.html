@@ -318,18 +318,35 @@
   background: var(--pico-surface-raised);
 }
 .pico-topbar > * { flex-shrink: 0; }
-/* 左端品牌位：文字或 Logo，auto 外边距把工具带推回右端；左右与工具带共用顶栏 padding。 */
+/* 左端：品牌菜单 + 页面标题，auto 外边距把工具带推回右端；左右与工具带共用顶栏 padding。 */
+.pico-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--pico-space-2);
+  margin-right: auto;
+  min-width: 0;
+}
 .pico-topbar-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--pico-space-2);
-  margin-right: auto;
   font: 600 var(--pico-size-sm)/1 var(--pico-font-ui);
   color: var(--pico-ink);
   user-select: none;
   -webkit-user-select: none;
 }
 .pico-topbar-logo { display: block; width: 22px; height: 22px; flex: 0 0 auto; }
+/* 页面标题（课程名）：品牌右侧，发丝线分隔，过长省略。 */
+.pico-topbar-title {
+  max-width: 32vw;
+  padding-left: var(--pico-space-3);
+  border-left: var(--pico-line);
+  font: 600 var(--pico-size-sm)/1.2 var(--pico-font-ui);
+  color: var(--pico-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* 工具带内的控件分组 */
 .pico-toolbar-group {
@@ -22800,6 +22817,50 @@ ${h2.join(`
   var import_react_dom = __toESM(require_react_dom());
   var import_react7 = __toESM(require_react());
 
+  // src/libs/dom.ts
+  function node(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className !== void 0) element.className = className;
+    if (text !== void 0) element.textContent = text;
+    return element;
+  }
+  var injectedStyles = /* @__PURE__ */ new WeakMap();
+  function ensureStyle(css) {
+    let styles = injectedStyles.get(document);
+    if (styles === void 0) {
+      styles = /* @__PURE__ */ new Set();
+      injectedStyles.set(document, styles);
+    }
+    if (styles.has(css)) return;
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
+    styles.add(css);
+  }
+  function downloadText(name2, text) {
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    const anchor = node("a");
+    anchor.href = url;
+    anchor.download = name2;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+  function emptySurface() {
+    const element = node("div", "pico-empty-surface");
+    element.setAttribute("aria-hidden", "true");
+    return element;
+  }
+  function panelWatermark(svg) {
+    ensureStyle(`
+.pico-panel-watermark { position: absolute; top: 50%; left: 50%; z-index: 1; transform: translate(-50%, -50%); width: 52px; height: 52px; color: var(--pico-ink-soft); opacity: .08; pointer-events: none; }
+.pico-panel-watermark svg { display: block; width: 100%; height: 100%; }
+`);
+    const element = node("span", "pico-panel-watermark");
+    element.setAttribute("aria-hidden", "true");
+    element.innerHTML = svg;
+    return element;
+  }
+
   // src/libs/components/impl/divider.tsx
   var import_react2 = __toESM(require_react());
   var import_jsx_runtime2 = __toESM(require_jsx_runtime());
@@ -23133,19 +23194,17 @@ ${h2.join(`
       }
     );
   }
-  function TopBarImpl({ brand, onResetEditor, groups, tail }) {
+  function TopBarImpl({ brand, name: name2, onResetEditor, groups }) {
     const list = groups ?? [];
-    const tailList = tail ?? [];
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("header", { className: "pico-topbar", "aria-label": "playground \u5DE5\u5177\u680F", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandMenu, { brand: brand ?? "Pico", onResetEditor }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pico-topbar-left", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandMenu, { brand: brand ?? "Pico Playground", onResetEditor }),
+        name2 !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-topbar-title", children: name2 })
+      ] }),
       list.map((group, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_react6.Fragment, { children: [
         index > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ToolbarSep, {}),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-toolbar-group", role: group.label === void 0 ? void 0 : "group", "aria-label": group.label, children: group.controls.map((control, controlIndex) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ControlView, { control }, controlIndex)) })
-      ] }, index)),
-      tailList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-        list.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ToolbarSep, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-toolbar-group", children: tailList.map((control, controlIndex) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ControlView, { control }, controlIndex)) })
-      ] })
+      ] }, index))
     ] });
   }
 
@@ -23155,11 +23214,13 @@ ${h2.join(`
   var MAX_RATIO = 0.6;
   var DEFAULT_RATIO = 0.43;
   function PlaygroundShellImpl({
+    name: name2,
+    id: id2,
+    source,
     brand,
     onResetEditor,
     editor,
     toolbar,
-    toolbarTail,
     panels,
     initialOpen,
     editorRatio = DEFAULT_RATIO
@@ -23175,6 +23236,9 @@ ${h2.join(`
     const transition = (0, import_react7.useRef)(null);
     const transitionId = (0, import_react7.useId)().replace(/[^a-zA-Z0-9_-]/g, "");
     (0, import_react7.useEffect)(() => () => transition.current?.skipTransition(), []);
+    (0, import_react7.useEffect)(() => {
+      if (name2 !== void 0) document.title = name2;
+    }, [name2]);
     const pinned = panels.filter((panel) => panel.pinned === true);
     const visible = panels.filter((panel) => panel.pinned !== true && open.has(panel.key));
     const toggle = (key) => {
@@ -23204,7 +23268,13 @@ ${h2.join(`
           pressed: open.has(panel.key),
           onClick: () => toggle(panel.key)
         }))
-      }] : []
+      }] : [],
+      { controls: [{
+        kind: "button",
+        icon: "download",
+        label: `\u4E0B\u8F7D ${id2}.py`,
+        onClick: () => downloadText(`${id2}.py`, source.getSnapshot())
+      }] }
     ];
     const renderPanel = (panel) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
       "section",
@@ -23219,7 +23289,7 @@ ${h2.join(`
     );
     return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "pico-page", children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("style", { children: CARD_MOTION_STYLE }),
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(TopBarImpl, { brand, onResetEditor, groups, tail: toolbarTail }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(TopBarImpl, { brand, name: name2, onResetEditor, groups }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "pico-split pico-split--row pico-pg-main", ref: main, children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "pico-pane", style: { flex: `0 0 ${pinned.length === 0 && visible.length === 0 ? 100 : ratio * 100}%`, viewTransitionName: `pico-${transitionId}-editor` }, children: editor }),
         (pinned.length > 0 || visible.length > 0) && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(import_jsx_runtime7.Fragment, { children: [
@@ -23274,42 +23344,6 @@ ${h2.join(`
 
   // src/libs/playground/impl.ts
   var import_react9 = __toESM(require_react());
-
-  // src/libs/dom.ts
-  function node(tag, className, text) {
-    const element = document.createElement(tag);
-    if (className !== void 0) element.className = className;
-    if (text !== void 0) element.textContent = text;
-    return element;
-  }
-  var injectedStyles = /* @__PURE__ */ new WeakMap();
-  function ensureStyle(css) {
-    let styles = injectedStyles.get(document);
-    if (styles === void 0) {
-      styles = /* @__PURE__ */ new Set();
-      injectedStyles.set(document, styles);
-    }
-    if (styles.has(css)) return;
-    const style = document.createElement("style");
-    style.textContent = css;
-    document.head.append(style);
-    styles.add(css);
-  }
-  function emptySurface() {
-    const element = node("div", "pico-empty-surface");
-    element.setAttribute("aria-hidden", "true");
-    return element;
-  }
-  function panelWatermark(svg) {
-    ensureStyle(`
-.pico-panel-watermark { position: absolute; top: 50%; left: 50%; z-index: 1; transform: translate(-50%, -50%); width: 52px; height: 52px; color: var(--pico-ink-soft); opacity: .08; pointer-events: none; }
-.pico-panel-watermark svg { display: block; width: 100%; height: 100%; }
-`);
-    const element = node("span", "pico-panel-watermark");
-    element.setAttribute("aria-hidden", "true");
-    element.innerHTML = svg;
-    return element;
-  }
 
   // src/libs/debugger/impl.ts
   var TRACE_CSS = `
@@ -48291,14 +48325,6 @@ _pico_result
 
   // playgrounds/hanoi.generated.tsx
   var import_jsx_runtime9 = __toESM(require_jsx_runtime());
-  function downloadSource(source) {
-    const url = URL.createObjectURL(new Blob([source.getSnapshot()], { type: "text/x-python" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "hanoi.py";
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }
   var STARTER = `def hanoi(n, src, dst, aux):
     if n == 1:
         print(f"{src} -> {dst}")
@@ -48339,7 +48365,9 @@ _pico_result
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
         PlaygroundShell,
         {
-          brand: "Pico Playground",
+          name: "Tower of Hanoi",
+          id: "hanoi",
+          source: model.source,
           onResetEditor: program.resetEditor,
           initialOpen: ["viz", "debug"],
           toolbar: [{ label: "\u7528\u4F8B", controls: [{
@@ -48349,7 +48377,6 @@ _pico_result
             value: String(n),
             onChange: model.testCase.set
           }] }],
-          toolbarTail: [{ kind: "button", icon: "download", label: "\u4E0B\u8F7D hanoi.py", onClick: () => downloadSource(model.source) }],
           editor: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Widget, { widget: program.editor }),
           panels: [
             { key: "viz", icon: "viz", title: "\u53EF\u89C6\u5316", flush: true, content: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "pico-scene pico-hanoi-scene", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(HanoiScene, { result: result2, position: program.position, source: model.source.getSnapshot(), n }) }) },
