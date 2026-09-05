@@ -14228,6 +14228,48 @@
     }
   });
 
+  // node_modules/react/cjs/react-jsx-runtime.production.js
+  var require_react_jsx_runtime_production = __commonJS({
+    "node_modules/react/cjs/react-jsx-runtime.production.js"(exports) {
+      "use strict";
+      var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element");
+      var REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment");
+      function jsxProd(type, config, maybeKey) {
+        var key = null;
+        void 0 !== maybeKey && (key = "" + maybeKey);
+        void 0 !== config.key && (key = "" + config.key);
+        if ("key" in config) {
+          maybeKey = {};
+          for (var propName in config)
+            "key" !== propName && (maybeKey[propName] = config[propName]);
+        } else maybeKey = config;
+        config = maybeKey.ref;
+        return {
+          $$typeof: REACT_ELEMENT_TYPE,
+          type,
+          key,
+          ref: void 0 !== config ? config : null,
+          props: maybeKey
+        };
+      }
+      exports.Fragment = REACT_FRAGMENT_TYPE;
+      exports.jsx = jsxProd;
+      exports.jsxs = jsxProd;
+    }
+  });
+
+  // node_modules/react/jsx-runtime.js
+  var require_jsx_runtime = __commonJS({
+    "node_modules/react/jsx-runtime.js"(exports, module2) {
+      "use strict";
+      if (true) {
+        module2.exports = require_react_jsx_runtime_production();
+      } else {
+        module2.exports = null;
+      }
+    }
+  });
+
   // node_modules/@xterm/xterm/lib/xterm.mjs
   var xterm_exports = {};
   __export(xterm_exports, {
@@ -23647,48 +23689,6 @@ ${h2.join(`
     }
   });
 
-  // node_modules/react/cjs/react-jsx-runtime.production.js
-  var require_react_jsx_runtime_production = __commonJS({
-    "node_modules/react/cjs/react-jsx-runtime.production.js"(exports) {
-      "use strict";
-      var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element");
-      var REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment");
-      function jsxProd(type, config, maybeKey) {
-        var key = null;
-        void 0 !== maybeKey && (key = "" + maybeKey);
-        void 0 !== config.key && (key = "" + config.key);
-        if ("key" in config) {
-          maybeKey = {};
-          for (var propName in config)
-            "key" !== propName && (maybeKey[propName] = config[propName]);
-        } else maybeKey = config;
-        config = maybeKey.ref;
-        return {
-          $$typeof: REACT_ELEMENT_TYPE,
-          type,
-          key,
-          ref: void 0 !== config ? config : null,
-          props: maybeKey
-        };
-      }
-      exports.Fragment = REACT_FRAGMENT_TYPE;
-      exports.jsx = jsxProd;
-      exports.jsxs = jsxProd;
-    }
-  });
-
-  // node_modules/react/jsx-runtime.js
-  var require_jsx_runtime = __commonJS({
-    "node_modules/react/jsx-runtime.js"(exports, module2) {
-      "use strict";
-      if (true) {
-        module2.exports = require_react_jsx_runtime_production();
-      } else {
-        module2.exports = null;
-      }
-    }
-  });
-
   // empty-node-ns:node:url
   var node_url_exports = {};
   __export(node_url_exports, {
@@ -23940,813 +23940,6 @@ ${h2.join(`
 
   // src/libs/components/index.tsx
   var import_react5 = __toESM(require_react());
-
-  // src/libs/components/impl/shared.ts
-  var SHARED_CSS = `
-.pico-widget { display: flex; flex-direction: column; gap: var(--pico-space-2); min-height: 0; }
-.pico-empty { color: var(--pico-ink-soft); font: italic var(--pico-size-sm)/1.6 var(--pico-font-text); }
-.pico-empty-surface { flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; background: var(--pico-code-bg); }
-.pico-empty-surface[hidden] { display: none; }
-`;
-  var injected = /* @__PURE__ */ new Set();
-  function ensureStyle(css) {
-    if (injected.has(css)) return;
-    injected.add(css);
-    const style = document.createElement("style");
-    style.textContent = css;
-    document.head.append(style);
-  }
-  function ensureSharedStyle() {
-    ensureStyle(SHARED_CSS);
-  }
-  function node(tag, className, text) {
-    const element = document.createElement(tag);
-    if (className !== void 0) element.className = className;
-    if (text !== void 0) element.textContent = text;
-    return element;
-  }
-  function emptySurface() {
-    const element = node("div", "pico-empty-surface");
-    element.setAttribute("aria-hidden", "true");
-    return element;
-  }
-  function maxIndex(trace2) {
-    return trace2 === null ? 0 : trace2.steps.length + 1;
-  }
-  function clamp(trace2, traceIndex) {
-    return Math.max(0, Math.min(maxIndex(trace2), Number.isFinite(traceIndex) ? Math.trunc(traceIndex) : 0));
-  }
-
-  // src/libs/components/impl/trace.ts
-  var TRACE_CSS = `
-.pico-trace-player { position: relative; display: flex; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
-.pico-trace-focus { position: relative; flex: 1; min-height: 0; height: 100%; overflow: hidden auto; border: 1px solid color-mix(in srgb, var(--pico-hairline) 72%, transparent); border-radius: var(--pico-radius); background: color-mix(in srgb, var(--pico-paper) 64%, transparent); scrollbar-width: thin; touch-action: none; user-select: none; cursor: ew-resize; }
-/* padding \u4F1A\u6210\u4E3A border-box \u7684\u5BBD\u5EA6\u4E0B\u9650\uFF080 8px \u21D2 \u6700\u5C11 16px\uFF09\uFF0C\u5757\u5BBD\u5FC5\u987B\u4E25\u683C\u7B49\u4E8E\u65F6\u95F4\u69FD\u5BBD\uFF1B
-   \u6807\u7B7E\u7F29\u8FDB\u7528 text-indent \u8868\u8FBE\u3002 */
-.pico-trace-block { position: absolute; bottom: calc(var(--pico-trace-row) * 24px + 2px); left: var(--pico-trace-left); width: var(--pico-trace-width); height: 20px; overflow: hidden; border-radius: 3px; box-sizing: border-box; container-type: inline-size; color: var(--pico-flame-ink); background: linear-gradient(to right, var(--pico-trace-color) 0 var(--pico-trace-progress), color-mix(in srgb, var(--pico-trace-color) 28%, var(--pico-paper)) var(--pico-trace-progress) 100%); font: 600 var(--pico-size-xs)/20px var(--pico-font-mono); text-overflow: ellipsis; white-space: nowrap; text-indent: 6px; transition: filter var(--pico-duration-fast), box-shadow var(--pico-duration-fast); }
-.pico-trace-block[data-palette="0"] { --pico-trace-color: var(--pico-flame-yellow); }
-.pico-trace-block[data-palette="1"] { --pico-trace-color: var(--pico-flame-orange); }
-.pico-trace-block[data-palette="2"] { --pico-trace-color: var(--pico-flame-salmon); }
-.pico-trace-block[data-palette="3"] { --pico-trace-color: var(--pico-flame-red); }
-.pico-trace-kind-loop, .pico-trace-kind-branch, .pico-trace-kind-iteration { text-align: center; text-indent: 0; }
-.pico-trace-kind-stmt { text-indent: 0; }
-.pico-trace-block-label { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; overflow: hidden; padding-inline: min(2px, 8cqw); font-size: min(var(--pico-size-xs), var(--pico-trace-label-size)); line-height: 1; }
-.pico-trace-block:hover { z-index: 3; opacity: 1; filter: saturate(1.12); }
-.pico-trace-block[data-current="true"] { z-index: 5; opacity: 1; box-shadow: inset 0 0 0 2px var(--pico-flame-ink), 0 0 0 2px var(--pico-accent); }
-.pico-trace-canvas { position: relative; min-height: 100%; }
-.pico-trace-cursor { position: absolute; z-index: 4; inset-block: 0; width: 2px; transform: translateX(-1px); background: var(--pico-accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--pico-paper) 48%, transparent); pointer-events: none; }
-
-/* \u7EC8\u6B62\u4F4D\u7F6E\u4E0E\u666E\u901A\u8BED\u53E5\u4F7F\u7528\u540C\u4E00\u89C6\u89C9\u8BED\u8A00\u3002 */
-.pico-trace-bound { position: absolute; z-index: 3; bottom: 2px; height: 20px; box-sizing: border-box; border-radius: 3px; background: var(--pico-flame-yellow); pointer-events: none; }
-.pico-trace-bound[data-phase="future"] { background: color-mix(in srgb, var(--pico-flame-yellow) 28%, var(--pico-paper)); }
-
-/* \u5DE6\u4E0A\u89D2\u53EA\u663E\u793A transport \u56FE\u6807\uFF1B\u6309\u4F4F\u6A2A\u62D6\u4E34\u65F6\u5012\u653E/\u6B63\u653E\uFF0C\u677E\u624B\u5373\u505C\u6B62\u3002 */
-.pico-trace-status { position: absolute; top: var(--pico-space-2); left: var(--pico-space-2); z-index: 7; width: 34px; height: 34px; padding: 0; border-radius: 10px; background: var(--pico-surface-raised); color: var(--pico-ink-soft); touch-action: none; }
-.pico-trace-status::after { inset: 3px; }
-.pico-trace-status svg { width: 19px; height: 19px; }
-.pico-trace-status[data-state="forward"], .pico-trace-status[data-state="reverse"] { color: var(--pico-accent); }
-.pico-scrub-pop { position: fixed; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 6px 12px; transform: translateX(-50%); border: 1px solid color-mix(in srgb, var(--pico-hairline) 85%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--pico-surface-raised) 88%, transparent); box-shadow: var(--pico-shadow-float); cursor: ew-resize; user-select: none; }
-.pico-scrub-pop[hidden] { display: none; }
-.pico-scrub-track { position: relative; width: 340px; height: 42px; border-radius: 21px; background: var(--pico-surface); }
-.pico-scrub-hint { color: var(--pico-ink-soft); font: 600 var(--pico-size-xs)/1 var(--pico-font-mono); opacity: 0.7; }
-.pico-scrub-tick { position: absolute; top: 50%; left: calc(50% + var(--pico-scrub-section) * 30px); width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--pico-ink-soft); opacity: 0.45; }
-.pico-scrub-thumb { position: absolute; top: 50%; left: calc(50% - 18px); z-index: 1; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; margin-top: -18px; border-radius: 50%; background: var(--pico-accent); color: var(--pico-on-accent); font: 700 13px/1 var(--pico-font-mono); box-shadow: 0 2px 8px var(--pico-accent-glow); }
-.pico-scrub-thumb svg { width: 16px; height: 16px; }
-`;
-  var DEBUGGER_CSS = `
-.pico-debugger { display: grid; flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; grid-template-columns: clamp(176px, 30%, 260px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); align-items: stretch; gap: var(--pico-space-3); overflow: hidden; }
-.pico-debugger > .pico-empty-surface { grid-column: 1 / -1; grid-row: 1; }
-.pico-debugger-diff { min-width: 0; min-height: 0; height: 100%; padding-right: var(--pico-space-3); border-right: 1px solid var(--pico-hairline); overflow-y: auto; scrollbar-width: thin; }
-.pico-debugger-variables { display: flex; flex-direction: column; margin: 0; padding: 0; }
-.pico-debugger-variable { display: grid; min-height: 30px; grid-template-columns: 6ch minmax(0, 1fr); align-items: baseline; gap: var(--pico-space-2); padding: var(--pico-space-1) 2px; border-bottom: 1px solid color-mix(in srgb, var(--pico-hairline) 58%, transparent); font: 500 var(--pico-size-sm)/1.4 var(--pico-font-mono); }
-.pico-debugger-name, .pico-debugger-value { margin: 0; }
-/* \u540D\u79F0\u53F3\u5BF9\u9F50\uFF0C\u5360 4 \u4E2A\u5B57\u7B26\u5217\uFF1B5 \u4E2A\u5B57\u7B26\u53CA\u4EE5\u4E0A\u6309 4/\u5B57\u7B26\u6570\u7B49\u6BD4\u7F29\u5C0F\u3002\u7B49\u53F7\u5DE6\u4FA7\u7559\u4E00\u683C\u7A7A\u683C\uFF0C\u81EA\u8EAB\u56FA\u5B9A\u5728\u7B2C 6 \u4E2A\u5B57\u7B26\u5217\u3002 */
-.pico-debugger-name { display: grid; grid-template-columns: 4ch 2ch; align-items: baseline; min-width: 0; overflow: hidden; color: var(--pico-ink-soft); white-space: nowrap; }
-.pico-debugger-name-label { display: block; min-width: 0; overflow: hidden; text-align: right; white-space: nowrap; }
-.pico-debugger-name::after { content: "="; color: var(--pico-code-dim); text-align: right; }
-.pico-debugger-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--pico-ink); }
-.pico-debugger-variable[data-change="added"] .pico-debugger-value,
-.pico-debugger-variable[data-change="changed"] .pico-debugger-value { font-weight: 650; }
-.pico-debugger-variable[data-change="removed"] { opacity: .5; }
-.pico-debugger-variable[data-change="removed"] .pico-debugger-value { text-decoration: line-through; }
-
-/* \u503C\u7C7B\u578B\u7740\u8272\uFF08\u4E0E\u8BED\u6CD5 token \u5BF9\u9F50\uFF09 */
-.pico-val--str { color: var(--pico-syn-str); }
-.pico-val--int, .pico-val--float { color: var(--pico-syn-num); }
-.pico-val--bool, .pico-val--none { color: var(--pico-syn-key); font-weight: 600; }
-
-`;
-  function format(value) {
-    return JSON.stringify(value);
-  }
-  function typeTag(value) {
-    if (typeof value === "string") return "str";
-    if (typeof value === "number") return Number.isInteger(value) ? "int" : "float";
-    if (typeof value === "boolean") return "bool";
-    if (value === null) return "none";
-    return Array.isArray(value) ? "list" : "dict";
-  }
-  function topFrame(state2) {
-    return state2.frames?.at(-1) ?? null;
-  }
-  function scopedVariables(state2) {
-    return { ...state2.globals ?? {}, ...topFrame(state2)?.locals ?? {} };
-  }
-  function variableRows(current, previous) {
-    const list = node("dl", "pico-debugger-variables");
-    for (const name2 of [.../* @__PURE__ */ new Set([...Object.keys(previous), ...Object.keys(current)])].sort()) {
-      const before = previous[name2];
-      const after = current[name2];
-      const row = node("div", "pico-debugger-variable");
-      if (!Object.hasOwn(previous, name2)) row.dataset.change = "added";
-      else if (!Object.hasOwn(current, name2)) row.dataset.change = "removed";
-      else if (JSON.stringify(before) !== JSON.stringify(after)) row.dataset.change = "changed";
-      const valueNode = node("dd", "pico-debugger-value", after === void 0 ? "\u2014" : format(after));
-      if (after !== void 0) valueNode.classList.add(`pico-val--${typeTag(after)}`);
-      const nameNode = node("dt", "pico-debugger-name");
-      nameNode.append(nameLabel(name2));
-      row.append(nameNode, valueNode);
-      list.append(row);
-    }
-    return list;
-  }
-  function nameLabel(name2) {
-    const label = node("span", "pico-debugger-name-label", name2);
-    if (name2.length >= 5) {
-      label.style.fontSize = `${(4 / name2.length * 100).toFixed(2)}%`;
-    }
-    return label;
-  }
-  function frameName(value) {
-    if (value === null || Array.isArray(value) || typeof value !== "object") return null;
-    const name2 = value.name;
-    return typeof name2 === "string" ? name2 : null;
-  }
-  function frameNames(frames) {
-    return (frames ?? []).map((frame2) => frame2.name);
-  }
-  function visibleFrames(frames) {
-    return frames.filter((name2) => name2 !== "<module>");
-  }
-  function tracePositions(trace2) {
-    let line = trace2.initialState.line;
-    let frames = frameNames(trace2.initialState.frames);
-    const positions = [{ line, frames: visibleFrames(frames) }];
-    for (const step2 of trace2.steps) {
-      for (const change2 of step2.changes) {
-        if (change2.op === "put" && change2.path.length === 1 && change2.path[0] === "line") {
-          line = typeof change2.value === "number" ? change2.value : null;
-        } else if (change2.path[0] === "frames") {
-          if (change2.op === "append" && change2.path.length === 1) {
-            const name2 = frameName(change2.value);
-            if (name2 !== null) frames.push(name2);
-          } else if (change2.op === "remove" && change2.path.length === 2 && change2.path[1] === -1) {
-            frames.pop();
-          } else if (change2.op === "put" && change2.path.length === 1) {
-            frames = (Array.isArray(change2.value) ? change2.value : []).map(frameName).filter((name2) => name2 !== null);
-          } else if (change2.op === "put" && change2.path.length === 3 && change2.path[2] === "name" && typeof change2.value === "string") {
-            const rawIndex = change2.path[1];
-            const index = rawIndex === -1 ? frames.length - 1 : rawIndex;
-            if (typeof index === "number" && index >= 0 && index < frames.length) frames[index] = change2.value;
-          }
-        }
-      }
-      positions.push({ line, frames: visibleFrames(frames) });
-    }
-    positions.push({ line: trace2.finalState.line, frames: visibleFrames(frameNames(trace2.finalState.frames)) });
-    return positions;
-  }
-  function functionBlocks(positions) {
-    const blocks = [];
-    const open = [];
-    for (let index = 0; index < positions.length; index += 1) {
-      const names = positions[index].frames;
-      let shared = 0;
-      while (shared < open.length && shared < names.length && open[shared].name === names[shared]) shared += 1;
-      while (open.length > shared) {
-        const span = open.pop();
-        if (index > span.start) blocks.push({ kind: "function", label: `${span.name}()`, line: null, row: open.length, start: span.start, end: index });
-      }
-      while (open.length < names.length) open.push({ name: names[open.length], start: index });
-    }
-    while (open.length > 0) {
-      const span = open.pop();
-      blocks.push({ kind: "function", label: `${span.name}()`, line: null, row: open.length, start: span.start, end: positions.length });
-    }
-    return blocks;
-  }
-  function controlKinds(structures) {
-    const kinds = /* @__PURE__ */ new Map();
-    const visit = (nodes) => {
-      for (const structure of nodes) {
-        if (structure.kind === "loop") {
-          kinds.set(structure.line, "loop");
-          visit(structure.body);
-        } else {
-          for (const arm of structure.arms) {
-            kinds.set(arm.line, "branch");
-            visit(arm.body);
-          }
-        }
-      }
-    };
-    visit(structures);
-    return kinds;
-  }
-  function flameBlocks(structures, trace2) {
-    const positions = tracePositions(trace2);
-    const kinds = controlKinds(structures);
-    const blocks = functionBlocks(positions);
-    for (let index = 0; index < positions.length; index += 1) {
-      const position = positions[index];
-      if (position.line === null) continue;
-      const kind = kinds.get(position.line) ?? "stmt";
-      blocks.push({
-        kind,
-        label: kind === "stmt" ? String(position.line) : kind === "loop" ? "loop" : "if",
-        line: position.line,
-        row: position.frames.length,
-        start: index,
-        end: index + 1
-      });
-    }
-    return blocks.sort((left, right) => left.row - right.row || left.start - right.start || right.end - left.end);
-  }
-  function flamePalette(block) {
-    let hash2 = block.row * 31 + block.start * 17 + block.end;
-    for (const char of block.label) hash2 = hash2 * 33 + char.charCodeAt(0) | 0;
-    return Math.abs(hash2) % 4;
-  }
-  var SCRUB_MULTIPLIERS = [1, 2, 4, 8, 16];
-  var TRANSPORT_ICONS = {
-    stopped: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.5" y="4.5" width="7" height="7" rx="1.5" fill="currentColor"/></svg>',
-    forward: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 13 8l-8 4.8z" fill="currentColor"/></svg>',
-    reverse: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 3.2 3 8l8 4.8z" fill="currentColor"/></svg>'
-  };
-  var MIN_TRACE_SLOT = 20;
-  var MAX_VISIBLE_SLOTS = 200;
-  var NO_STRUCTURES = [];
-  var DebuggerCore = class {
-    constructor(options) {
-      this.options = options;
-      ensureSharedStyle();
-      ensureStyle(TRACE_CSS);
-      ensureStyle(DEBUGGER_CSS);
-      this.player.append(this.flame, this.status);
-      this.element.append(this.empty, this.diff, this.player);
-      this.diff.hidden = true;
-      this.player.hidden = true;
-      this.flame.tabIndex = 0;
-      this.flame.setAttribute("role", "img");
-      this.flame.setAttribute("aria-label", "\u6267\u884C\u8F68\u8FF9\u65F6\u95F4\u8F74\uFF1B\u62D6\u52A8\u6216\u4F7F\u7528\u5DE6\u53F3\u952E\u5355\u6B65");
-      this.diff.setAttribute("aria-live", "polite");
-      this.status.type = "button";
-      this.status.title = "\u6309\u4F4F\u5E76\u5DE6\u53F3\u62D6\u52A8\uFF1A\u25C0 \xB7 \u25A0 \xB7 \u25B6";
-      this.scrubPop.hidden = true;
-      this.scrubPop.append(node("span", "pico-scrub-hint", "\u25C0"), this.scrubTrack, node("span", "pico-scrub-hint", "\u25B6"));
-      this.scrubTrack.append(this.scrubThumb);
-      for (let section = -5; section <= 5; section += 1) {
-        if (section === 0) continue;
-        const tick = node("span", "pico-scrub-tick");
-        tick.style.setProperty("--pico-scrub-section", String(section));
-        this.scrubTrack.append(tick);
-      }
-      this.status.addEventListener("pointerdown", (event) => this.startScrub(event));
-      this.status.addEventListener("pointermove", (event) => {
-        if (!this.scrubPop.hidden) this.applyScrub(this.scrubSectionAt(event.clientX));
-      });
-      this.status.addEventListener("pointerup", (event) => this.endScrub(event));
-      this.status.addEventListener("pointercancel", (event) => this.endScrub(event));
-      this.flame.addEventListener("keydown", (event) => {
-        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-        event.preventDefault();
-        this.stopTransport();
-        this.move(this.traceIndex + (event.key === "ArrowLeft" ? -1 : 1));
-      });
-      this.flame.addEventListener("pointerdown", (event) => {
-        if (event.button !== 0) return;
-        this.dragging = true;
-        this.stopTransport();
-        try {
-          this.flame.setPointerCapture(event.pointerId);
-        } catch {
-        }
-        this.move(this.stepFromPointer(event.clientX));
-      });
-      this.flame.addEventListener("pointermove", (event) => {
-        if (this.dragging) this.move(this.stepFromPointer(event.clientX));
-      });
-      const endDrag = (event) => {
-        this.dragging = false;
-        try {
-          this.flame.releasePointerCapture(event.pointerId);
-        } catch {
-        }
-      };
-      this.flame.addEventListener("pointerup", endDrag);
-      this.flame.addEventListener("pointercancel", endDrag);
-      if (typeof ResizeObserver !== "undefined") {
-        let width = this.flame.clientWidth;
-        new ResizeObserver(() => {
-          const next = this.flame.clientWidth;
-          if (next === width) return;
-          width = next;
-          if (this.trace !== null) this.paint();
-        }).observe(this.flame);
-      }
-      this.setTransport("stopped");
-    }
-    options;
-    /** 容器 = 自带临时 transport 的轨迹播放器 + 当前语句后果区。 */
-    element = node("div", "pico-widget pico-debugger");
-    player = node("section", "pico-trace-player");
-    flame = node("div", "pico-trace-focus");
-    diff = node("div", "pico-debugger-diff");
-    empty = emptySurface();
-    status = node("button", "pico-ghost-btn pico-trace-status");
-    scrubPop = node("div", "pico-scrub-pop");
-    scrubTrack = node("div", "pico-scrub-track");
-    scrubThumb = node("span", "pico-scrub-thumb");
-    trace = null;
-    cachedTrace = null;
-    cachedControlFlow = NO_STRUCTURES;
-    blocks = [];
-    traceIndex = 0;
-    viewStart = 0;
-    viewSpan = 1;
-    dragging = false;
-    scrubTimer = null;
-    scrubSection = 0;
-    canvas = node("div", "pico-trace-canvas");
-    render(trace2, controlFlow, traceIndex) {
-      const structures = controlFlow ?? NO_STRUCTURES;
-      const traceChanged = trace2 !== this.cachedTrace;
-      const structuresChanged = structures !== this.cachedControlFlow;
-      const landed = this.traceIndex;
-      this.trace = trace2;
-      if (traceChanged) {
-        this.stopTransport();
-        this.scrubPop.hidden = true;
-        this.scrubPop.remove();
-        this.scrubSection = 0;
-        this.cachedTrace = trace2;
-      }
-      if (traceChanged || structuresChanged) {
-        this.cachedControlFlow = structures;
-        this.blocks = trace2 === null ? [] : flameBlocks(structures, trace2);
-      }
-      const landing = traceIndex ?? (traceChanged ? maxIndex(trace2) : this.traceIndex);
-      this.traceIndex = trace2 === null ? 0 : Math.max(1, clamp(trace2, landing));
-      this.empty.hidden = trace2 !== null;
-      this.diff.hidden = trace2 === null;
-      this.player.hidden = trace2 === null;
-      this.status.disabled = trace2 === null;
-      if (trace2 === null || this.traceIndex >= maxIndex(trace2)) this.stopTransport();
-      this.paint();
-      this.paintDiff();
-      if (traceChanged || this.traceIndex !== landed) this.emit();
-    }
-    /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
-    emit() {
-      this.options.onChange(this.position());
-    }
-    position() {
-      const trace2 = this.trace;
-      if (trace2 === null) return null;
-      const step2 = this.traceIndex >= 1 && this.traceIndex <= trace2.steps.length ? trace2.steps[this.traceIndex - 1] : null;
-      return {
-        traceIndex: this.traceIndex,
-        atEnd: this.traceIndex === maxIndex(trace2),
-        event: step2?.event ?? null,
-        state: trace2.at(this.traceIndex),
-        previous: trace2.at(Math.max(0, this.traceIndex - 1))
-      };
-    }
-    /** 当前语句后果：合并作用域相对上一步的变量 diff；调用栈由火焰图自示。 */
-    paintDiff() {
-      if (this.trace === null) {
-        this.diff.replaceChildren();
-        return;
-      }
-      const current = this.trace.at(this.traceIndex);
-      const previous = this.trace.at(Math.max(0, this.traceIndex - 1));
-      this.diff.replaceChildren(variableRows(scopedVariables(current), scopedVariables(previous)));
-    }
-    paint() {
-      if (this.trace === null) {
-        this.flame.replaceChildren();
-        return;
-      }
-      const finalIndex = maxIndex(this.trace);
-      const measuredSlots = this.flame.clientWidth > 0 ? Math.max(1, Math.floor(this.flame.clientWidth / MIN_TRACE_SLOT)) : MAX_VISIBLE_SLOTS;
-      this.viewSpan = Math.max(1, Math.min(MAX_VISIBLE_SLOTS, measuredSlots, finalIndex));
-      this.viewStart = Math.max(1, Math.min(this.traceIndex - Math.floor(this.viewSpan / 2), finalIndex + 1 - this.viewSpan));
-      const viewEnd = this.viewStart + this.viewSpan;
-      const active = this.blocks.filter((block) => block.start <= this.traceIndex && this.traceIndex < block.end);
-      const deepest = active.reduce((found, block) => found === null || block.row >= found.row ? block : found, null);
-      const nodes = [];
-      for (const block of this.blocks) {
-        const left = Math.max(block.start, this.viewStart);
-        const right = Math.min(block.end, viewEnd);
-        if (right <= left) continue;
-        const width = 100 * (right - left) / this.viewSpan;
-        const blockNode = node("span", `pico-trace-block pico-trace-kind-${block.kind}`);
-        blockNode.dataset.kind = block.kind;
-        blockNode.dataset.palette = String(flamePalette(block));
-        blockNode.dataset.phase = block.start > this.traceIndex ? "future" : block.end <= this.traceIndex ? "past" : "active";
-        blockNode.dataset.current = String(block === deepest);
-        blockNode.style.setProperty("--pico-trace-left", `${100 * (left - this.viewStart) / this.viewSpan}%`);
-        blockNode.style.setProperty("--pico-trace-width", `${width}%`);
-        blockNode.style.setProperty("--pico-trace-row", String(block.row));
-        const progress = 100 * Math.max(0, Math.min(right, this.traceIndex + 0.5) - left) / (right - left);
-        blockNode.style.setProperty("--pico-trace-progress", `${progress}%`);
-        blockNode.title = `${block.label}${block.line === null ? "" : ` \xB7 \u7B2C ${block.line} \u884C`}\uFF08\u4F4D\u7F6E ${block.start}..${block.end}\uFF09`;
-        if (block.kind === "iteration") blockNode.textContent = width >= 4 ? block.label : "";
-        else if (block.kind === "stmt") {
-          const label = node("span", "pico-trace-block-label", block.label);
-          const fit = 100 / (block.label.length * 0.62 + 0.3);
-          label.style.setProperty("--pico-trace-label-size", `${fit}cqw`);
-          blockNode.append(label);
-        } else if (block.kind === "branch") blockNode.textContent = width >= 8 ? `\u2442 ${block.label}` : "\u2442";
-        else if (block.kind === "loop") blockNode.textContent = width >= 10 ? `\u21BB ${block.label}` : "\u21BB";
-        else blockNode.textContent = width >= 10 ? `\u0192 ${block.label}` : width >= 4 ? "\u0192 fn" : "";
-        nodes.push(blockNode);
-      }
-      const cursor = node("div", "pico-trace-cursor");
-      cursor.setAttribute("aria-hidden", "true");
-      cursor.style.left = `${100 * (this.traceIndex - this.viewStart + 0.5) / this.viewSpan}%`;
-      const maxRow = this.blocks.reduce((found, block) => Math.max(found, block.row), -1);
-      this.canvas.style.height = `${maxRow * 24 + 24}px`;
-      const bound = (index, label) => {
-        const element = node("div", "pico-trace-bound");
-        element.style.left = `${100 * (index - this.viewStart) / this.viewSpan}%`;
-        element.style.width = `${100 / this.viewSpan}%`;
-        element.dataset.phase = index > this.traceIndex ? "future" : "past";
-        element.title = label;
-        return element;
-      };
-      this.canvas.replaceChildren(
-        ...nodes,
-        cursor,
-        bound(finalIndex, "\u7A0B\u5E8F\u7ED3\u675F")
-      );
-      this.flame.replaceChildren(this.canvas);
-    }
-    move(traceIndex) {
-      const firstIndex = this.trace === null ? 0 : 1;
-      const next = Math.max(firstIndex, clamp(this.trace, traceIndex));
-      if (next === this.traceIndex) {
-        if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
-        return;
-      }
-      this.traceIndex = next;
-      this.paint();
-      this.paintDiff();
-      this.emit();
-      if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
-    }
-    stepFromPointer(clientX) {
-      const rect = this.flame.getBoundingClientRect();
-      const width = this.flame.clientWidth;
-      if (width <= 0) return this.traceIndex;
-      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / width));
-      return Math.floor(this.viewStart + ratio * this.viewSpan);
-    }
-    setTransport(state2, multiplier = 1) {
-      this.status.dataset.state = state2;
-      this.status.innerHTML = TRANSPORT_ICONS[state2];
-      const description = state2 === "stopped" ? "\u505C\u6B62" : `${state2 === "forward" ? "\u5411\u524D" : "\u5411\u540E"} \xD7${multiplier}`;
-      this.status.setAttribute("aria-label", `\u8F68\u8FF9\u72B6\u6001\uFF1A${description}`);
-    }
-    startScrub(event) {
-      if (event.button !== 0 || this.trace === null) return;
-      event.preventDefault();
-      this.stopScrubTimer();
-      this.scrubSection = 0;
-      this.setTransport("stopped");
-      try {
-        this.status.setPointerCapture(event.pointerId);
-      } catch {
-      }
-      const rect = this.status.getBoundingClientRect();
-      this.scrubPop.style.left = `${rect.left + rect.width / 2}px`;
-      this.scrubPop.style.top = `${rect.bottom + 12}px`;
-      this.scrubPop.hidden = false;
-      document.body.append(this.scrubPop);
-      this.applyScrub(0);
-    }
-    scrubSectionAt(clientX) {
-      const rect = this.scrubTrack.getBoundingClientRect();
-      return Math.max(-5, Math.min(5, Math.round((clientX - rect.left - rect.width / 2) / 30)));
-    }
-    applyScrub(section) {
-      if (section === this.scrubSection && (section === 0 || this.scrubTimer !== null)) return;
-      this.stopScrubTimer();
-      this.scrubSection = section;
-      this.scrubThumb.style.left = `calc(50% + ${section * 30}px - 18px)`;
-      if (section === 0) {
-        this.scrubThumb.innerHTML = TRANSPORT_ICONS.stopped;
-        this.setTransport("stopped");
-        return;
-      }
-      this.scrubThumb.textContent = `\xD7${SCRUB_MULTIPLIERS[Math.abs(section) - 1]}`;
-      const multiplier = SCRUB_MULTIPLIERS[Math.abs(section) - 1];
-      this.setTransport(section > 0 ? "forward" : "reverse", multiplier);
-      const delay = 1e3 / (3 * multiplier);
-      this.scrubTimer = window.setInterval(() => this.move(this.traceIndex + Math.sign(section)), delay);
-    }
-    endScrub(event) {
-      if (this.scrubPop.hidden) return;
-      this.stopScrubTimer();
-      this.scrubSection = 0;
-      this.scrubThumb.style.left = "calc(50% - 18px)";
-      this.scrubThumb.innerHTML = TRANSPORT_ICONS.stopped;
-      this.scrubPop.hidden = true;
-      this.scrubPop.remove();
-      this.setTransport("stopped");
-      try {
-        this.status.releasePointerCapture(event.pointerId);
-      } catch {
-      }
-    }
-    stopScrubTimer() {
-      if (this.scrubTimer !== null) window.clearInterval(this.scrubTimer);
-      this.scrubTimer = null;
-    }
-    stopTransport() {
-      this.stopScrubTimer();
-      this.setTransport("stopped");
-    }
-  };
-
-  // src/libs/components/impl/terminal.ts
-  var TERMINAL_CSS = `
-.pico-term {
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.pico-term-body {
-  flex: 1;
-  min-height: 0;
-  background: var(--pico-code-bg);
-}
-
-.pico-term .xterm-viewport { scrollbar-width: thin; }
-
-/* \u5E38\u9A7B\u6C34\u5370\uFF1A\u7EDD\u5BF9\u5B9A\u4F4D\u5C45\u4E2D\u3001\u4E0D\u53C2\u4E0E\u5E03\u5C40\u3001\u4E0D\u6321\u4EA4\u4E92\uFF0C\u59CB\u7EC8\u6807\u51FA\u8FD9\u662F\u8F93\u51FA\u9762\u677F\u3002 */
-.pico-term-watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-  width: 52px;
-  height: 52px;
-  color: var(--pico-ink-soft);
-  opacity: 0.08;
-  pointer-events: none;
-}
-.pico-term-watermark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-`;
-  var PROMPT = "\u203A ";
-  var TERMINAL_WATERMARK = '<svg width="52" height="52" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2"/></svg>';
-  var TerminalCore = class {
-    #root = node("div", "pico-widget pico-term");
-    #host = node("div", "pico-term-body");
-    #empty = emptySurface();
-    #onLine;
-    #surfaceFactory;
-    #surface = null;
-    #pending = null;
-    #accepting = false;
-    #buffer = "";
-    #lineStart = true;
-    // 光标在行首（上次写以 \n 结尾）
-    #shownOut = "";
-    #shownErr = "";
-    #hasActivity = false;
-    constructor(options) {
-      this.#onLine = options.onLine;
-      this.#surfaceFactory = options.surface ?? defaultSurface;
-      ensureSharedStyle();
-      ensureStyle(TERMINAL_CSS);
-      const watermark = node("span", "pico-term-watermark");
-      watermark.innerHTML = TERMINAL_WATERMARK;
-      this.#root.append(this.#host, this.#empty, watermark);
-      this.#syncEmpty();
-    }
-    /** 终端元素；访问即开始装载表面（挂载后尽早懒加载 xterm）。 */
-    get element() {
-      this.#ensure();
-      return this.#root;
-    }
-    reset() {
-      this.#shownOut = "";
-      this.#shownErr = "";
-      this.#buffer = "";
-      this.#accepting = false;
-      this.#hasActivity = false;
-      this.#lineStart = true;
-      if (this.#surface !== null) {
-        this.#surface.reset();
-        this.#surface.setActive(false);
-      }
-      this.#syncEmpty();
-    }
-    /** 推累积 stdout/stderr；确定性程序保证各段前缀递增，这里只追加差量。
-        非前缀（含 trace 回退）时软清屏后整写，避免 surface.reset() 整机复位闪烁。 */
-    render(stdout, stderr) {
-      this.#ensure();
-      if (stdout === this.#shownOut && stderr === this.#shownErr) return;
-      if (!stdout.startsWith(this.#shownOut) || !stderr.startsWith(this.#shownErr)) {
-        this.#surface?.clear();
-        this.#shownOut = "";
-        this.#shownErr = "";
-        this.#lineStart = true;
-        this.#hasActivity = false;
-      }
-      if (stdout !== this.#shownOut) {
-        this.#hasActivity = true;
-        this.#emit(stdout.slice(this.#shownOut.length));
-        this.#shownOut = stdout;
-      }
-      if (stderr !== this.#shownErr) {
-        this.#hasActivity = true;
-        this.#emit(stderr.slice(this.#shownErr.length), "error");
-        this.#shownErr = stderr;
-      }
-      this.#syncEmpty();
-    }
-    /** true：出提示符并接收一行键入；false：冻结（不收键、藏光标）。 */
-    setAcceptingInput(accepting) {
-      this.#ensure();
-      if (accepting === this.#accepting) return;
-      this.#accepting = accepting;
-      if (accepting) this.#hasActivity = true;
-      this.#syncEmpty();
-      this.#surface?.setActive(accepting);
-      if (!accepting) {
-        this.#surface?.blur();
-        return;
-      }
-      if (!this.#lineStart) this.#emit("\n");
-      this.#repaint();
-      this.#surface?.focus();
-    }
-    #ensure() {
-      if (this.#surface !== null || this.#pending !== null) return;
-      this.#pending = Promise.resolve(this.#surfaceFactory(this.#host)).then((surface) => {
-        this.#surface = surface;
-        surface.onData((data) => this.#receive(data));
-        surface.reset();
-        surface.setActive(this.#accepting);
-        if (this.#shownOut !== "") this.#emit(this.#shownOut);
-        if (this.#shownErr !== "") this.#emit(this.#shownErr, "error");
-        if (this.#accepting) this.#repaint();
-      }).catch((error2) => {
-        this.#pending = null;
-        console.error("Terminal \u8868\u9762\u521D\u59CB\u5316\u5931\u8D25", error2);
-      });
-    }
-    #emit(text, ink, replaceLine = false) {
-      this.#surface?.write(text, { ink, replaceLine });
-      if (!replaceLine) this.#lineStart = text.endsWith("\n");
-    }
-    #repaint() {
-      this.#emit(`${PROMPT}${this.#buffer}`, "input", true);
-    }
-    #receive(data) {
-      if (!this.#accepting) return;
-      data = data.replaceAll("\x1B[200~", "").replaceAll("\x1B[201~", "");
-      if (data.startsWith("\x1B")) return;
-      for (const char of data) {
-        if (char === "\r") {
-          this.#submit();
-          return;
-        }
-        if (char === "\x7F") this.#buffer = this.#buffer.slice(0, -1);
-        else if (char >= " ") this.#buffer += char;
-        else continue;
-        this.#repaint();
-      }
-    }
-    #submit() {
-      const line = this.#buffer;
-      this.#buffer = "";
-      this.#accepting = false;
-      this.#surface?.setActive(false);
-      this.#emit("\n");
-      this.#onLine(line);
-    }
-    #syncEmpty() {
-      this.#host.hidden = !this.#hasActivity;
-      this.#empty.hidden = this.#hasActivity;
-    }
-  };
-  function resolveToken(token, property) {
-    const probe = document.createElement("span");
-    probe.style.setProperty(property, `var(${token})`);
-    document.body.append(probe);
-    const value = getComputedStyle(probe).getPropertyValue(property).trim();
-    probe.remove();
-    return value;
-  }
-  var INPUT_SLOT = 195;
-  var ERROR_SLOT = 203;
-  var RESET_INK = "\x1B[39m";
-  var defaultSurface = async (host) => {
-    const [{ Terminal: Terminal2 }, { FitAddon }, { default: xtermCss }] = await Promise.all([
-      Promise.resolve().then(() => (init_xterm(), xterm_exports)),
-      Promise.resolve().then(() => (init_addon_fit(), addon_fit_exports)),
-      Promise.resolve().then(() => __toESM(require_xterm()))
-    ]);
-    ensureStyle(xtermCss);
-    const term = new Terminal2({
-      convertEol: true,
-      // 程序 stdout 是裸 \n
-      scrollback: 1e3,
-      fontFamily: resolveToken("--pico-font-mono", "font-family"),
-      fontSize: Number.parseFloat(resolveToken("--pico-size-sm", "font-size")),
-      // Editor(--pico-size-code)小一号
-      lineHeight: 22 / 13,
-      cursorStyle: "bar",
-      cursorBlink: true
-    });
-    term.open(host);
-    const applyTheme = () => {
-      const extendedAnsi = [];
-      extendedAnsi[INPUT_SLOT - 16] = resolveToken("--pico-syn-key", "color");
-      extendedAnsi[ERROR_SLOT - 16] = resolveToken("--pico-hue-error-ink", "color");
-      term.options.theme = {
-        background: resolveToken("--pico-code-bg", "background-color"),
-        foreground: resolveToken("--pico-code-ink", "color"),
-        cursor: resolveToken("--pico-accent", "color"),
-        selectionBackground: resolveToken("--pico-accent-wash", "background-color"),
-        extendedAnsi
-      };
-    };
-    applyTheme();
-    if (typeof MutationObserver !== "undefined") {
-      new MutationObserver(applyTheme).observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-pico-theme"]
-      });
-    }
-    window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", applyTheme);
-    const fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
-    const fit = () => {
-      if (host.clientWidth > 0 && host.clientHeight > 0) fitAddon.fit();
-    };
-    fit();
-    if (typeof ResizeObserver !== "undefined") {
-      let frame2 = 0;
-      new ResizeObserver(() => {
-        cancelAnimationFrame(frame2);
-        frame2 = requestAnimationFrame(fit);
-      }).observe(host);
-    }
-    return {
-      write(text, options) {
-        let out = "";
-        if (options?.replaceLine === true) out += "\r\x1B[2K";
-        if (options?.ink === "input") out += `\x1B[38;5;${INPUT_SLOT}m`;
-        else if (options?.ink === "error") out += `\x1B[38;5;${ERROR_SLOT}m`;
-        out += text;
-        if (options?.ink !== void 0) out += RESET_INK;
-        term.write(out);
-      },
-      onData(handler) {
-        term.onData(handler);
-      },
-      setActive(active) {
-        term.write(active ? "\x1B[?25h" : "\x1B[?25l");
-      },
-      focus() {
-        term.focus();
-      },
-      blur() {
-        term.blur();
-      },
-      clear() {
-        term.write("\x1B[2J\x1B[H");
-      },
-      reset() {
-        term.reset();
-      }
-    };
-  };
 
   // src/libs/components/impl/playground-shell.tsx
   var import_react4 = __toESM(require_react());
@@ -25099,38 +24292,838 @@ ${h2.join(`
   function PlaygroundShell(props) {
     return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlaygroundShellImpl, { ...props });
   }
+
+  // src/libs/dom/index.ts
+  function node(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className !== void 0) element.className = className;
+    if (text !== void 0) element.textContent = text;
+    return element;
+  }
+  var injected = /* @__PURE__ */ new Set();
+  function ensureStyle(css) {
+    if (injected.has(css)) return;
+    injected.add(css);
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
+  }
+  var WIDGET_CSS = `
+.pico-widget { display: flex; flex-direction: column; gap: var(--pico-space-2); min-height: 0; }
+.pico-empty-surface { flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; background: var(--pico-code-bg); }
+.pico-empty-surface[hidden] { display: none; }
+`;
+  function emptySurface() {
+    ensureStyle(WIDGET_CSS);
+    const element = node("div", "pico-empty-surface");
+    element.setAttribute("aria-hidden", "true");
+    return element;
+  }
+
+  // src/libs/debugger/impl.ts
+  var TRACE_CSS = `
+.pico-trace-player { position: relative; display: flex; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
+.pico-trace-focus { position: relative; flex: 1; min-height: 0; height: 100%; overflow: hidden auto; border: 1px solid color-mix(in srgb, var(--pico-hairline) 72%, transparent); border-radius: var(--pico-radius); background: color-mix(in srgb, var(--pico-paper) 64%, transparent); scrollbar-width: thin; touch-action: none; user-select: none; cursor: ew-resize; }
+/* padding \u4F1A\u6210\u4E3A border-box \u7684\u5BBD\u5EA6\u4E0B\u9650\uFF080 8px \u21D2 \u6700\u5C11 16px\uFF09\uFF0C\u5757\u5BBD\u5FC5\u987B\u4E25\u683C\u7B49\u4E8E\u65F6\u95F4\u69FD\u5BBD\uFF1B
+   \u6807\u7B7E\u7F29\u8FDB\u7528 text-indent \u8868\u8FBE\u3002 */
+.pico-trace-block { position: absolute; bottom: calc(var(--pico-trace-row) * 24px + 2px); left: var(--pico-trace-left); width: var(--pico-trace-width); height: 20px; overflow: hidden; border-radius: 3px; box-sizing: border-box; container-type: inline-size; color: var(--pico-flame-ink); background: linear-gradient(to right, var(--pico-trace-color) 0 var(--pico-trace-progress), color-mix(in srgb, var(--pico-trace-color) 28%, var(--pico-paper)) var(--pico-trace-progress) 100%); font: 600 var(--pico-size-xs)/20px var(--pico-font-mono); text-overflow: ellipsis; white-space: nowrap; text-indent: 6px; transition: filter var(--pico-duration-fast), box-shadow var(--pico-duration-fast); }
+.pico-trace-block[data-palette="0"] { --pico-trace-color: var(--pico-flame-yellow); }
+.pico-trace-block[data-palette="1"] { --pico-trace-color: var(--pico-flame-orange); }
+.pico-trace-block[data-palette="2"] { --pico-trace-color: var(--pico-flame-salmon); }
+.pico-trace-block[data-palette="3"] { --pico-trace-color: var(--pico-flame-red); }
+.pico-trace-kind-loop, .pico-trace-kind-branch, .pico-trace-kind-iteration { text-align: center; text-indent: 0; }
+.pico-trace-kind-stmt { text-indent: 0; }
+.pico-trace-block-label { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; overflow: hidden; padding-inline: min(2px, 8cqw); font-size: min(var(--pico-size-xs), var(--pico-trace-label-size)); line-height: 1; }
+.pico-trace-block:hover { z-index: 3; opacity: 1; filter: saturate(1.12); }
+.pico-trace-block[data-current="true"] { z-index: 5; opacity: 1; box-shadow: inset 0 0 0 2px var(--pico-flame-ink), 0 0 0 2px var(--pico-accent); }
+.pico-trace-canvas { position: relative; min-height: 100%; }
+.pico-trace-cursor { position: absolute; z-index: 4; inset-block: 0; width: 2px; transform: translateX(-1px); background: var(--pico-accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--pico-paper) 48%, transparent); pointer-events: none; }
+
+/* \u7EC8\u6B62\u4F4D\u7F6E\u4E0E\u666E\u901A\u8BED\u53E5\u4F7F\u7528\u540C\u4E00\u89C6\u89C9\u8BED\u8A00\u3002 */
+.pico-trace-bound { position: absolute; z-index: 3; bottom: 2px; height: 20px; box-sizing: border-box; border-radius: 3px; background: var(--pico-flame-yellow); pointer-events: none; }
+.pico-trace-bound[data-phase="future"] { background: color-mix(in srgb, var(--pico-flame-yellow) 28%, var(--pico-paper)); }
+
+/* \u5DE6\u4E0A\u89D2\u53EA\u663E\u793A transport \u56FE\u6807\uFF1B\u6309\u4F4F\u6A2A\u62D6\u4E34\u65F6\u5012\u653E/\u6B63\u653E\uFF0C\u677E\u624B\u5373\u505C\u6B62\u3002 */
+.pico-trace-status { position: absolute; top: var(--pico-space-2); left: var(--pico-space-2); z-index: 7; width: 34px; height: 34px; padding: 0; border-radius: 10px; background: var(--pico-surface-raised); color: var(--pico-ink-soft); touch-action: none; }
+.pico-trace-status::after { inset: 3px; }
+.pico-trace-status svg { width: 19px; height: 19px; }
+.pico-trace-status[data-state="forward"], .pico-trace-status[data-state="reverse"] { color: var(--pico-accent); }
+.pico-scrub-pop { position: fixed; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 6px 12px; transform: translateX(-50%); border: 1px solid color-mix(in srgb, var(--pico-hairline) 85%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--pico-surface-raised) 88%, transparent); box-shadow: var(--pico-shadow-float); cursor: ew-resize; user-select: none; }
+.pico-scrub-pop[hidden] { display: none; }
+.pico-scrub-track { position: relative; width: 340px; height: 42px; border-radius: 21px; background: var(--pico-surface); }
+.pico-scrub-hint { color: var(--pico-ink-soft); font: 600 var(--pico-size-xs)/1 var(--pico-font-mono); opacity: 0.7; }
+.pico-scrub-tick { position: absolute; top: 50%; left: calc(50% + var(--pico-scrub-section) * 30px); width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--pico-ink-soft); opacity: 0.45; }
+.pico-scrub-thumb { position: absolute; top: 50%; left: calc(50% - 18px); z-index: 1; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; margin-top: -18px; border-radius: 50%; background: var(--pico-accent); color: var(--pico-on-accent); font: 700 13px/1 var(--pico-font-mono); box-shadow: 0 2px 8px var(--pico-accent-glow); }
+.pico-scrub-thumb svg { width: 16px; height: 16px; }
+`;
+  var DEBUGGER_CSS = `
+.pico-debugger { display: grid; flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; grid-template-columns: clamp(176px, 30%, 260px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); align-items: stretch; gap: var(--pico-space-3); overflow: hidden; }
+.pico-debugger > .pico-empty-surface { grid-column: 1 / -1; grid-row: 1; }
+.pico-debugger-diff { min-width: 0; min-height: 0; height: 100%; padding-right: var(--pico-space-3); border-right: 1px solid var(--pico-hairline); overflow-y: auto; scrollbar-width: thin; }
+.pico-debugger-variables { display: flex; flex-direction: column; margin: 0; padding: 0; }
+.pico-debugger-variable { display: grid; min-height: 30px; grid-template-columns: 6ch minmax(0, 1fr); align-items: baseline; gap: var(--pico-space-2); padding: var(--pico-space-1) 2px; border-bottom: 1px solid color-mix(in srgb, var(--pico-hairline) 58%, transparent); font: 500 var(--pico-size-sm)/1.4 var(--pico-font-mono); }
+.pico-debugger-name, .pico-debugger-value { margin: 0; }
+/* \u540D\u79F0\u53F3\u5BF9\u9F50\uFF0C\u5360 4 \u4E2A\u5B57\u7B26\u5217\uFF1B5 \u4E2A\u5B57\u7B26\u53CA\u4EE5\u4E0A\u6309 4/\u5B57\u7B26\u6570\u7B49\u6BD4\u7F29\u5C0F\u3002\u7B49\u53F7\u5DE6\u4FA7\u7559\u4E00\u683C\u7A7A\u683C\uFF0C\u81EA\u8EAB\u56FA\u5B9A\u5728\u7B2C 6 \u4E2A\u5B57\u7B26\u5217\u3002 */
+.pico-debugger-name { display: grid; grid-template-columns: 4ch 2ch; align-items: baseline; min-width: 0; overflow: hidden; color: var(--pico-ink-soft); white-space: nowrap; }
+.pico-debugger-name-label { display: block; min-width: 0; overflow: hidden; text-align: right; white-space: nowrap; }
+.pico-debugger-name::after { content: "="; color: var(--pico-code-dim); text-align: right; }
+.pico-debugger-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--pico-ink); }
+.pico-debugger-variable[data-change="added"] .pico-debugger-value,
+.pico-debugger-variable[data-change="changed"] .pico-debugger-value { font-weight: 650; }
+.pico-debugger-variable[data-change="removed"] { opacity: .5; }
+.pico-debugger-variable[data-change="removed"] .pico-debugger-value { text-decoration: line-through; }
+
+/* \u503C\u7C7B\u578B\u7740\u8272\uFF08\u4E0E\u8BED\u6CD5 token \u5BF9\u9F50\uFF09 */
+.pico-val--str { color: var(--pico-syn-str); }
+.pico-val--int, .pico-val--float { color: var(--pico-syn-num); }
+.pico-val--bool, .pico-val--none { color: var(--pico-syn-key); font-weight: 600; }
+
+`;
+  function format(value) {
+    return JSON.stringify(value);
+  }
+  function typeTag(value) {
+    if (typeof value === "string") return "str";
+    if (typeof value === "number") return Number.isInteger(value) ? "int" : "float";
+    if (typeof value === "boolean") return "bool";
+    if (value === null) return "none";
+    return Array.isArray(value) ? "list" : "dict";
+  }
+  function topFrame(state2) {
+    return state2.frames?.at(-1) ?? null;
+  }
+  function scopedVariables(state2) {
+    return { ...state2.globals ?? {}, ...topFrame(state2)?.locals ?? {} };
+  }
+  function variableRows(current, previous) {
+    const list = node("dl", "pico-debugger-variables");
+    for (const name2 of [.../* @__PURE__ */ new Set([...Object.keys(previous), ...Object.keys(current)])].sort()) {
+      const before = previous[name2];
+      const after = current[name2];
+      const row = node("div", "pico-debugger-variable");
+      if (!Object.hasOwn(previous, name2)) row.dataset.change = "added";
+      else if (!Object.hasOwn(current, name2)) row.dataset.change = "removed";
+      else if (JSON.stringify(before) !== JSON.stringify(after)) row.dataset.change = "changed";
+      const valueNode = node("dd", "pico-debugger-value", after === void 0 ? "\u2014" : format(after));
+      if (after !== void 0) valueNode.classList.add(`pico-val--${typeTag(after)}`);
+      const nameNode = node("dt", "pico-debugger-name");
+      nameNode.append(nameLabel(name2));
+      row.append(nameNode, valueNode);
+      list.append(row);
+    }
+    return list;
+  }
+  function nameLabel(name2) {
+    const label = node("span", "pico-debugger-name-label", name2);
+    if (name2.length >= 5) {
+      label.style.fontSize = `${(4 / name2.length * 100).toFixed(2)}%`;
+    }
+    return label;
+  }
+  function maxIndex(trace2) {
+    return trace2 === null ? 0 : trace2.steps.length + 1;
+  }
+  function clamp(trace2, traceIndex) {
+    return Math.max(0, Math.min(maxIndex(trace2), Number.isFinite(traceIndex) ? Math.trunc(traceIndex) : 0));
+  }
+  function frameName(value) {
+    if (value === null || Array.isArray(value) || typeof value !== "object") return null;
+    const name2 = value.name;
+    return typeof name2 === "string" ? name2 : null;
+  }
+  function frameNames(frames) {
+    return (frames ?? []).map((frame2) => frame2.name);
+  }
+  function visibleFrames(frames) {
+    return frames.filter((name2) => name2 !== "<module>");
+  }
+  function tracePositions(trace2) {
+    let line = trace2.initialState.line;
+    let frames = frameNames(trace2.initialState.frames);
+    const positions = [{ line, frames: visibleFrames(frames) }];
+    for (const step2 of trace2.steps) {
+      for (const change2 of step2.changes) {
+        if (change2.op === "put" && change2.path.length === 1 && change2.path[0] === "line") {
+          line = typeof change2.value === "number" ? change2.value : null;
+        } else if (change2.path[0] === "frames") {
+          if (change2.op === "append" && change2.path.length === 1) {
+            const name2 = frameName(change2.value);
+            if (name2 !== null) frames.push(name2);
+          } else if (change2.op === "remove" && change2.path.length === 2 && change2.path[1] === -1) {
+            frames.pop();
+          } else if (change2.op === "put" && change2.path.length === 1) {
+            frames = (Array.isArray(change2.value) ? change2.value : []).map(frameName).filter((name2) => name2 !== null);
+          } else if (change2.op === "put" && change2.path.length === 3 && change2.path[2] === "name" && typeof change2.value === "string") {
+            const rawIndex = change2.path[1];
+            const index = rawIndex === -1 ? frames.length - 1 : rawIndex;
+            if (typeof index === "number" && index >= 0 && index < frames.length) frames[index] = change2.value;
+          }
+        }
+      }
+      positions.push({ line, frames: visibleFrames(frames) });
+    }
+    positions.push({ line: trace2.finalState.line, frames: visibleFrames(frameNames(trace2.finalState.frames)) });
+    return positions;
+  }
+  function functionBlocks(positions) {
+    const blocks = [];
+    const open = [];
+    for (let index = 0; index < positions.length; index += 1) {
+      const names = positions[index].frames;
+      let shared = 0;
+      while (shared < open.length && shared < names.length && open[shared].name === names[shared]) shared += 1;
+      while (open.length > shared) {
+        const span = open.pop();
+        if (index > span.start) blocks.push({ kind: "function", label: `${span.name}()`, line: null, row: open.length, start: span.start, end: index });
+      }
+      while (open.length < names.length) open.push({ name: names[open.length], start: index });
+    }
+    while (open.length > 0) {
+      const span = open.pop();
+      blocks.push({ kind: "function", label: `${span.name}()`, line: null, row: open.length, start: span.start, end: positions.length });
+    }
+    return blocks;
+  }
+  function controlKinds(structures) {
+    const kinds = /* @__PURE__ */ new Map();
+    const visit = (nodes) => {
+      for (const structure of nodes) {
+        if (structure.kind === "loop") {
+          kinds.set(structure.line, "loop");
+          visit(structure.body);
+        } else {
+          for (const arm of structure.arms) {
+            kinds.set(arm.line, "branch");
+            visit(arm.body);
+          }
+        }
+      }
+    };
+    visit(structures);
+    return kinds;
+  }
+  function flameBlocks(structures, trace2) {
+    const positions = tracePositions(trace2);
+    const kinds = controlKinds(structures);
+    const blocks = functionBlocks(positions);
+    for (let index = 0; index < positions.length; index += 1) {
+      const position = positions[index];
+      if (position.line === null) continue;
+      const kind = kinds.get(position.line) ?? "stmt";
+      blocks.push({
+        kind,
+        label: kind === "stmt" ? String(position.line) : kind === "loop" ? "loop" : "if",
+        line: position.line,
+        row: position.frames.length,
+        start: index,
+        end: index + 1
+      });
+    }
+    return blocks.sort((left, right) => left.row - right.row || left.start - right.start || right.end - left.end);
+  }
+  function flamePalette(block) {
+    let hash2 = block.row * 31 + block.start * 17 + block.end;
+    for (const char of block.label) hash2 = hash2 * 33 + char.charCodeAt(0) | 0;
+    return Math.abs(hash2) % 4;
+  }
+  var SCRUB_MULTIPLIERS = [1, 2, 4, 8, 16];
+  var TRANSPORT_ICONS = {
+    stopped: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.5" y="4.5" width="7" height="7" rx="1.5" fill="currentColor"/></svg>',
+    forward: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2 13 8l-8 4.8z" fill="currentColor"/></svg>',
+    reverse: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 3.2 3 8l8 4.8z" fill="currentColor"/></svg>'
+  };
+  var MIN_TRACE_SLOT = 20;
+  var MAX_VISIBLE_SLOTS = 200;
+  var NO_STRUCTURES = [];
+  var DebuggerCore = class {
+    constructor(options) {
+      this.options = options;
+      ensureStyle(TRACE_CSS);
+      ensureStyle(DEBUGGER_CSS);
+      this.player.append(this.flame, this.status);
+      this.element.append(this.empty, this.diff, this.player);
+      this.diff.hidden = true;
+      this.player.hidden = true;
+      this.flame.tabIndex = 0;
+      this.flame.setAttribute("role", "img");
+      this.flame.setAttribute("aria-label", "\u6267\u884C\u8F68\u8FF9\u65F6\u95F4\u8F74\uFF1B\u62D6\u52A8\u6216\u4F7F\u7528\u5DE6\u53F3\u952E\u5355\u6B65");
+      this.diff.setAttribute("aria-live", "polite");
+      this.status.type = "button";
+      this.status.title = "\u6309\u4F4F\u5E76\u5DE6\u53F3\u62D6\u52A8\uFF1A\u25C0 \xB7 \u25A0 \xB7 \u25B6";
+      this.scrubPop.hidden = true;
+      this.scrubPop.append(node("span", "pico-scrub-hint", "\u25C0"), this.scrubTrack, node("span", "pico-scrub-hint", "\u25B6"));
+      this.scrubTrack.append(this.scrubThumb);
+      for (let section = -5; section <= 5; section += 1) {
+        if (section === 0) continue;
+        const tick = node("span", "pico-scrub-tick");
+        tick.style.setProperty("--pico-scrub-section", String(section));
+        this.scrubTrack.append(tick);
+      }
+      this.status.addEventListener("pointerdown", (event) => this.startScrub(event));
+      this.status.addEventListener("pointermove", (event) => {
+        if (!this.scrubPop.hidden) this.applyScrub(this.scrubSectionAt(event.clientX));
+      });
+      this.status.addEventListener("pointerup", (event) => this.endScrub(event));
+      this.status.addEventListener("pointercancel", (event) => this.endScrub(event));
+      this.flame.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        this.stopTransport();
+        this.move(this.traceIndex + (event.key === "ArrowLeft" ? -1 : 1));
+      });
+      this.flame.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        this.dragging = true;
+        this.stopTransport();
+        try {
+          this.flame.setPointerCapture(event.pointerId);
+        } catch {
+        }
+        this.move(this.stepFromPointer(event.clientX));
+      });
+      this.flame.addEventListener("pointermove", (event) => {
+        if (this.dragging) this.move(this.stepFromPointer(event.clientX));
+      });
+      const endDrag = (event) => {
+        this.dragging = false;
+        try {
+          this.flame.releasePointerCapture(event.pointerId);
+        } catch {
+        }
+      };
+      this.flame.addEventListener("pointerup", endDrag);
+      this.flame.addEventListener("pointercancel", endDrag);
+      if (typeof ResizeObserver !== "undefined") {
+        let width = this.flame.clientWidth;
+        new ResizeObserver(() => {
+          const next = this.flame.clientWidth;
+          if (next === width) return;
+          width = next;
+          if (this.trace !== null) this.paint();
+        }).observe(this.flame);
+      }
+      this.setTransport("stopped");
+    }
+    options;
+    /** 容器 = 自带临时 transport 的轨迹播放器 + 当前语句后果区。 */
+    element = node("div", "pico-widget pico-debugger");
+    player = node("section", "pico-trace-player");
+    flame = node("div", "pico-trace-focus");
+    diff = node("div", "pico-debugger-diff");
+    empty = emptySurface();
+    status = node("button", "pico-ghost-btn pico-trace-status");
+    scrubPop = node("div", "pico-scrub-pop");
+    scrubTrack = node("div", "pico-scrub-track");
+    scrubThumb = node("span", "pico-scrub-thumb");
+    trace = null;
+    cachedTrace = null;
+    cachedControlFlow = NO_STRUCTURES;
+    blocks = [];
+    traceIndex = 0;
+    viewStart = 0;
+    viewSpan = 1;
+    dragging = false;
+    scrubTimer = null;
+    scrubSection = 0;
+    canvas = node("div", "pico-trace-canvas");
+    render(trace2, controlFlow, landing) {
+      const structures = controlFlow ?? NO_STRUCTURES;
+      const traceChanged = trace2 !== this.cachedTrace;
+      const structuresChanged = structures !== this.cachedControlFlow;
+      const landed = this.traceIndex;
+      this.trace = trace2;
+      if (traceChanged) {
+        this.stopTransport();
+        this.scrubPop.hidden = true;
+        this.scrubPop.remove();
+        this.scrubSection = 0;
+        this.cachedTrace = trace2;
+      }
+      if (traceChanged || structuresChanged) {
+        this.cachedControlFlow = structures;
+        this.blocks = trace2 === null ? [] : flameBlocks(structures, trace2);
+      }
+      const target = landing ?? (traceChanged ? maxIndex(trace2) : this.traceIndex);
+      this.traceIndex = trace2 === null ? 0 : Math.max(1, clamp(trace2, target));
+      this.empty.hidden = trace2 !== null;
+      this.diff.hidden = trace2 === null;
+      this.player.hidden = trace2 === null;
+      this.status.disabled = trace2 === null;
+      if (trace2 === null || this.traceIndex >= maxIndex(trace2)) this.stopTransport();
+      this.paint();
+      this.paintDiff();
+      if (traceChanged || this.traceIndex !== landed) this.emit();
+    }
+    /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
+    emit() {
+      this.options.onPosition(this.position());
+    }
+    position() {
+      const trace2 = this.trace;
+      if (trace2 === null) return null;
+      const step2 = this.traceIndex >= 1 && this.traceIndex <= trace2.steps.length ? trace2.steps[this.traceIndex - 1] : null;
+      return {
+        traceIndex: this.traceIndex,
+        atEnd: this.traceIndex === maxIndex(trace2),
+        event: step2?.event ?? null,
+        state: trace2.at(this.traceIndex),
+        previous: trace2.at(Math.max(0, this.traceIndex - 1))
+      };
+    }
+    /** 当前语句后果：合并作用域相对上一步的变量 diff；调用栈由火焰图自示。 */
+    paintDiff() {
+      if (this.trace === null) {
+        this.diff.replaceChildren();
+        return;
+      }
+      const current = this.trace.at(this.traceIndex);
+      const previous = this.trace.at(Math.max(0, this.traceIndex - 1));
+      this.diff.replaceChildren(variableRows(scopedVariables(current), scopedVariables(previous)));
+    }
+    paint() {
+      if (this.trace === null) {
+        this.flame.replaceChildren();
+        return;
+      }
+      const finalIndex = maxIndex(this.trace);
+      const measuredSlots = this.flame.clientWidth > 0 ? Math.max(1, Math.floor(this.flame.clientWidth / MIN_TRACE_SLOT)) : MAX_VISIBLE_SLOTS;
+      this.viewSpan = Math.max(1, Math.min(MAX_VISIBLE_SLOTS, measuredSlots, finalIndex));
+      this.viewStart = Math.max(1, Math.min(this.traceIndex - Math.floor(this.viewSpan / 2), finalIndex + 1 - this.viewSpan));
+      const viewEnd = this.viewStart + this.viewSpan;
+      const active = this.blocks.filter((block) => block.start <= this.traceIndex && this.traceIndex < block.end);
+      const deepest = active.reduce((found, block) => found === null || block.row >= found.row ? block : found, null);
+      const nodes = [];
+      for (const block of this.blocks) {
+        const left = Math.max(block.start, this.viewStart);
+        const right = Math.min(block.end, viewEnd);
+        if (right <= left) continue;
+        const width = 100 * (right - left) / this.viewSpan;
+        const blockNode = node("span", `pico-trace-block pico-trace-kind-${block.kind}`);
+        blockNode.dataset.kind = block.kind;
+        blockNode.dataset.palette = String(flamePalette(block));
+        blockNode.dataset.phase = block.start > this.traceIndex ? "future" : block.end <= this.traceIndex ? "past" : "active";
+        blockNode.dataset.current = String(block === deepest);
+        blockNode.style.setProperty("--pico-trace-left", `${100 * (left - this.viewStart) / this.viewSpan}%`);
+        blockNode.style.setProperty("--pico-trace-width", `${width}%`);
+        blockNode.style.setProperty("--pico-trace-row", String(block.row));
+        const progress = 100 * Math.max(0, Math.min(right, this.traceIndex + 0.5) - left) / (right - left);
+        blockNode.style.setProperty("--pico-trace-progress", `${progress}%`);
+        blockNode.title = `${block.label}${block.line === null ? "" : ` \xB7 \u7B2C ${block.line} \u884C`}\uFF08\u4F4D\u7F6E ${block.start}..${block.end}\uFF09`;
+        if (block.kind === "iteration") blockNode.textContent = width >= 4 ? block.label : "";
+        else if (block.kind === "stmt") {
+          const label = node("span", "pico-trace-block-label", block.label);
+          const fit = 100 / (block.label.length * 0.62 + 0.3);
+          label.style.setProperty("--pico-trace-label-size", `${fit}cqw`);
+          blockNode.append(label);
+        } else if (block.kind === "branch") blockNode.textContent = width >= 8 ? `\u2442 ${block.label}` : "\u2442";
+        else if (block.kind === "loop") blockNode.textContent = width >= 10 ? `\u21BB ${block.label}` : "\u21BB";
+        else blockNode.textContent = width >= 10 ? `\u0192 ${block.label}` : width >= 4 ? "\u0192 fn" : "";
+        nodes.push(blockNode);
+      }
+      const cursor = node("div", "pico-trace-cursor");
+      cursor.setAttribute("aria-hidden", "true");
+      cursor.style.left = `${100 * (this.traceIndex - this.viewStart + 0.5) / this.viewSpan}%`;
+      const maxRow = this.blocks.reduce((found, block) => Math.max(found, block.row), -1);
+      this.canvas.style.height = `${maxRow * 24 + 24}px`;
+      const bound = (index, label) => {
+        const element = node("div", "pico-trace-bound");
+        element.style.left = `${100 * (index - this.viewStart) / this.viewSpan}%`;
+        element.style.width = `${100 / this.viewSpan}%`;
+        element.dataset.phase = index > this.traceIndex ? "future" : "past";
+        element.title = label;
+        return element;
+      };
+      this.canvas.replaceChildren(
+        ...nodes,
+        cursor,
+        bound(finalIndex, "\u7A0B\u5E8F\u7ED3\u675F")
+      );
+      this.flame.replaceChildren(this.canvas);
+    }
+    move(traceIndex) {
+      const firstIndex = this.trace === null ? 0 : 1;
+      const next = Math.max(firstIndex, clamp(this.trace, traceIndex));
+      if (next === this.traceIndex) {
+        if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
+        return;
+      }
+      this.traceIndex = next;
+      this.paint();
+      this.paintDiff();
+      this.emit();
+      if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
+    }
+    stepFromPointer(clientX) {
+      const rect = this.flame.getBoundingClientRect();
+      const width = this.flame.clientWidth;
+      if (width <= 0) return this.traceIndex;
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / width));
+      return Math.floor(this.viewStart + ratio * this.viewSpan);
+    }
+    setTransport(state2, multiplier = 1) {
+      this.status.dataset.state = state2;
+      this.status.innerHTML = TRANSPORT_ICONS[state2];
+      const description = state2 === "stopped" ? "\u505C\u6B62" : `${state2 === "forward" ? "\u5411\u524D" : "\u5411\u540E"} \xD7${multiplier}`;
+      this.status.setAttribute("aria-label", `\u8F68\u8FF9\u72B6\u6001\uFF1A${description}`);
+    }
+    startScrub(event) {
+      if (event.button !== 0 || this.trace === null) return;
+      event.preventDefault();
+      this.stopScrubTimer();
+      this.scrubSection = 0;
+      this.setTransport("stopped");
+      try {
+        this.status.setPointerCapture(event.pointerId);
+      } catch {
+      }
+      const rect = this.status.getBoundingClientRect();
+      this.scrubPop.style.left = `${rect.left + rect.width / 2}px`;
+      this.scrubPop.style.top = `${rect.bottom + 12}px`;
+      this.scrubPop.hidden = false;
+      document.body.append(this.scrubPop);
+      this.applyScrub(0);
+    }
+    scrubSectionAt(clientX) {
+      const rect = this.scrubTrack.getBoundingClientRect();
+      return Math.max(-5, Math.min(5, Math.round((clientX - rect.left - rect.width / 2) / 30)));
+    }
+    applyScrub(section) {
+      if (section === this.scrubSection && (section === 0 || this.scrubTimer !== null)) return;
+      this.stopScrubTimer();
+      this.scrubSection = section;
+      this.scrubThumb.style.left = `calc(50% + ${section * 30}px - 18px)`;
+      if (section === 0) {
+        this.scrubThumb.innerHTML = TRANSPORT_ICONS.stopped;
+        this.setTransport("stopped");
+        return;
+      }
+      this.scrubThumb.textContent = `\xD7${SCRUB_MULTIPLIERS[Math.abs(section) - 1]}`;
+      const multiplier = SCRUB_MULTIPLIERS[Math.abs(section) - 1];
+      this.setTransport(section > 0 ? "forward" : "reverse", multiplier);
+      const delay = 1e3 / (3 * multiplier);
+      this.scrubTimer = window.setInterval(() => this.move(this.traceIndex + Math.sign(section)), delay);
+    }
+    endScrub(event) {
+      if (this.scrubPop.hidden) return;
+      this.stopScrubTimer();
+      this.scrubSection = 0;
+      this.scrubThumb.style.left = "calc(50% - 18px)";
+      this.scrubThumb.innerHTML = TRANSPORT_ICONS.stopped;
+      this.scrubPop.hidden = true;
+      this.scrubPop.remove();
+      this.setTransport("stopped");
+      try {
+        this.status.releasePointerCapture(event.pointerId);
+      } catch {
+      }
+    }
+    stopScrubTimer() {
+      if (this.scrubTimer !== null) window.clearInterval(this.scrubTimer);
+      this.scrubTimer = null;
+    }
+    stopTransport() {
+      this.stopScrubTimer();
+      this.setTransport("stopped");
+    }
+  };
+
+  // src/libs/debugger/index.ts
   var Debugger = class {
     #core;
     constructor(options) {
       this.#core = new DebuggerCore(options);
     }
-    /** 调试卡本体：变量 diff + 自带播放控制的火焰图；由页面挂进卡片。 */
     get element() {
       return this.#core.element;
     }
-    /** 推送事实。traceIndex 是新 trace 的显式落点：缺省落终点；同一 trace 重复推送保持光标。 */
-    render(trace2, controlFlow, traceIndex) {
-      this.#core.render(trace2, controlFlow, traceIndex);
+    render(trace2, controlFlow, landing) {
+      this.#core.render(trace2, controlFlow, landing);
     }
   };
+
+  // src/libs/terminal/impl.ts
+  var TERMINAL_CSS = `
+.pico-term {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pico-term-body {
+  flex: 1;
+  min-height: 0;
+  background: var(--pico-code-bg);
+}
+
+.pico-term .xterm-viewport { scrollbar-width: thin; }
+
+/* \u5E38\u9A7B\u6C34\u5370\uFF1A\u7EDD\u5BF9\u5B9A\u4F4D\u5C45\u4E2D\u3001\u4E0D\u53C2\u4E0E\u5E03\u5C40\u3001\u4E0D\u6321\u4EA4\u4E92\uFF0C\u59CB\u7EC8\u6807\u51FA\u8FD9\u662F\u8F93\u51FA\u9762\u677F\u3002 */
+.pico-term-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  color: var(--pico-ink-soft);
+  opacity: 0.08;
+  pointer-events: none;
+}
+.pico-term-watermark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+`;
+  var PROMPT = "\u203A ";
+  var TERMINAL_WATERMARK = '<svg width="52" height="52" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2"/></svg>';
+  var TerminalCore = class {
+    #root = node("div", "pico-widget pico-term");
+    #host = node("div", "pico-term-body");
+    #empty = emptySurface();
+    #onLine;
+    #surfaceFactory;
+    #surface = null;
+    #pending = null;
+    #accepting = false;
+    #buffer = "";
+    #lineStart = true;
+    // 光标在行首（上次写以 \n 结尾）
+    #shownOut = "";
+    #shownErr = "";
+    #hasActivity = false;
+    constructor(options) {
+      this.#onLine = options.onLine;
+      this.#surfaceFactory = options.surface ?? defaultSurface;
+      ensureStyle(TERMINAL_CSS);
+      const watermark = node("span", "pico-term-watermark");
+      watermark.innerHTML = TERMINAL_WATERMARK;
+      this.#root.append(this.#host, this.#empty, watermark);
+      this.#syncEmpty();
+    }
+    /** 终端元素；访问即开始装载表面（挂载后尽早懒加载 xterm）。 */
+    get element() {
+      this.#ensure();
+      return this.#root;
+    }
+    reset() {
+      this.#shownOut = "";
+      this.#shownErr = "";
+      this.#buffer = "";
+      this.#accepting = false;
+      this.#hasActivity = false;
+      this.#lineStart = true;
+      if (this.#surface !== null) {
+        this.#surface.reset();
+        this.#surface.setActive(false);
+      }
+      this.#syncEmpty();
+    }
+    /** 推累积 stdout/stderr；确定性程序保证各段前缀递增，这里只追加差量。
+        非前缀（含 trace 回退）时软清屏后整写，避免 surface.reset() 整机复位闪烁。 */
+    render(stdout, stderr) {
+      this.#ensure();
+      if (stdout === this.#shownOut && stderr === this.#shownErr) return;
+      if (!stdout.startsWith(this.#shownOut) || !stderr.startsWith(this.#shownErr)) {
+        this.#surface?.clear();
+        this.#shownOut = "";
+        this.#shownErr = "";
+        this.#lineStart = true;
+        this.#hasActivity = false;
+      }
+      if (stdout !== this.#shownOut) {
+        this.#hasActivity = true;
+        this.#emit(stdout.slice(this.#shownOut.length));
+        this.#shownOut = stdout;
+      }
+      if (stderr !== this.#shownErr) {
+        this.#hasActivity = true;
+        this.#emit(stderr.slice(this.#shownErr.length), "error");
+        this.#shownErr = stderr;
+      }
+      this.#syncEmpty();
+    }
+    /** true：出提示符并接收一行键入；false：冻结（不收键、藏光标）。 */
+    setAcceptingInput(accepting) {
+      this.#ensure();
+      if (accepting === this.#accepting) return;
+      this.#accepting = accepting;
+      if (accepting) this.#hasActivity = true;
+      this.#syncEmpty();
+      this.#surface?.setActive(accepting);
+      if (!accepting) {
+        this.#surface?.blur();
+        return;
+      }
+      if (!this.#lineStart) this.#emit("\n");
+      this.#repaint();
+      this.#surface?.focus();
+    }
+    #ensure() {
+      if (this.#surface !== null || this.#pending !== null) return;
+      this.#pending = Promise.resolve(this.#surfaceFactory(this.#host)).then((surface) => {
+        this.#surface = surface;
+        surface.onData((data) => this.#receive(data));
+        surface.reset();
+        surface.setActive(this.#accepting);
+        if (this.#shownOut !== "") this.#emit(this.#shownOut);
+        if (this.#shownErr !== "") this.#emit(this.#shownErr, "error");
+        if (this.#accepting) this.#repaint();
+      }).catch((error2) => {
+        this.#pending = null;
+        console.error("Terminal \u8868\u9762\u521D\u59CB\u5316\u5931\u8D25", error2);
+      });
+    }
+    #emit(text, ink, replaceLine = false) {
+      this.#surface?.write(text, { ink, replaceLine });
+      if (!replaceLine) this.#lineStart = text.endsWith("\n");
+    }
+    #repaint() {
+      this.#emit(`${PROMPT}${this.#buffer}`, "input", true);
+    }
+    #receive(data) {
+      if (!this.#accepting) return;
+      data = data.replaceAll("\x1B[200~", "").replaceAll("\x1B[201~", "");
+      if (data.startsWith("\x1B")) return;
+      for (const char of data) {
+        if (char === "\r") {
+          this.#submit();
+          return;
+        }
+        if (char === "\x7F") this.#buffer = this.#buffer.slice(0, -1);
+        else if (char >= " ") this.#buffer += char;
+        else continue;
+        this.#repaint();
+      }
+    }
+    #submit() {
+      const line = this.#buffer;
+      this.#buffer = "";
+      this.#accepting = false;
+      this.#surface?.setActive(false);
+      this.#emit("\n");
+      this.#onLine(line);
+    }
+    #syncEmpty() {
+      this.#host.hidden = !this.#hasActivity;
+      this.#empty.hidden = this.#hasActivity;
+    }
+  };
+  function resolveToken(token, property) {
+    const probe = document.createElement("span");
+    probe.style.setProperty(property, `var(${token})`);
+    document.body.append(probe);
+    const value = getComputedStyle(probe).getPropertyValue(property).trim();
+    probe.remove();
+    return value;
+  }
+  var INPUT_SLOT = 195;
+  var ERROR_SLOT = 203;
+  var RESET_INK = "\x1B[39m";
+  var defaultSurface = async (host) => {
+    const [{ Terminal: Terminal2 }, { FitAddon }, { default: xtermCss }] = await Promise.all([
+      Promise.resolve().then(() => (init_xterm(), xterm_exports)),
+      Promise.resolve().then(() => (init_addon_fit(), addon_fit_exports)),
+      Promise.resolve().then(() => __toESM(require_xterm()))
+    ]);
+    ensureStyle(xtermCss);
+    const term = new Terminal2({
+      convertEol: true,
+      // 程序 stdout 是裸 \n
+      scrollback: 1e3,
+      fontFamily: resolveToken("--pico-font-mono", "font-family"),
+      fontSize: Number.parseFloat(resolveToken("--pico-size-sm", "font-size")),
+      // Editor(--pico-size-code)小一号
+      lineHeight: 22 / 13,
+      cursorStyle: "bar",
+      cursorBlink: true
+    });
+    term.open(host);
+    const applyTheme = () => {
+      const extendedAnsi = [];
+      extendedAnsi[INPUT_SLOT - 16] = resolveToken("--pico-syn-key", "color");
+      extendedAnsi[ERROR_SLOT - 16] = resolveToken("--pico-hue-error-ink", "color");
+      term.options.theme = {
+        background: resolveToken("--pico-code-bg", "background-color"),
+        foreground: resolveToken("--pico-code-ink", "color"),
+        cursor: resolveToken("--pico-accent", "color"),
+        selectionBackground: resolveToken("--pico-accent-wash", "background-color"),
+        extendedAnsi
+      };
+    };
+    applyTheme();
+    if (typeof MutationObserver !== "undefined") {
+      new MutationObserver(applyTheme).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-pico-theme"]
+      });
+    }
+    window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", applyTheme);
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    const fit = () => {
+      if (host.clientWidth > 0 && host.clientHeight > 0) fitAddon.fit();
+    };
+    fit();
+    if (typeof ResizeObserver !== "undefined") {
+      let frame2 = 0;
+      new ResizeObserver(() => {
+        cancelAnimationFrame(frame2);
+        frame2 = requestAnimationFrame(fit);
+      }).observe(host);
+    }
+    return {
+      write(text, options) {
+        let out = "";
+        if (options?.replaceLine === true) out += "\r\x1B[2K";
+        if (options?.ink === "input") out += `\x1B[38;5;${INPUT_SLOT}m`;
+        else if (options?.ink === "error") out += `\x1B[38;5;${ERROR_SLOT}m`;
+        out += text;
+        if (options?.ink !== void 0) out += RESET_INK;
+        term.write(out);
+      },
+      onData(handler) {
+        term.onData(handler);
+      },
+      setActive(active) {
+        term.write(active ? "\x1B[?25h" : "\x1B[?25l");
+      },
+      focus() {
+        term.focus();
+      },
+      blur() {
+        term.blur();
+      },
+      clear() {
+        term.write("\x1B[2J\x1B[H");
+      },
+      reset() {
+        term.reset();
+      }
+    };
+  };
+
+  // src/libs/terminal/index.ts
   var Terminal = class {
     #core;
     constructor(options) {
       this.#core = new TerminalCore(options);
     }
-    /** 终端元素；由页面挂进输出卡片。 */
     get element() {
       return this.#core.element;
     }
-    /** 清空会话：已显示输出与进行中的输入行一并丢弃。 */
     reset() {
       this.#core.reset();
     }
-    /** 推累积 stdout/stderr；内部差量追加（确定性程序保证前缀性）。 */
     render(stdout, stderr) {
       this.#core.render(stdout, stderr);
     }
-    /** true：出提示符并接收一行键入；false：冻结（不收键、藏光标）。 */
     setAcceptingInput(accepting) {
       this.#core.setAcceptingInput(accepting);
     }
@@ -47960,7 +47953,7 @@ print("Got", got)
       onLine: (line) => this.feedLine(line)
     });
     debugger = new Debugger({
-      onChange: (position) => this.observe(position)
+      onPosition: (position) => this.observe(position)
     });
     /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
     subscribeView = (listener) => {
