@@ -24654,7 +24654,6 @@ ${h2.join(`
       this.paintDiff();
       if (traceChanged || this.traceIndex !== landed) this.emit();
     }
-    /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
     emit() {
       this.options.onPosition(this.position());
     }
@@ -47067,25 +47066,20 @@ ${h2.join(`
     constructor(text) {
       this.state = new EditorState2(stripTrailingNewline(text));
     }
-    /** 学生代码的规范形：末尾至多剥掉一个换行（CodeMirror 会把结尾 \n 渲染成多余空行）。 */
     get text() {
       return this.state.text;
     }
-    /** 整篇替换（同步 CodeMirror）；任何文档变化都会清除行高亮。 */
     replace(text) {
       const next = stripTrailingNewline(text);
       this.state.transition({ text: next });
       syncEditorText(this, next);
     }
-    /** 编辑器卡片（含 CodeMirror）；首次访问时惰性创建视图。 */
     get element() {
       return editorElement(this);
     }
-    /** 高亮一行（1 计）；编辑器聚焦输入时不滚动视口。高亮是纯视图状态，不进 Pico state。 */
     showLine(line, kind, scroll = true) {
       showEditorLine(this, line, kind, scroll);
     }
-    /** 清除行高亮。 */
     clearLine() {
       clearEditorLine(this);
     }
@@ -47938,16 +47932,13 @@ _pico_result
   var HanoiModel = class extends Playground {
     id = "hanoi";
     title = "Tower of Hanoi";
-    // PicoState 只承载最根本的事实：学生代码与用例选择；运行流水线由模型自持。
     editor = this.use(Editor, STARTER);
     testCase = this.use(CaseState);
     runId = 0;
-    /** 运行流水线的当前阶段；view 经 subscribeView 直读。 */
     #execution = { kind: "idle", submission: INITIAL_SUBMISSION };
     get execution() {
       return this.#execution;
     }
-    /** Debugger 回发的最新位置快照；视图订阅即对齐。 */
     #position = null;
     positionListeners = /* @__PURE__ */ new Set();
     autoRunTimer = null;
@@ -47957,7 +47948,6 @@ _pico_result
     debugger = new Debugger({
       onPosition: (position) => this.observe(position)
     });
-    /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
     subscribeView = (listener) => {
       this.viewListeners.add(listener);
       return () => this.viewListeners.delete(listener);
@@ -47965,7 +47955,6 @@ _pico_result
     invalidateViews() {
       for (const listener of this.viewListeners) listener();
     }
-    /** 可视化订阅位置快照（视图跟随）；订阅即刻对齐当前值，返回退订。 */
     observePosition(listener) {
       this.positionListeners.add(listener);
       listener(this.#position);
@@ -47993,7 +47982,6 @@ _pico_result
         this.launch(source, Number(selected));
       }, 400);
     });
-    /** 发起一次运行：捕获当前代码/用例的快照并推进流水线。 */
     launch(source, n) {
       const submission = { source, n, revision: ++this.runId };
       this.#execution = { kind: "running", submission };
@@ -48020,13 +48008,11 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
       }
       this.syncViews();
     }
-    /** 与当前代码/用例仍匹配的运行结果；否则 null（回到初始塔）。 */
     result() {
       const execution = this.#execution;
       const matches = execution.submission.source === this.editor.text && execution.submission.n === Number(this.testCase.value);
       return matches && execution.kind === "done" ? execution.result : null;
     }
-    /** 消费 Debugger 发射的位置快照：光标归 Debugger，宿主只按快照渲染各视图。 */
     observe(position) {
       const result2 = this.result();
       if (position === null || result2 === null) {
@@ -48039,7 +48025,6 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
       this.renderEditorLine(result2, position);
       this.publishPosition(position);
     }
-    /** 把当前事实推给面板：过期结果清空，新运行抵达时光标停在终点。 */
     syncViews() {
       const result2 = this.result();
       const trace2 = result2?.trace ?? null;
