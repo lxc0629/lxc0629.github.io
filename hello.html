@@ -24299,6 +24299,22 @@ ${h2.join(`
       if (trace2 === null || this.traceIndex >= maxIndex(trace2)) this.stopTransport();
       this.paint();
       this.paintDiff();
+      this.emit();
+    }
+    /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
+    emit() {
+      this.options.onChange(this.position());
+    }
+    position() {
+      const trace2 = this.trace;
+      if (trace2 === null) return null;
+      const step2 = this.traceIndex >= 1 && this.traceIndex <= trace2.steps.length ? trace2.steps[this.traceIndex - 1] : null;
+      return {
+        traceIndex: this.traceIndex,
+        event: step2?.event ?? null,
+        state: trace2.at(this.traceIndex),
+        previous: trace2.at(Math.max(0, this.traceIndex - 1))
+      };
     }
     /** 当前语句后果：合并作用域相对上一步的变量 diff；调用栈由火焰图自示。 */
     paintDiff() {
@@ -24380,7 +24396,7 @@ ${h2.join(`
       this.traceIndex = next;
       this.paint();
       this.paintDiff();
-      this.options.onChange(next);
+      this.emit();
       if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
     }
     stepFromPointer(clientX) {
@@ -47940,7 +47956,7 @@ print("Got", got)
       onLine: (line) => this.feedLine(line)
     });
     debugger = new Debugger({
-      onChange: (traceIndex) => this.observe(traceIndex)
+      onChange: (position) => this.observe(position)
     });
     /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
     subscribeView = (listener) => {
@@ -48017,37 +48033,34 @@ print("Got", got)
       const matches = execution.submission.mode === this.mode.value && execution.submission.source === this.editor.text;
       return matches && execution.kind === "done" ? execution.result : null;
     }
-    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图。 */
-    observe(traceIndex) {
+    /** 消费 Debugger 发射的位置快照：光标归 Debugger，宿主只按快照渲染各视图。 */
+    observe(position) {
       const result2 = this.currentResult();
-      if (result2 === null) return;
-      if (this.mode.value !== "free") {
-        const state2 = result2.trace.at(traceIndex);
-        this.terminal.render(state2.stdout ?? "", state2.stderr ?? "");
+      if (position === null || result2 === null) {
+        this.terminal.render("", "");
+        return this.editor.clearLine();
       }
-      this.renderEditorLine(result2, traceIndex);
+      if (this.mode.value !== "free") {
+        this.terminal.render(position.state.stdout ?? "", position.state.stderr ?? "");
+      }
+      this.renderEditorLine(result2, position);
     }
-    /** 把当前事实推给各面板：过期结果清空，新运行抵达时光标停在终点。 */
+    /** 把当前事实推给面板：过期结果清空，新运行抵达时光标停在终点。 */
     syncViews() {
       const result2 = this.currentResult();
       const trace2 = result2?.trace ?? null;
-      const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
       const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(this.editor.text));
-      this.debugger.render(trace2, controlFlow, traceIndex);
-      const terminalState = trace2 === null ? null : trace2.at(traceIndex);
-      this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
+      this.debugger.render(trace2, controlFlow, trace2 === null ? 0 : trace2.steps.length + 1);
       this.terminal.setAcceptingInput(this.mode.value === "free" && result2 !== null && result2.waiting !== null);
-      this.renderEditorLine(result2, traceIndex);
       this.invalidateViews();
     }
-    renderEditorLine(result2, traceIndex) {
-      if (result2 === null) return this.editor.clearLine();
-      const atEnd = traceIndex === result2.trace.steps.length + 1;
+    renderEditorLine(result2, position) {
+      const atEnd = position.traceIndex === result2.trace.steps.length + 1;
       const error2 = result2.error;
       if (atEnd && error2 !== null && error2.line !== null) {
         return this.editor.showLine(error2.line, "error", false);
       }
-      const line = result2.trace.at(traceIndex).line;
+      const line = position.state.line;
       if (line === null) this.editor.clearLine();
       else this.editor.showLine(line, "execution", false);
     }

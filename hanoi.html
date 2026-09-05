@@ -24299,6 +24299,22 @@ ${h2.join(`
       if (trace2 === null || this.traceIndex >= maxIndex(trace2)) this.stopTransport();
       this.paint();
       this.paintDiff();
+      this.emit();
+    }
+    /** 位置快照是唯一的外发事实：宿主消费它渲染自己的视图，不镜像光标、不回灌。 */
+    emit() {
+      this.options.onChange(this.position());
+    }
+    position() {
+      const trace2 = this.trace;
+      if (trace2 === null) return null;
+      const step2 = this.traceIndex >= 1 && this.traceIndex <= trace2.steps.length ? trace2.steps[this.traceIndex - 1] : null;
+      return {
+        traceIndex: this.traceIndex,
+        event: step2?.event ?? null,
+        state: trace2.at(this.traceIndex),
+        previous: trace2.at(Math.max(0, this.traceIndex - 1))
+      };
     }
     /** 当前语句后果：合并作用域相对上一步的变量 diff；调用栈由火焰图自示。 */
     paintDiff() {
@@ -24380,7 +24396,7 @@ ${h2.join(`
       this.traceIndex = next;
       this.paint();
       this.paintDiff();
-      this.options.onChange(next);
+      this.emit();
       if (next === firstIndex || next >= maxIndex(this.trace)) this.stopTransport();
     }
     stepFromPointer(clientX) {
@@ -47934,14 +47950,15 @@ _pico_result
     get execution() {
       return this.#execution;
     }
-    cursor = 0;
-    cursorListeners = /* @__PURE__ */ new Set();
+    /** Debugger 回发的最新位置快照；视图订阅即对齐。 */
+    #position = null;
+    positionListeners = /* @__PURE__ */ new Set();
     autoRunTimer = null;
     viewListeners = /* @__PURE__ */ new Set();
     terminal = new Terminal({ onLine: () => {
     } });
     debugger = new Debugger({
-      onChange: (traceIndex) => this.observe(traceIndex)
+      onChange: (position) => this.observe(position)
     });
     /** React 视图订阅会话状态变化（渲染时直读模型字段）；返回退订。 */
     subscribeView = (listener) => {
@@ -47951,15 +47968,15 @@ _pico_result
     invalidateViews() {
       for (const listener of this.viewListeners) listener();
     }
-    /** 订阅光标广播（视图跟随可视化）；订阅即刻对齐当前值，返回退订。 */
-    observeCursor(listener) {
-      this.cursorListeners.add(listener);
-      listener(this.cursor);
-      return () => this.cursorListeners.delete(listener);
+    /** 可视化订阅位置快照（视图跟随）；订阅即刻对齐当前值，返回退订。 */
+    observePosition(listener) {
+      this.positionListeners.add(listener);
+      listener(this.#position);
+      return () => this.positionListeners.delete(listener);
     }
-    publishCursor(traceIndex) {
-      this.cursor = traceIndex;
-      for (const listener of this.cursorListeners) listener(traceIndex);
+    publishPosition(position) {
+      this.#position = position;
+      for (const listener of this.positionListeners) listener(position);
     }
     selectCase(value) {
       this.terminal.reset();
@@ -48012,36 +48029,34 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
       const matches = execution.submission.source === this.editor.text && execution.submission.n === Number(this.testCase.value);
       return matches && execution.kind === "done" ? execution.result : null;
     }
-    /** 光标是视图状态，由 Debugger 持有；移动时只同步各视图。 */
-    observe(traceIndex) {
+    /** 消费 Debugger 发射的位置快照：光标归 Debugger，宿主只按快照渲染各视图。 */
+    observe(position) {
       const result2 = this.result();
-      if (result2 === null) return;
-      const state2 = result2.trace.at(traceIndex);
-      this.terminal.render(state2.stdout ?? "", state2.stderr ?? "");
-      this.renderEditorLine(result2, traceIndex);
-      this.publishCursor(traceIndex);
+      if (position === null || result2 === null) {
+        this.terminal.render("", "");
+        this.editor.clearLine();
+        this.publishPosition(null);
+        return;
+      }
+      this.terminal.render(position.state.stdout ?? "", position.state.stderr ?? "");
+      this.renderEditorLine(result2, position);
+      this.publishPosition(position);
     }
-    /** 把当前事实推给各面板：过期结果清空，新运行抵达时光标停在终点。 */
+    /** 把当前事实推给面板：过期结果清空，新运行抵达时光标停在终点。 */
     syncViews() {
       const result2 = this.result();
       const trace2 = result2?.trace ?? null;
-      const traceIndex = trace2 === null ? 0 : trace2.steps.length + 1;
       const controlFlow = trace2 === null ? null : controlFlowOf2(linkProgram(this.editor.text));
-      this.debugger.render(trace2, controlFlow, traceIndex);
-      const terminalState = trace2?.at(traceIndex);
-      this.terminal.render(terminalState?.stdout ?? "", terminalState?.stderr ?? "");
-      this.renderEditorLine(result2, traceIndex);
-      this.publishCursor(traceIndex);
+      this.debugger.render(trace2, controlFlow, trace2 === null ? 0 : trace2.steps.length + 1);
       this.invalidateViews();
     }
-    renderEditorLine(result2, traceIndex) {
-      if (result2 === null) return this.editor.clearLine();
-      const atEnd = traceIndex === result2.trace.steps.length + 1;
+    renderEditorLine(result2, position) {
+      const atEnd = position.traceIndex === result2.trace.steps.length + 1;
       const error2 = result2.error;
       if (atEnd && error2 !== null && error2.line !== null) {
         return this.editor.showLine(error2.line, "error", false);
       }
-      const line = result2.trace.at(traceIndex).line;
+      const line = position.state.line;
       if (line === null) this.editor.clearLine();
       else this.editor.showLine(line, "execution", false);
     }
@@ -48120,19 +48135,16 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
   }
   function HanoiScene({
     result: result2,
-    traceIndex,
+    position,
     n
   }) {
-    const trace2 = result2?.trace ?? null;
-    const beforeState = trace2?.at(Math.max(0, traceIndex - 1));
-    const state2 = trace2?.at(traceIndex);
-    const before = hanoiWorld(beforeState?.stdout ?? "", n);
+    const state2 = position?.state;
+    const before = hanoiWorld(position?.previous.stdout ?? "", n);
     const world = hanoiWorld(state2?.stdout ?? "", n);
     const lastMove = world.moves.length > before.moves.length ? world.moves.at(-1) ?? null : null;
     const error2 = world.error;
     const pegs = world.pegs;
-    const stepEvent = trace2 !== null && traceIndex >= 1 && traceIndex <= trace2.steps.length ? trace2.steps[traceIndex - 1].event : null;
-    const call = stepEvent === "call" ? hanoiCall(state2) : null;
+    const call = position?.event === "call" ? hanoiCall(state2) : null;
     let displayPegs = pegs;
     let virtualTarget = null;
     let virtualMoved = [];
@@ -48200,8 +48212,8 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
     (0, import_react6.useEffect)(() => model.subscribeView(() => invalidate((value) => value + 1)), [model]);
     const execution = model.execution;
     const result2 = model.result();
-    const [traceIndex, setTraceIndex] = (0, import_react6.useState)(0);
-    (0, import_react6.useEffect)(() => model.observeCursor(setTraceIndex), [model]);
+    const [position, setPosition] = (0, import_react6.useState)(null);
+    (0, import_react6.useEffect)(() => model.observePosition(setPosition), [model]);
     const hosts = (0, import_react6.useMemo)(() => {
       const of = (element) => (node2) => {
         if (node2 !== null) node2.replaceChildren(element);
@@ -48241,7 +48253,7 @@ __pico_answer = hanoi(${submission.n}, "A", "C", "B")
               icon: "viz",
               title: "\u53EF\u89C6\u5316",
               flush: true,
-              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { result: result2, traceIndex, n }) }, execution.submission.revision)
+              content: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pico-scene pico-hanoi-scene pico-swap", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HanoiScene, { result: result2, position, n }) }, execution.submission.revision)
             },
             {
               key: "output",
