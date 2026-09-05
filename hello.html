@@ -1147,6 +1147,11 @@
 .pico-card-body:has(.pico-empty-surface:not([hidden])) { padding: 0; }
 .pico-card-body--flush { padding: 0; }
 
+/* 命令式 widget（Debugger/Terminal）的挂载根与空态面 */
+.pico-widget { display: flex; flex-direction: column; gap: var(--pico-space-2); min-height: 0; }
+.pico-empty-surface { flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; background: var(--pico-code-bg); }
+.pico-empty-surface[hidden] { display: none; }
+
 /* 世界列的可折叠面板堆叠区：面板自带皮肤（.pico-card），分隔条见下。 */
 
 /* 分隔条：卡片之间的拖拽调隙；--v 为左右（编辑卡与世界列）方向 */
@@ -2005,13 +2010,13 @@
   var require_scheduler_production = __commonJS({
     "node_modules/scheduler/cjs/scheduler.production.js"(exports) {
       "use strict";
-      function push(heap, node2) {
+      function push(heap, node3) {
         var index = heap.length;
-        heap.push(node2);
+        heap.push(node3);
         a: for (; 0 < index; ) {
           var parentIndex = index - 1 >>> 1, parent = heap[parentIndex];
-          if (0 < compare2(parent, node2))
-            heap[parentIndex] = node2, heap[index] = parent, index = parentIndex;
+          if (0 < compare2(parent, node3))
+            heap[parentIndex] = node3, heap[index] = parent, index = parentIndex;
           else break a;
         }
       }
@@ -2477,19 +2482,19 @@
         }
         return "Minified React error #" + code2 + "; visit " + url + " for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";
       }
-      function isValidContainer(node2) {
-        return !(!node2 || 1 !== node2.nodeType && 9 !== node2.nodeType && 11 !== node2.nodeType);
+      function isValidContainer(node3) {
+        return !(!node3 || 1 !== node3.nodeType && 9 !== node3.nodeType && 11 !== node3.nodeType);
       }
       function getNearestMountedFiber(fiber) {
-        var node2 = fiber, nearestMounted = fiber;
-        if (fiber.alternate) for (; node2.return; ) node2 = node2.return;
+        var node3 = fiber, nearestMounted = fiber;
+        if (fiber.alternate) for (; node3.return; ) node3 = node3.return;
         else {
-          fiber = node2;
+          fiber = node3;
           do
-            node2 = fiber, 0 !== (node2.flags & 4098) && (nearestMounted = node2.return), fiber = node2.return;
+            node3 = fiber, 0 !== (node3.flags & 4098) && (nearestMounted = node3.return), fiber = node3.return;
           while (fiber);
         }
-        return 3 === node2.tag ? nearestMounted : null;
+        return 3 === node3.tag ? nearestMounted : null;
       }
       function getSuspenseInstanceFromFiber(fiber) {
         if (13 === fiber.tag) {
@@ -2579,13 +2584,13 @@
         if (3 !== a.tag) throw Error(formatProdErrorMessage(188));
         return a.stateNode.current === a ? fiber : alternate;
       }
-      function findCurrentHostFiberImpl(node2) {
-        var tag = node2.tag;
-        if (5 === tag || 26 === tag || 27 === tag || 6 === tag) return node2;
-        for (node2 = node2.child; null !== node2; ) {
-          tag = findCurrentHostFiberImpl(node2);
+      function findCurrentHostFiberImpl(node3) {
+        var tag = node3.tag;
+        if (5 === tag || 26 === tag || 27 === tag || 6 === tag) return node3;
+        for (node3 = node3.child; null !== node3; ) {
+          tag = findCurrentHostFiberImpl(node3);
           if (null !== tag) return tag;
-          node2 = node2.sibling;
+          node3 = node3.sibling;
         }
         return null;
       }
@@ -3132,12 +3137,12 @@
       var internalEventHandlesSetKey = "__reactHandles$" + randomKey;
       var internalRootNodeResourcesKey = "__reactResources$" + randomKey;
       var internalHoistableMarker = "__reactMarker$" + randomKey;
-      function detachDeletedInstance(node2) {
-        delete node2[internalInstanceKey];
-        delete node2[internalPropsKey];
-        delete node2[internalEventHandlersKey];
-        delete node2[internalEventHandlerListenersKey];
-        delete node2[internalEventHandlesSetKey];
+      function detachDeletedInstance(node3) {
+        delete node3[internalInstanceKey];
+        delete node3[internalPropsKey];
+        delete node3[internalEventHandlersKey];
+        delete node3[internalEventHandlerListenersKey];
+        delete node3[internalEventHandlesSetKey];
       }
       function getClosestInstanceFromNode(targetNode) {
         var targetInst = targetNode[internalInstanceKey];
@@ -3157,11 +3162,11 @@
         }
         return null;
       }
-      function getInstanceFromNode(node2) {
-        if (node2 = node2[internalInstanceKey] || node2[internalContainerInstanceKey]) {
-          var tag = node2.tag;
+      function getInstanceFromNode(node3) {
+        if (node3 = node3[internalInstanceKey] || node3[internalContainerInstanceKey]) {
+          var tag = node3.tag;
           if (5 === tag || 6 === tag || 13 === tag || 31 === tag || 26 === tag || 27 === tag || 3 === tag)
-            return node2;
+            return node3;
         }
         return null;
       }
@@ -3175,8 +3180,8 @@
         resources || (resources = root2[internalRootNodeResourcesKey] = { hoistableStyles: /* @__PURE__ */ new Map(), hoistableScripts: /* @__PURE__ */ new Map() });
         return resources;
       }
-      function markNodeAsHoistable(node2) {
-        node2[internalHoistableMarker] = true;
+      function markNodeAsHoistable(node3) {
+        node3[internalHoistableMarker] = true;
       }
       var allNativeEvents = /* @__PURE__ */ new Set();
       var registrationNameDependencies = {};
@@ -3203,52 +3208,52 @@
         illegalAttributeNameCache[attributeName] = true;
         return false;
       }
-      function setValueForAttribute(node2, name2, value) {
+      function setValueForAttribute(node3, name2, value) {
         if (isAttributeNameSafe(name2))
-          if (null === value) node2.removeAttribute(name2);
+          if (null === value) node3.removeAttribute(name2);
           else {
             switch (typeof value) {
               case "undefined":
               case "function":
               case "symbol":
-                node2.removeAttribute(name2);
+                node3.removeAttribute(name2);
                 return;
               case "boolean":
                 var prefix$10 = name2.toLowerCase().slice(0, 5);
                 if ("data-" !== prefix$10 && "aria-" !== prefix$10) {
-                  node2.removeAttribute(name2);
+                  node3.removeAttribute(name2);
                   return;
                 }
             }
-            node2.setAttribute(name2, "" + value);
+            node3.setAttribute(name2, "" + value);
           }
       }
-      function setValueForKnownAttribute(node2, name2, value) {
-        if (null === value) node2.removeAttribute(name2);
+      function setValueForKnownAttribute(node3, name2, value) {
+        if (null === value) node3.removeAttribute(name2);
         else {
           switch (typeof value) {
             case "undefined":
             case "function":
             case "symbol":
             case "boolean":
-              node2.removeAttribute(name2);
+              node3.removeAttribute(name2);
               return;
           }
-          node2.setAttribute(name2, "" + value);
+          node3.setAttribute(name2, "" + value);
         }
       }
-      function setValueForNamespacedAttribute(node2, namespace, name2, value) {
-        if (null === value) node2.removeAttribute(name2);
+      function setValueForNamespacedAttribute(node3, namespace, name2, value) {
+        if (null === value) node3.removeAttribute(name2);
         else {
           switch (typeof value) {
             case "undefined":
             case "function":
             case "symbol":
             case "boolean":
-              node2.removeAttribute(name2);
+              node3.removeAttribute(name2);
               return;
           }
-          node2.setAttributeNS(namespace, name2, "" + value);
+          node3.setAttributeNS(namespace, name2, "" + value);
         }
       }
       function getToStringValue(value) {
@@ -3269,14 +3274,14 @@
         var type = elem.type;
         return (elem = elem.nodeName) && "input" === elem.toLowerCase() && ("checkbox" === type || "radio" === type);
       }
-      function trackValueOnNode(node2, valueField, currentValue) {
+      function trackValueOnNode(node3, valueField, currentValue) {
         var descriptor = Object.getOwnPropertyDescriptor(
-          node2.constructor.prototype,
+          node3.constructor.prototype,
           valueField
         );
-        if (!node2.hasOwnProperty(valueField) && "undefined" !== typeof descriptor && "function" === typeof descriptor.get && "function" === typeof descriptor.set) {
+        if (!node3.hasOwnProperty(valueField) && "undefined" !== typeof descriptor && "function" === typeof descriptor.get && "function" === typeof descriptor.set) {
           var get = descriptor.get, set = descriptor.set;
-          Object.defineProperty(node2, valueField, {
+          Object.defineProperty(node3, valueField, {
             configurable: true,
             get: function() {
               return get.call(this);
@@ -3286,7 +3291,7 @@
               set.call(this, value);
             }
           });
-          Object.defineProperty(node2, valueField, {
+          Object.defineProperty(node3, valueField, {
             enumerable: descriptor.enumerable
           });
           return {
@@ -3297,31 +3302,31 @@
               currentValue = "" + value;
             },
             stopTracking: function() {
-              node2._valueTracker = null;
-              delete node2[valueField];
+              node3._valueTracker = null;
+              delete node3[valueField];
             }
           };
         }
       }
-      function track(node2) {
-        if (!node2._valueTracker) {
-          var valueField = isCheckable(node2) ? "checked" : "value";
-          node2._valueTracker = trackValueOnNode(
-            node2,
+      function track(node3) {
+        if (!node3._valueTracker) {
+          var valueField = isCheckable(node3) ? "checked" : "value";
+          node3._valueTracker = trackValueOnNode(
+            node3,
             valueField,
-            "" + node2[valueField]
+            "" + node3[valueField]
           );
         }
       }
-      function updateValueIfChanged(node2) {
-        if (!node2) return false;
-        var tracker = node2._valueTracker;
+      function updateValueIfChanged(node3) {
+        if (!node3) return false;
+        var tracker = node3._valueTracker;
         if (!tracker) return true;
         var lastValue = tracker.getValue();
         var value = "";
-        node2 && (value = isCheckable(node2) ? node2.checked ? "true" : "false" : node2.value);
-        node2 = value;
-        return node2 !== lastValue ? (tracker.setValue(node2), true) : false;
+        node3 && (value = isCheckable(node3) ? node3.checked ? "true" : "false" : node3.value);
+        node3 = value;
+        return node3 !== lastValue ? (tracker.setValue(node3), true) : false;
       }
       function getActiveElement(doc2) {
         doc2 = doc2 || ("undefined" !== typeof document ? document : void 0);
@@ -3376,27 +3381,27 @@
         null != name2 && "function" !== typeof name2 && "symbol" !== typeof name2 && "boolean" !== typeof name2 && (element.name = name2);
         track(element);
       }
-      function setDefaultValue(node2, type, value) {
-        "number" === type && getActiveElement(node2.ownerDocument) === node2 || node2.defaultValue === "" + value || (node2.defaultValue = "" + value);
+      function setDefaultValue(node3, type, value) {
+        "number" === type && getActiveElement(node3.ownerDocument) === node3 || node3.defaultValue === "" + value || (node3.defaultValue = "" + value);
       }
-      function updateOptions(node2, multiple, propValue, setDefaultSelected) {
-        node2 = node2.options;
+      function updateOptions(node3, multiple, propValue, setDefaultSelected) {
+        node3 = node3.options;
         if (multiple) {
           multiple = {};
           for (var i2 = 0; i2 < propValue.length; i2++)
             multiple["$" + propValue[i2]] = true;
-          for (propValue = 0; propValue < node2.length; propValue++)
-            i2 = multiple.hasOwnProperty("$" + node2[propValue].value), node2[propValue].selected !== i2 && (node2[propValue].selected = i2), i2 && setDefaultSelected && (node2[propValue].defaultSelected = true);
+          for (propValue = 0; propValue < node3.length; propValue++)
+            i2 = multiple.hasOwnProperty("$" + node3[propValue].value), node3[propValue].selected !== i2 && (node3[propValue].selected = i2), i2 && setDefaultSelected && (node3[propValue].defaultSelected = true);
         } else {
           propValue = "" + getToStringValue(propValue);
           multiple = null;
-          for (i2 = 0; i2 < node2.length; i2++) {
-            if (node2[i2].value === propValue) {
-              node2[i2].selected = true;
-              setDefaultSelected && (node2[i2].defaultSelected = true);
+          for (i2 = 0; i2 < node3.length; i2++) {
+            if (node3[i2].value === propValue) {
+              node3[i2].selected = true;
+              setDefaultSelected && (node3[i2].defaultSelected = true);
               return;
             }
-            null !== multiple || node2[i2].disabled || (multiple = node2[i2]);
+            null !== multiple || node3[i2].disabled || (multiple = node3[i2]);
           }
           null !== multiple && (multiple.selected = true);
         }
@@ -3427,15 +3432,15 @@
         children2 === defaultValue && "" !== children2 && null !== children2 && (element.value = children2);
         track(element);
       }
-      function setTextContent(node2, text) {
+      function setTextContent(node3, text) {
         if (text) {
-          var firstChild = node2.firstChild;
-          if (firstChild && firstChild === node2.lastChild && 3 === firstChild.nodeType) {
+          var firstChild = node3.firstChild;
+          if (firstChild && firstChild === node3.lastChild && 3 === firstChild.nodeType) {
             firstChild.nodeValue = text;
             return;
           }
         }
-        node2.textContent = text;
+        node3.textContent = text;
       }
       var unitlessNumbers = new Set(
         "animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(
@@ -3446,18 +3451,18 @@
         var isCustomProperty = 0 === styleName.indexOf("--");
         null == value || "boolean" === typeof value || "" === value ? isCustomProperty ? style2.setProperty(styleName, "") : "float" === styleName ? style2.cssFloat = "" : style2[styleName] = "" : isCustomProperty ? style2.setProperty(styleName, value) : "number" !== typeof value || 0 === value || unitlessNumbers.has(styleName) ? "float" === styleName ? style2.cssFloat = value : style2[styleName] = ("" + value).trim() : style2[styleName] = value + "px";
       }
-      function setValueForStyles(node2, styles, prevStyles) {
+      function setValueForStyles(node3, styles, prevStyles) {
         if (null != styles && "object" !== typeof styles)
           throw Error(formatProdErrorMessage(62));
-        node2 = node2.style;
+        node3 = node3.style;
         if (null != prevStyles) {
           for (var styleName in prevStyles)
-            !prevStyles.hasOwnProperty(styleName) || null != styles && styles.hasOwnProperty(styleName) || (0 === styleName.indexOf("--") ? node2.setProperty(styleName, "") : "float" === styleName ? node2.cssFloat = "" : node2[styleName] = "");
+            !prevStyles.hasOwnProperty(styleName) || null != styles && styles.hasOwnProperty(styleName) || (0 === styleName.indexOf("--") ? node3.setProperty(styleName, "") : "float" === styleName ? node3.cssFloat = "" : node3[styleName] = "");
           for (var styleName$16 in styles)
-            styleName = styles[styleName$16], styles.hasOwnProperty(styleName$16) && prevStyles[styleName$16] !== styleName && setValueForStyle(node2, styleName$16, styleName);
+            styleName = styles[styleName$16], styles.hasOwnProperty(styleName$16) && prevStyles[styleName$16] !== styleName && setValueForStyle(node3, styleName$16, styleName);
         } else
           for (var styleName$17 in styles)
-            styles.hasOwnProperty(styleName$17) && setValueForStyle(node2, styleName$17, styles[styleName$17]);
+            styles.hasOwnProperty(styleName$17) && setValueForStyle(node3, styleName$17, styles[styleName$17]);
       }
       function isCustomElement(tagName) {
         if (-1 === tagName.indexOf("-")) return false;
@@ -4102,31 +4107,31 @@
         }
         return true;
       }
-      function getLeafNode(node2) {
-        for (; node2 && node2.firstChild; ) node2 = node2.firstChild;
-        return node2;
+      function getLeafNode(node3) {
+        for (; node3 && node3.firstChild; ) node3 = node3.firstChild;
+        return node3;
       }
       function getNodeForCharacterOffset(root2, offset) {
-        var node2 = getLeafNode(root2);
+        var node3 = getLeafNode(root2);
         root2 = 0;
-        for (var nodeEnd; node2; ) {
-          if (3 === node2.nodeType) {
-            nodeEnd = root2 + node2.textContent.length;
+        for (var nodeEnd; node3; ) {
+          if (3 === node3.nodeType) {
+            nodeEnd = root2 + node3.textContent.length;
             if (root2 <= offset && nodeEnd >= offset)
-              return { node: node2, offset: offset - root2 };
+              return { node: node3, offset: offset - root2 };
             root2 = nodeEnd;
           }
           a: {
-            for (; node2; ) {
-              if (node2.nextSibling) {
-                node2 = node2.nextSibling;
+            for (; node3; ) {
+              if (node3.nextSibling) {
+                node3 = node3.nextSibling;
                 break a;
               }
-              node2 = node2.parentNode;
+              node3 = node3.parentNode;
             }
-            node2 = void 0;
+            node3 = void 0;
           }
-          node2 = getLeafNode(node2);
+          node3 = getLeafNode(node3);
         }
       }
       function containsNode(outerNode, innerNode) {
@@ -5631,25 +5636,25 @@
       }
       var suspenseStackCursor = createCursor(0);
       function findFirstSuspended(row) {
-        for (var node2 = row; null !== node2; ) {
-          if (13 === node2.tag) {
-            var state2 = node2.memoizedState;
+        for (var node3 = row; null !== node3; ) {
+          if (13 === node3.tag) {
+            var state2 = node3.memoizedState;
             if (null !== state2 && (state2 = state2.dehydrated, null === state2 || isSuspenseInstancePending(state2) || isSuspenseInstanceFallback(state2)))
-              return node2;
-          } else if (19 === node2.tag && ("forwards" === node2.memoizedProps.revealOrder || "backwards" === node2.memoizedProps.revealOrder || "unstable_legacy-backwards" === node2.memoizedProps.revealOrder || "together" === node2.memoizedProps.revealOrder)) {
-            if (0 !== (node2.flags & 128)) return node2;
-          } else if (null !== node2.child) {
-            node2.child.return = node2;
-            node2 = node2.child;
+              return node3;
+          } else if (19 === node3.tag && ("forwards" === node3.memoizedProps.revealOrder || "backwards" === node3.memoizedProps.revealOrder || "unstable_legacy-backwards" === node3.memoizedProps.revealOrder || "together" === node3.memoizedProps.revealOrder)) {
+            if (0 !== (node3.flags & 128)) return node3;
+          } else if (null !== node3.child) {
+            node3.child.return = node3;
+            node3 = node3.child;
             continue;
           }
-          if (node2 === row) break;
-          for (; null === node2.sibling; ) {
-            if (null === node2.return || node2.return === row) return null;
-            node2 = node2.return;
+          if (node3 === row) break;
+          for (; null === node3.sibling; ) {
+            if (null === node3.return || node3.return === row) return null;
+            node3 = node3.return;
           }
-          node2.sibling.return = node2.return;
-          node2 = node2.sibling;
+          node3.sibling.return = node3.return;
+          node3 = node3.sibling;
         }
         return null;
       }
@@ -6052,36 +6057,36 @@
           null === setPendingState ? (actionNode.next = actionQueue.pending = actionNode, runActionStateAction(actionQueue, actionNode)) : (actionNode.next = setPendingState.next, actionQueue.pending = setPendingState.next = actionNode);
         }
       }
-      function runActionStateAction(actionQueue, node2) {
-        var action = node2.action, payload = node2.payload, prevState = actionQueue.state;
-        if (node2.isTransition) {
+      function runActionStateAction(actionQueue, node3) {
+        var action = node3.action, payload = node3.payload, prevState = actionQueue.state;
+        if (node3.isTransition) {
           var prevTransition = ReactSharedInternals.T, currentTransition = {};
           ReactSharedInternals.T = currentTransition;
           try {
             var returnValue = action(prevState, payload), onStartTransitionFinish = ReactSharedInternals.S;
             null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
-            handleActionReturnValue(actionQueue, node2, returnValue);
+            handleActionReturnValue(actionQueue, node3, returnValue);
           } catch (error2) {
-            onActionError(actionQueue, node2, error2);
+            onActionError(actionQueue, node3, error2);
           } finally {
             null !== prevTransition && null !== currentTransition.types && (prevTransition.types = currentTransition.types), ReactSharedInternals.T = prevTransition;
           }
         } else
           try {
-            prevTransition = action(prevState, payload), handleActionReturnValue(actionQueue, node2, prevTransition);
+            prevTransition = action(prevState, payload), handleActionReturnValue(actionQueue, node3, prevTransition);
           } catch (error$66) {
-            onActionError(actionQueue, node2, error$66);
+            onActionError(actionQueue, node3, error$66);
           }
       }
-      function handleActionReturnValue(actionQueue, node2, returnValue) {
+      function handleActionReturnValue(actionQueue, node3, returnValue) {
         null !== returnValue && "object" === typeof returnValue && "function" === typeof returnValue.then ? returnValue.then(
           function(nextState) {
-            onActionSuccess(actionQueue, node2, nextState);
+            onActionSuccess(actionQueue, node3, nextState);
           },
           function(error2) {
-            return onActionError(actionQueue, node2, error2);
+            return onActionError(actionQueue, node3, error2);
           }
-        ) : onActionSuccess(actionQueue, node2, returnValue);
+        ) : onActionSuccess(actionQueue, node3, returnValue);
       }
       function onActionSuccess(actionQueue, actionNode, nextState) {
         actionNode.status = "fulfilled";
@@ -8803,21 +8808,21 @@
           if (!(fiber.flags & 2)) return fiber.stateNode;
         }
       }
-      function insertOrAppendPlacementNodeIntoContainer(node2, before, parent) {
-        var tag = node2.tag;
+      function insertOrAppendPlacementNodeIntoContainer(node3, before, parent) {
+        var tag = node3.tag;
         if (5 === tag || 6 === tag)
-          node2 = node2.stateNode, before ? (9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent).insertBefore(node2, before) : (before = 9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent, before.appendChild(node2), parent = parent._reactRootContainer, null !== parent && void 0 !== parent || null !== before.onclick || (before.onclick = noop$1));
-        else if (4 !== tag && (27 === tag && isSingletonScope(node2.type) && (parent = node2.stateNode, before = null), node2 = node2.child, null !== node2))
-          for (insertOrAppendPlacementNodeIntoContainer(node2, before, parent), node2 = node2.sibling; null !== node2; )
-            insertOrAppendPlacementNodeIntoContainer(node2, before, parent), node2 = node2.sibling;
+          node3 = node3.stateNode, before ? (9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent).insertBefore(node3, before) : (before = 9 === parent.nodeType ? parent.body : "HTML" === parent.nodeName ? parent.ownerDocument.body : parent, before.appendChild(node3), parent = parent._reactRootContainer, null !== parent && void 0 !== parent || null !== before.onclick || (before.onclick = noop$1));
+        else if (4 !== tag && (27 === tag && isSingletonScope(node3.type) && (parent = node3.stateNode, before = null), node3 = node3.child, null !== node3))
+          for (insertOrAppendPlacementNodeIntoContainer(node3, before, parent), node3 = node3.sibling; null !== node3; )
+            insertOrAppendPlacementNodeIntoContainer(node3, before, parent), node3 = node3.sibling;
       }
-      function insertOrAppendPlacementNode(node2, before, parent) {
-        var tag = node2.tag;
+      function insertOrAppendPlacementNode(node3, before, parent) {
+        var tag = node3.tag;
         if (5 === tag || 6 === tag)
-          node2 = node2.stateNode, before ? parent.insertBefore(node2, before) : parent.appendChild(node2);
-        else if (4 !== tag && (27 === tag && isSingletonScope(node2.type) && (parent = node2.stateNode), node2 = node2.child, null !== node2))
-          for (insertOrAppendPlacementNode(node2, before, parent), node2 = node2.sibling; null !== node2; )
-            insertOrAppendPlacementNode(node2, before, parent), node2 = node2.sibling;
+          node3 = node3.stateNode, before ? parent.insertBefore(node3, before) : parent.appendChild(node3);
+        else if (4 !== tag && (27 === tag && isSingletonScope(node3.type) && (parent = node3.stateNode), node3 = node3.child, null !== node3))
+          for (insertOrAppendPlacementNode(node3, before, parent), node3 = node3.sibling; null !== node3; )
+            insertOrAppendPlacementNode(node3, before, parent), node3 = node3.sibling;
       }
       function commitHostSingletonAcquisition(finishedWork) {
         var singleton = finishedWork.stateNode, props = finishedWork.memoizedProps;
@@ -8860,25 +8865,25 @@
                   JSCompiler_temp = null;
                   break a;
                 }
-                var length = 0, start = -1, end = -1, indexWithinAnchor = 0, indexWithinFocus = 0, node2 = root2, parentNode = null;
+                var length = 0, start = -1, end = -1, indexWithinAnchor = 0, indexWithinFocus = 0, node3 = root2, parentNode = null;
                 b: for (; ; ) {
                   for (var next; ; ) {
-                    node2 !== JSCompiler_temp || 0 !== anchorOffset && 3 !== node2.nodeType || (start = length + anchorOffset);
-                    node2 !== focusNode || 0 !== selection && 3 !== node2.nodeType || (end = length + selection);
-                    3 === node2.nodeType && (length += node2.nodeValue.length);
-                    if (null === (next = node2.firstChild)) break;
-                    parentNode = node2;
-                    node2 = next;
+                    node3 !== JSCompiler_temp || 0 !== anchorOffset && 3 !== node3.nodeType || (start = length + anchorOffset);
+                    node3 !== focusNode || 0 !== selection && 3 !== node3.nodeType || (end = length + selection);
+                    3 === node3.nodeType && (length += node3.nodeValue.length);
+                    if (null === (next = node3.firstChild)) break;
+                    parentNode = node3;
+                    node3 = next;
                   }
                   for (; ; ) {
-                    if (node2 === root2) break b;
+                    if (node3 === root2) break b;
                     parentNode === JSCompiler_temp && ++indexWithinAnchor === anchorOffset && (start = length);
                     parentNode === focusNode && ++indexWithinFocus === selection && (end = length);
-                    if (null !== (next = node2.nextSibling)) break;
-                    node2 = parentNode;
-                    parentNode = node2.parentNode;
+                    if (null !== (next = node3.nextSibling)) break;
+                    node3 = parentNode;
+                    parentNode = node3.parentNode;
                   }
-                  node2 = next;
+                  node3 = next;
                 }
                 JSCompiler_temp = -1 === start || -1 === end ? null : { start, end };
               } else JSCompiler_temp = null;
@@ -10456,9 +10461,9 @@
         );
       }
       function isRenderConsistentWithExternalStores(finishedWork) {
-        for (var node2 = finishedWork; ; ) {
-          var tag = node2.tag;
-          if ((0 === tag || 11 === tag || 15 === tag) && node2.flags & 16384 && (tag = node2.updateQueue, null !== tag && (tag = tag.stores, null !== tag)))
+        for (var node3 = finishedWork; ; ) {
+          var tag = node3.tag;
+          if ((0 === tag || 11 === tag || 15 === tag) && node3.flags & 16384 && (tag = node3.updateQueue, null !== tag && (tag = tag.stores, null !== tag)))
             for (var i2 = 0; i2 < tag.length; i2++) {
               var check = tag[i2], getSnapshot = check.getSnapshot;
               check = check.value;
@@ -10468,17 +10473,17 @@
                 return false;
               }
             }
-          tag = node2.child;
-          if (node2.subtreeFlags & 16384 && null !== tag)
-            tag.return = node2, node2 = tag;
+          tag = node3.child;
+          if (node3.subtreeFlags & 16384 && null !== tag)
+            tag.return = node3, node3 = tag;
           else {
-            if (node2 === finishedWork) break;
-            for (; null === node2.sibling; ) {
-              if (null === node2.return || node2.return === finishedWork) return true;
-              node2 = node2.return;
+            if (node3 === finishedWork) break;
+            for (; null === node3.sibling; ) {
+              if (null === node3.return || node3.return === finishedWork) return true;
+              node3 = node3.return;
             }
-            node2.sibling.return = node2.return;
-            node2 = node2.sibling;
+            node3.sibling.return = node3.return;
+            node3 = node3.sibling;
           }
         }
         return true;
@@ -12757,71 +12762,71 @@
         return "head" === type;
       }
       function clearHydrationBoundary(parentInstance, hydrationInstance) {
-        var node2 = hydrationInstance, depth = 0;
+        var node3 = hydrationInstance, depth = 0;
         do {
-          var nextNode = node2.nextSibling;
-          parentInstance.removeChild(node2);
+          var nextNode = node3.nextSibling;
+          parentInstance.removeChild(node3);
           if (nextNode && 8 === nextNode.nodeType)
-            if (node2 = nextNode.data, "/$" === node2 || "/&" === node2) {
+            if (node3 = nextNode.data, "/$" === node3 || "/&" === node3) {
               if (0 === depth) {
                 parentInstance.removeChild(nextNode);
                 retryIfBlockedOn(hydrationInstance);
                 return;
               }
               depth--;
-            } else if ("$" === node2 || "$?" === node2 || "$~" === node2 || "$!" === node2 || "&" === node2)
+            } else if ("$" === node3 || "$?" === node3 || "$~" === node3 || "$!" === node3 || "&" === node3)
               depth++;
-            else if ("html" === node2)
+            else if ("html" === node3)
               releaseSingletonInstance(parentInstance.ownerDocument.documentElement);
-            else if ("head" === node2) {
-              node2 = parentInstance.ownerDocument.head;
-              releaseSingletonInstance(node2);
-              for (var node$jscomp$0 = node2.firstChild; node$jscomp$0; ) {
+            else if ("head" === node3) {
+              node3 = parentInstance.ownerDocument.head;
+              releaseSingletonInstance(node3);
+              for (var node$jscomp$0 = node3.firstChild; node$jscomp$0; ) {
                 var nextNode$jscomp$0 = node$jscomp$0.nextSibling, nodeName = node$jscomp$0.nodeName;
-                node$jscomp$0[internalHoistableMarker] || "SCRIPT" === nodeName || "STYLE" === nodeName || "LINK" === nodeName && "stylesheet" === node$jscomp$0.rel.toLowerCase() || node2.removeChild(node$jscomp$0);
+                node$jscomp$0[internalHoistableMarker] || "SCRIPT" === nodeName || "STYLE" === nodeName || "LINK" === nodeName && "stylesheet" === node$jscomp$0.rel.toLowerCase() || node3.removeChild(node$jscomp$0);
                 node$jscomp$0 = nextNode$jscomp$0;
               }
             } else
-              "body" === node2 && releaseSingletonInstance(parentInstance.ownerDocument.body);
-          node2 = nextNode;
-        } while (node2);
+              "body" === node3 && releaseSingletonInstance(parentInstance.ownerDocument.body);
+          node3 = nextNode;
+        } while (node3);
         retryIfBlockedOn(hydrationInstance);
       }
       function hideOrUnhideDehydratedBoundary(suspenseInstance, isHidden) {
-        var node2 = suspenseInstance;
+        var node3 = suspenseInstance;
         suspenseInstance = 0;
         do {
-          var nextNode = node2.nextSibling;
-          1 === node2.nodeType ? isHidden ? (node2._stashedDisplay = node2.style.display, node2.style.display = "none") : (node2.style.display = node2._stashedDisplay || "", "" === node2.getAttribute("style") && node2.removeAttribute("style")) : 3 === node2.nodeType && (isHidden ? (node2._stashedText = node2.nodeValue, node2.nodeValue = "") : node2.nodeValue = node2._stashedText || "");
+          var nextNode = node3.nextSibling;
+          1 === node3.nodeType ? isHidden ? (node3._stashedDisplay = node3.style.display, node3.style.display = "none") : (node3.style.display = node3._stashedDisplay || "", "" === node3.getAttribute("style") && node3.removeAttribute("style")) : 3 === node3.nodeType && (isHidden ? (node3._stashedText = node3.nodeValue, node3.nodeValue = "") : node3.nodeValue = node3._stashedText || "");
           if (nextNode && 8 === nextNode.nodeType)
-            if (node2 = nextNode.data, "/$" === node2)
+            if (node3 = nextNode.data, "/$" === node3)
               if (0 === suspenseInstance) break;
               else suspenseInstance--;
             else
-              "$" !== node2 && "$?" !== node2 && "$~" !== node2 && "$!" !== node2 || suspenseInstance++;
-          node2 = nextNode;
-        } while (node2);
+              "$" !== node3 && "$?" !== node3 && "$~" !== node3 && "$!" !== node3 || suspenseInstance++;
+          node3 = nextNode;
+        } while (node3);
       }
       function clearContainerSparingly(container2) {
         var nextNode = container2.firstChild;
         nextNode && 10 === nextNode.nodeType && (nextNode = nextNode.nextSibling);
         for (; nextNode; ) {
-          var node2 = nextNode;
+          var node3 = nextNode;
           nextNode = nextNode.nextSibling;
-          switch (node2.nodeName) {
+          switch (node3.nodeName) {
             case "HTML":
             case "HEAD":
             case "BODY":
-              clearContainerSparingly(node2);
-              detachDeletedInstance(node2);
+              clearContainerSparingly(node3);
+              detachDeletedInstance(node3);
               continue;
             case "SCRIPT":
             case "STYLE":
               continue;
             case "LINK":
-              if ("stylesheet" === node2.rel.toLowerCase()) continue;
+              if ("stylesheet" === node3.rel.toLowerCase()) continue;
           }
-          container2.removeChild(node2);
+          container2.removeChild(node3);
         }
       }
       function canHydrateInstance(instance, type, props, inRootOrSingleton) {
@@ -12903,18 +12908,18 @@
           instance._reactRetry = listener;
         }
       }
-      function getNextHydratable(node2) {
-        for (; null != node2; node2 = node2.nextSibling) {
-          var nodeType = node2.nodeType;
+      function getNextHydratable(node3) {
+        for (; null != node3; node3 = node3.nextSibling) {
+          var nodeType = node3.nodeType;
           if (1 === nodeType || 3 === nodeType) break;
           if (8 === nodeType) {
-            nodeType = node2.data;
+            nodeType = node3.data;
             if ("$" === nodeType || "$!" === nodeType || "$?" === nodeType || "$~" === nodeType || "&" === nodeType || "F!" === nodeType || "F" === nodeType)
               break;
             if ("/$" === nodeType || "/&" === nodeType) return null;
           }
         }
-        return node2;
+        return node3;
       }
       var previousHydratableOnEnteringScopedSingleton = null;
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
@@ -13305,8 +13310,8 @@
         for (var nodes = root2.querySelectorAll(
           'link[rel="stylesheet"][data-precedence],style[data-precedence]'
         ), last = nodes.length ? nodes[nodes.length - 1] : null, prior = last, i2 = 0; i2 < nodes.length; i2++) {
-          var node2 = nodes[i2];
-          if (node2.dataset.precedence === precedence) prior = node2;
+          var node3 = nodes[i2];
+          if (node3.dataset.precedence === precedence) prior = node3;
           else if (prior !== last) break;
         }
         prior ? prior.parentNode.insertBefore(instance, prior.nextSibling) : (precedence = 9 === root2.nodeType ? root2.head : root2, precedence.insertBefore(instance, precedence.firstChild));
@@ -13333,12 +13338,12 @@
         cache2.set(type, null);
         ownerDocument = ownerDocument.getElementsByTagName(type);
         for (caches = 0; caches < ownerDocument.length; caches++) {
-          var node2 = ownerDocument[caches];
-          if (!(node2[internalHoistableMarker] || node2[internalInstanceKey] || "link" === type && "stylesheet" === node2.getAttribute("rel")) && "http://www.w3.org/2000/svg" !== node2.namespaceURI) {
-            var nodeKey = node2.getAttribute(keyAttribute) || "";
+          var node3 = ownerDocument[caches];
+          if (!(node3[internalHoistableMarker] || node3[internalInstanceKey] || "link" === type && "stylesheet" === node3.getAttribute("rel")) && "http://www.w3.org/2000/svg" !== node3.namespaceURI) {
+            var nodeKey = node3.getAttribute(keyAttribute) || "";
             nodeKey = type + nodeKey;
             var existing = cache2.get(nodeKey);
-            existing ? existing.push(node2) : cache2.set(nodeKey, [node2]);
+            existing ? existing.push(node3) : cache2.set(nodeKey, [node3]);
           }
         }
         return cache2;
@@ -13468,17 +13473,17 @@
             for (var nodes = root2.querySelectorAll(
               "link[data-precedence],style[data-precedence]"
             ), i2 = 0; i2 < nodes.length; i2++) {
-              var node2 = nodes[i2];
-              if ("LINK" === node2.nodeName || "not all" !== node2.getAttribute("media"))
-                precedences.set(node2.dataset.precedence, node2), last = node2;
+              var node3 = nodes[i2];
+              if ("LINK" === node3.nodeName || "not all" !== node3.getAttribute("media"))
+                precedences.set(node3.dataset.precedence, node3), last = node3;
             }
             last && precedences.set(null, last);
           }
           nodes = resource.instance;
-          node2 = nodes.getAttribute("data-precedence");
-          i2 = precedences.get(node2) || last;
+          node3 = nodes.getAttribute("data-precedence");
+          i2 = precedences.get(node3) || last;
           i2 === last && precedences.set(null, nodes);
-          precedences.set(node2, nodes);
+          precedences.set(node3, nodes);
           this.count++;
           last = onUnsuspend.bind(this);
           nodes.addEventListener("load", last);
@@ -23903,7 +23908,7 @@ ${h2.join(`
     /** React external-store 快照；仅在 transition 后变化。 */
     getSnapshot = () => this.revision;
   };
-  var stateOf = (node2) => node2 instanceof PicoState ? node2 : node2.state;
+  var stateOf = (node3) => node3 instanceof PicoState ? node3 : node3.state;
   var Derivation = class {
     constructor(inputs, outputs, compute) {
       this.inputs = inputs;
@@ -24293,34 +24298,26 @@ ${h2.join(`
     return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlaygroundShellImpl, { ...props });
   }
 
-  // src/libs/dom/index.ts
+  // src/libs/debugger/impl.ts
   function node(tag, className, text) {
     const element = document.createElement(tag);
     if (className !== void 0) element.className = className;
     if (text !== void 0) element.textContent = text;
     return element;
   }
-  var injected = /* @__PURE__ */ new Set();
+  var injectedStyles = /* @__PURE__ */ new Set();
   function ensureStyle(css) {
-    if (injected.has(css)) return;
-    injected.add(css);
+    if (injectedStyles.has(css)) return;
+    injectedStyles.add(css);
     const style = document.createElement("style");
     style.textContent = css;
     document.head.append(style);
   }
-  var WIDGET_CSS = `
-.pico-widget { display: flex; flex-direction: column; gap: var(--pico-space-2); min-height: 0; }
-.pico-empty-surface { flex: 1; width: 100%; height: 100%; min-width: 0; min-height: 0; background: var(--pico-code-bg); }
-.pico-empty-surface[hidden] { display: none; }
-`;
   function emptySurface() {
-    ensureStyle(WIDGET_CSS);
     const element = node("div", "pico-empty-surface");
     element.setAttribute("aria-hidden", "true");
     return element;
   }
-
-  // src/libs/debugger/impl.ts
   var TRACE_CSS = `
 .pico-trace-player { position: relative; display: flex; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
 .pico-trace-focus { position: relative; flex: 1; min-height: 0; height: 100%; overflow: hidden auto; border: 1px solid color-mix(in srgb, var(--pico-hairline) 72%, transparent); border-radius: var(--pico-radius); background: color-mix(in srgb, var(--pico-paper) 64%, transparent); scrollbar-width: thin; touch-action: none; user-select: none; cursor: ew-resize; }
@@ -24841,6 +24838,25 @@ ${h2.join(`
   };
 
   // src/libs/terminal/impl.ts
+  function node2(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className !== void 0) element.className = className;
+    if (text !== void 0) element.textContent = text;
+    return element;
+  }
+  var injectedStyles2 = /* @__PURE__ */ new Set();
+  function ensureStyle2(css) {
+    if (injectedStyles2.has(css)) return;
+    injectedStyles2.add(css);
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
+  }
+  function emptySurface2() {
+    const element = node2("div", "pico-empty-surface");
+    element.setAttribute("aria-hidden", "true");
+    return element;
+  }
   var TERMINAL_CSS = `
 .pico-term {
   flex: 1;
@@ -24883,9 +24899,9 @@ ${h2.join(`
   var PROMPT = "\u203A ";
   var TERMINAL_WATERMARK = '<svg width="52" height="52" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2"/></svg>';
   var TerminalCore = class {
-    #root = node("div", "pico-widget pico-term");
-    #host = node("div", "pico-term-body");
-    #empty = emptySurface();
+    #root = node2("div", "pico-widget pico-term");
+    #host = node2("div", "pico-term-body");
+    #empty = emptySurface2();
     #onLine;
     #surfaceFactory;
     #surface = null;
@@ -24900,8 +24916,8 @@ ${h2.join(`
     constructor(options) {
       this.#onLine = options.onLine;
       this.#surfaceFactory = options.surface ?? defaultSurface;
-      ensureStyle(TERMINAL_CSS);
-      const watermark = node("span", "pico-term-watermark");
+      ensureStyle2(TERMINAL_CSS);
+      const watermark = node2("span", "pico-term-watermark");
       watermark.innerHTML = TERMINAL_WATERMARK;
       this.#root.append(this.#host, this.#empty, watermark);
       this.#syncEmpty();
@@ -25031,7 +25047,7 @@ ${h2.join(`
       Promise.resolve().then(() => (init_addon_fit(), addon_fit_exports)),
       Promise.resolve().then(() => __toESM(require_xterm()))
     ]);
-    ensureStyle(xtermCss);
+    ensureStyle2(xtermCss);
     const term = new Terminal2({
       convertEol: true,
       // 程序 stdout 是裸 \n
@@ -25282,9 +25298,9 @@ ${h2.join(`
       for (let prop in map)
         for (let name2 of prop.split(" "))
           direct[name2] = map[prop];
-      return (node2) => {
-        for (let groups = node2.prop(NodeProp.group), i2 = -1; i2 < (groups ? groups.length : 0); i2++) {
-          let found = direct[i2 < 0 ? node2.name : groups[i2]];
+      return (node3) => {
+        for (let groups = node3.prop(NodeProp.group), i2 = -1; i2 < (groups ? groups.length : 0); i2++) {
+          let found = direct[i2 < 0 ? node3.name : groups[i2]];
           if (found)
             return found;
         }
@@ -25417,9 +25433,9 @@ ${h2.join(`
     [`resolveInner`](#common.Tree.resolveInner) instead.
     */
     resolve(pos, side = 0) {
-      let node2 = resolveNode(CachedNode.get(this) || this.topNode, pos, side, false);
-      CachedNode.set(this, node2);
-      return node2;
+      let node3 = resolveNode(CachedNode.get(this) || this.topNode, pos, side, false);
+      CachedNode.set(this, node3);
+      return node3;
     }
     /**
     Like [`resolve`](#common.Tree.resolve), but will enter
@@ -25429,9 +25445,9 @@ ${h2.join(`
     the host trees).
     */
     resolveInner(pos, side = 0) {
-      let node2 = resolveNode(CachedInnerNode.get(this) || this.topNode, pos, side, true);
-      CachedInnerNode.set(this, node2);
-      return node2;
+      let node3 = resolveNode(CachedInnerNode.get(this) || this.topNode, pos, side, true);
+      CachedInnerNode.set(this, node3);
+      return node3;
     }
     /**
     In some situations, it can be useful to iterate through all
@@ -25624,25 +25640,25 @@ ${h2.join(`
         return true;
     }
   }
-  function resolveNode(node2, pos, side, overlays) {
+  function resolveNode(node3, pos, side, overlays) {
     var _a2;
-    while (node2.from == node2.to || (side < 1 ? node2.from >= pos : node2.from > pos) || (side > -1 ? node2.to <= pos : node2.to < pos)) {
-      let parent = !overlays && node2 instanceof TreeNode && node2.index < 0 ? null : node2.parent;
+    while (node3.from == node3.to || (side < 1 ? node3.from >= pos : node3.from > pos) || (side > -1 ? node3.to <= pos : node3.to < pos)) {
+      let parent = !overlays && node3 instanceof TreeNode && node3.index < 0 ? null : node3.parent;
       if (!parent)
-        return node2;
-      node2 = parent;
+        return node3;
+      node3 = parent;
     }
     let mode = overlays ? 0 : IterMode.IgnoreOverlays;
     if (overlays)
-      for (let scan = node2, parent = scan.parent; parent; scan = parent, parent = scan.parent) {
+      for (let scan = node3, parent = scan.parent; parent; scan = parent, parent = scan.parent) {
         if (scan instanceof TreeNode && scan.index < 0 && ((_a2 = parent.enter(pos, side, mode)) === null || _a2 === void 0 ? void 0 : _a2.from) != scan.from)
-          node2 = parent;
+          node3 = parent;
       }
     for (; ; ) {
-      let inner = node2.enter(pos, side, mode);
+      let inner = node3.enter(pos, side, mode);
       if (!inner)
-        return node2;
-      node2 = inner;
+        return node3;
+      node3 = inner;
     }
   }
   var BaseNode = class {
@@ -25666,19 +25682,19 @@ ${h2.join(`
       return matchNodeContext(this.parent, context);
     }
     enterUnfinishedNodesBefore(pos) {
-      let scan = this.childBefore(pos), node2 = this;
+      let scan = this.childBefore(pos), node3 = this;
       while (scan) {
         let last = scan.lastChild;
         if (!last || last.to != scan.to)
           break;
         if (last.type.isError && last.from == last.to) {
-          node2 = scan;
+          node3 = scan;
           scan = last.prevSibling;
         } else {
           scan = last;
         }
       }
-      return node2;
+      return node3;
     }
     get node() {
       return this;
@@ -25825,8 +25841,8 @@ ${h2.join(`
       return this._tree.toString();
     }
   };
-  function getChildren(node2, type, before, after) {
-    let cur2 = node2.cursor(), result2 = [];
+  function getChildren(node3, type, before, after) {
+    let cur2 = node3.cursor(), result2 = [];
     if (!cur2.firstChild())
       return result2;
     if (before != null)
@@ -25844,8 +25860,8 @@ ${h2.join(`
         return after == null ? result2 : [];
     }
   }
-  function matchNodeContext(node2, context, i2 = context.length - 1) {
-    for (let p2 = node2; i2 >= 0; p2 = p2.parent) {
+  function matchNodeContext(node3, context, i2 = context.length - 1) {
+    for (let p2 = node3; i2 >= 0; p2 = p2.parent) {
       if (!p2)
         return false;
       if (!p2.type.isAnonymous) {
@@ -25987,9 +26003,9 @@ ${h2.join(`
       return null;
     let pick = 0, picked = heads[0];
     for (let i2 = 1; i2 < heads.length; i2++) {
-      let node2 = heads[i2];
-      if (node2.from > picked.from || node2.to < picked.to) {
-        picked = node2;
+      let node3 = heads[i2];
+      if (node3.from > picked.from || node3.to < picked.to) {
+        picked = node3;
         pick = i2;
       }
     }
@@ -26002,9 +26018,9 @@ ${h2.join(`
     return new StackIterator(newHeads, picked);
   }
   var StackIterator = class {
-    constructor(heads, node2) {
+    constructor(heads, node3) {
       this.heads = heads;
-      this.node = node2;
+      this.node = node3;
     }
     get next() {
       return iterStack(this.heads);
@@ -26037,30 +26053,30 @@ ${h2.join(`
     /**
     @internal
     */
-    constructor(node2, mode = 0) {
+    constructor(node3, mode = 0) {
       this.buffer = null;
       this.stack = [];
       this.index = 0;
       this.bufferNode = null;
       this.mode = mode & ~IterMode.EnterBracketed;
-      if (node2 instanceof TreeNode) {
-        this.yieldNode(node2);
+      if (node3 instanceof TreeNode) {
+        this.yieldNode(node3);
       } else {
-        this._tree = node2.context.parent;
-        this.buffer = node2.context;
-        for (let n = node2._parent; n; n = n._parent)
+        this._tree = node3.context.parent;
+        this.buffer = node3.context;
+        for (let n = node3._parent; n; n = n._parent)
           this.stack.unshift(n.index);
-        this.bufferNode = node2;
-        this.yieldBuf(node2.index);
+        this.bufferNode = node3;
+        this.yieldBuf(node3.index);
       }
     }
-    yieldNode(node2) {
-      if (!node2)
+    yieldNode(node3) {
+      if (!node3)
         return false;
-      this._tree = node2;
-      this.type = node2.type;
-      this.from = node2.from;
-      this.to = node2.to;
+      this._tree = node3;
+      this.type = node3.type;
+      this.from = node3.from;
+      this.to = node3.to;
       return true;
     }
     yieldBuf(index, type) {
@@ -26074,15 +26090,15 @@ ${h2.join(`
     /**
     @internal
     */
-    yield(node2) {
-      if (!node2)
+    yield(node3) {
+      if (!node3)
         return false;
-      if (node2 instanceof TreeNode) {
+      if (node3 instanceof TreeNode) {
         this.buffer = null;
-        return this.yieldNode(node2);
+        return this.yieldNode(node3);
       }
-      this.buffer = node2.context;
-      return this.yieldBuf(node2.index, node2.type);
+      this.buffer = node3.context;
+      return this.yieldBuf(node3.index, node3.type);
     }
     /**
     @internal
@@ -26382,8 +26398,8 @@ ${h2.join(`
       if (size < 0) {
         cursor.next();
         if (size == -1) {
-          let node3 = reused[id2];
-          children3.push(node3);
+          let node4 = reused[id2];
+          children3.push(node4);
           positions2.push(start - parentStart);
           return;
         } else if (size == -3) {
@@ -26396,14 +26412,14 @@ ${h2.join(`
           throw new RangeError(`Unrecognized record size: ${size}`);
         }
       }
-      let type = types2[id2], node2, buffer2;
+      let type = types2[id2], node3, buffer2;
       let startPos = start - parentStart;
       if (end - start <= maxBufferLength && (buffer2 = findBufferSize(cursor.pos - minPos, inRepeat))) {
         let data2 = new Uint16Array(buffer2.size - buffer2.skip);
         let endPos = cursor.pos - buffer2.size, index = data2.length;
         while (cursor.pos > endPos)
           index = copyToBuffer(buffer2.start, data2, index);
-        node2 = new TreeBuffer(data2, end - buffer2.start, nodeSet);
+        node3 = new TreeBuffer(data2, end - buffer2.start, nodeSet);
         startPos = buffer2.start - parentStart;
       } else {
         let endPos = cursor.pos - size;
@@ -26431,12 +26447,12 @@ ${h2.join(`
         localPositions.reverse();
         if (localInRepeat > -1 && lastGroup > 0) {
           let make = makeBalanced(type, contextAtStart);
-          node2 = balanceRange(type, localChildren, localPositions, 0, localChildren.length, 0, end - start, make, make);
+          node3 = balanceRange(type, localChildren, localPositions, 0, localChildren.length, 0, end - start, make, make);
         } else {
-          node2 = makeTree(type, localChildren, localPositions, end - start, lookAheadAtStart - end, contextAtStart);
+          node3 = makeTree(type, localChildren, localPositions, end - start, lookAheadAtStart - end, contextAtStart);
         }
       }
-      children3.push(node2);
+      children3.push(node3);
       positions2.push(startPos);
     }
     function takeFlatNode(parentStart, minPos, children3, positions2) {
@@ -26572,20 +26588,20 @@ ${h2.join(`
     return new Tree(types2[data.topID], children2.reverse(), positions.reverse(), length);
   }
   var nodeSizeCache = /* @__PURE__ */ new WeakMap();
-  function nodeSize(balanceType, node2) {
-    if (!balanceType.isAnonymous || node2 instanceof TreeBuffer || node2.type != balanceType)
+  function nodeSize(balanceType, node3) {
+    if (!balanceType.isAnonymous || node3 instanceof TreeBuffer || node3.type != balanceType)
       return 1;
-    let size = nodeSizeCache.get(node2);
+    let size = nodeSizeCache.get(node3);
     if (size == null) {
       size = 1;
-      for (let child2 of node2.children) {
+      for (let child2 of node3.children) {
         if (child2.type != balanceType || !(child2 instanceof Tree)) {
           size = 1;
           break;
         }
         size += nodeSize(balanceType, child2);
       }
-      nodeSizeCache.set(node2, size);
+      nodeSizeCache.set(node3, size);
     }
     return size;
   }
@@ -26642,17 +26658,17 @@ ${h2.join(`
     /**
     Set the value for this syntax node.
     */
-    set(node2, value) {
-      if (node2 instanceof BufferNode)
-        this.setBuffer(node2.context.buffer, node2.index, value);
-      else if (node2 instanceof TreeNode)
-        this.map.set(node2.tree, value);
+    set(node3, value) {
+      if (node3 instanceof BufferNode)
+        this.setBuffer(node3.context.buffer, node3.index, value);
+      else if (node3 instanceof TreeNode)
+        this.map.set(node3.tree, value);
     }
     /**
     Retrieve value for this syntax node, if it exists in the map.
     */
-    get(node2) {
-      return node2 instanceof BufferNode ? this.getBuffer(node2.context.buffer, node2.index) : node2 instanceof TreeNode ? this.map.get(node2.tree) : void 0;
+    get(node3) {
+      return node3 instanceof BufferNode ? this.getBuffer(node3.context.buffer, node3.index) : node3 instanceof TreeNode ? this.map.get(node3.tree) : void 0;
     }
     /**
     Set the value for the node that a cursor currently points to.
@@ -28859,9 +28875,9 @@ ${h2.join(`
       }
     }
   };
-  function getStyleTags(node2) {
-    let rule = node2.type.prop(ruleNodeProp);
-    while (rule && rule.context && !node2.matchContext(rule.context))
+  function getStyleTags(node3) {
+    let rule = node3.type.prop(ruleNodeProp);
+    while (rule && rule.context && !node3.matchContext(rule.context))
       rule = rule.next;
     return rule || null;
   }
@@ -30026,8 +30042,8 @@ ${h2.join(`
       function add(child2) {
         let last;
         if (child2.lines > maxChunk && child2 instanceof _TextNode) {
-          for (let node2 of child2.children)
-            add(node2);
+          for (let node3 of child2.children)
+            add(node3);
         } else if (child2.lines > minChunk && (currentLines > minChunk || !currentLines)) {
           flush();
           chunked.push(child2);
@@ -33684,8 +33700,8 @@ ${h2.join(`
     }
     return target.getSelection();
   }
-  function contains(dom, node2) {
-    return node2 ? dom == node2 || dom.contains(node2.nodeType != 1 ? node2.parentNode : node2) : false;
+  function contains(dom, node3) {
+    return node3 ? dom == node3 || dom.contains(node3.nodeType != 1 ? node3.parentNode : node3) : false;
   }
   function hasSelection(dom, selection) {
     if (!selection.anchorNode)
@@ -33704,43 +33720,43 @@ ${h2.join(`
     else
       return [];
   }
-  function isEquivalentPosition(node2, off, targetNode, targetOff) {
-    return targetNode ? scanFor(node2, off, targetNode, targetOff, -1) || scanFor(node2, off, targetNode, targetOff, 1) : false;
+  function isEquivalentPosition(node3, off, targetNode, targetOff) {
+    return targetNode ? scanFor(node3, off, targetNode, targetOff, -1) || scanFor(node3, off, targetNode, targetOff, 1) : false;
   }
-  function domIndex(node2) {
+  function domIndex(node3) {
     for (var index = 0; ; index++) {
-      node2 = node2.previousSibling;
-      if (!node2)
+      node3 = node3.previousSibling;
+      if (!node3)
         return index;
     }
   }
-  function isBlockElement(node2) {
-    return node2.nodeType == 1 && /^(DIV|P|LI|UL|OL|BLOCKQUOTE|DD|DT|H\d|SECTION|PRE)$/.test(node2.nodeName);
+  function isBlockElement(node3) {
+    return node3.nodeType == 1 && /^(DIV|P|LI|UL|OL|BLOCKQUOTE|DD|DT|H\d|SECTION|PRE)$/.test(node3.nodeName);
   }
-  function scanFor(node2, off, targetNode, targetOff, dir) {
+  function scanFor(node3, off, targetNode, targetOff, dir) {
     for (; ; ) {
-      if (node2 == targetNode && off == targetOff)
+      if (node3 == targetNode && off == targetOff)
         return true;
-      if (off == (dir < 0 ? 0 : maxOffset(node2))) {
-        if (node2.nodeName == "DIV")
+      if (off == (dir < 0 ? 0 : maxOffset(node3))) {
+        if (node3.nodeName == "DIV")
           return false;
-        let parent = node2.parentNode;
+        let parent = node3.parentNode;
         if (!parent || parent.nodeType != 1)
           return false;
-        off = domIndex(node2) + (dir < 0 ? 0 : 1);
-        node2 = parent;
-      } else if (node2.nodeType == 1) {
-        node2 = node2.childNodes[off + (dir < 0 ? -1 : 0)];
-        if (node2.nodeType == 1 && node2.contentEditable == "false")
+        off = domIndex(node3) + (dir < 0 ? 0 : 1);
+        node3 = parent;
+      } else if (node3.nodeType == 1) {
+        node3 = node3.childNodes[off + (dir < 0 ? -1 : 0)];
+        if (node3.nodeType == 1 && node3.contentEditable == "false")
           return false;
-        off = dir < 0 ? maxOffset(node2) : 0;
+        off = dir < 0 ? maxOffset(node3) : 0;
       } else {
         return false;
       }
     }
   }
-  function maxOffset(node2) {
-    return node2.nodeType == 3 ? node2.nodeValue.length : node2.childNodes.length;
+  function maxOffset(node3) {
+    return node3.nodeType == 3 ? node3.nodeValue.length : node3.childNodes.length;
   }
   function flattenRect(rect, toLeft) {
     let { left, right } = rect;
@@ -33921,11 +33937,11 @@ ${h2.join(`
     return stack;
   }
   function restoreScrollStack(stack, vert = true) {
-    for (let { node: node2, left, top: top2 } of stack) {
-      if (vert && node2.scrollTop != top2)
-        node2.scrollTop = top2;
-      if (node2.scrollLeft != left)
-        node2.scrollLeft = left;
+    for (let { node: node3, left, top: top2 } of stack) {
+      if (vert && node3.scrollTop != top2)
+        node3.scrollTop = top2;
+      if (node3.scrollLeft != left)
+        node3.scrollLeft = left;
     }
   }
   var preventScrollSupported = null;
@@ -33949,10 +33965,10 @@ ${h2.join(`
     }
   }
   var scratchRange;
-  function textRange(node2, from, to = from) {
+  function textRange(node3, from, to = from) {
     let range = scratchRange || (scratchRange = document.createRange());
-    range.setEnd(node2, to);
-    range.setStart(node2, from);
+    range.setEnd(node3, to);
+    range.setStart(node3, from);
     return range;
   }
   function dispatchKey(elt, name2, code2, mods) {
@@ -33967,35 +33983,35 @@ ${h2.join(`
     elt.dispatchEvent(up);
     return down.defaultPrevented || up.defaultPrevented;
   }
-  function getRoot(node2) {
-    while (node2) {
-      if (node2 && (node2.nodeType == 9 || node2.nodeType == 11 && node2.host))
-        return node2;
-      node2 = node2.assignedSlot || node2.parentNode;
+  function getRoot(node3) {
+    while (node3) {
+      if (node3 && (node3.nodeType == 9 || node3.nodeType == 11 && node3.host))
+        return node3;
+      node3 = node3.assignedSlot || node3.parentNode;
     }
     return null;
   }
   function atElementStart(doc2, selection) {
-    let node2 = selection.focusNode, offset = selection.focusOffset;
-    if (!node2 || selection.anchorNode != node2 || selection.anchorOffset != offset)
+    let node3 = selection.focusNode, offset = selection.focusOffset;
+    if (!node3 || selection.anchorNode != node3 || selection.anchorOffset != offset)
       return false;
-    offset = Math.min(offset, maxOffset(node2));
+    offset = Math.min(offset, maxOffset(node3));
     for (; ; ) {
       if (offset) {
-        if (node2.nodeType != 1)
+        if (node3.nodeType != 1)
           return false;
-        let prev = node2.childNodes[offset - 1];
+        let prev = node3.childNodes[offset - 1];
         if (prev.contentEditable == "false")
           offset--;
         else {
-          node2 = prev;
-          offset = maxOffset(node2);
+          node3 = prev;
+          offset = maxOffset(node3);
         }
-      } else if (node2 == doc2) {
+      } else if (node3 == doc2) {
         return true;
       } else {
-        offset = domIndex(node2);
-        node2 = node2.parentNode;
+        offset = domIndex(node3);
+        node3 = node3.parentNode;
       }
     }
   }
@@ -34005,42 +34021,42 @@ ${h2.join(`
     return elt.scrollTop > Math.max(1, elt.scrollHeight - elt.clientHeight - 4);
   }
   function textNodeBefore(startNode, startOffset) {
-    for (let node2 = startNode, offset = startOffset; ; ) {
-      if (node2.nodeType == 3 && offset > 0) {
-        return { node: node2, offset };
-      } else if (node2.nodeType == 1 && offset > 0) {
-        if (node2.contentEditable == "false")
+    for (let node3 = startNode, offset = startOffset; ; ) {
+      if (node3.nodeType == 3 && offset > 0) {
+        return { node: node3, offset };
+      } else if (node3.nodeType == 1 && offset > 0) {
+        if (node3.contentEditable == "false")
           return null;
-        node2 = node2.childNodes[offset - 1];
-        offset = maxOffset(node2);
-      } else if (node2.parentNode && !isBlockElement(node2)) {
-        offset = domIndex(node2);
-        node2 = node2.parentNode;
+        node3 = node3.childNodes[offset - 1];
+        offset = maxOffset(node3);
+      } else if (node3.parentNode && !isBlockElement(node3)) {
+        offset = domIndex(node3);
+        node3 = node3.parentNode;
       } else {
         return null;
       }
     }
   }
   function textNodeAfter(startNode, startOffset) {
-    for (let node2 = startNode, offset = startOffset; ; ) {
-      if (node2.nodeType == 3 && offset < node2.nodeValue.length) {
-        return { node: node2, offset };
-      } else if (node2.nodeType == 1 && offset < node2.childNodes.length) {
-        if (node2.contentEditable == "false")
+    for (let node3 = startNode, offset = startOffset; ; ) {
+      if (node3.nodeType == 3 && offset < node3.nodeValue.length) {
+        return { node: node3, offset };
+      } else if (node3.nodeType == 1 && offset < node3.childNodes.length) {
+        if (node3.contentEditable == "false")
           return null;
-        node2 = node2.childNodes[offset];
+        node3 = node3.childNodes[offset];
         offset = 0;
-      } else if (node2.parentNode && !isBlockElement(node2)) {
-        offset = domIndex(node2) + 1;
-        node2 = node2.parentNode;
+      } else if (node3.parentNode && !isBlockElement(node3)) {
+        offset = domIndex(node3) + 1;
+        node3 = node3.parentNode;
       } else {
         return null;
       }
     }
   }
   var DOMPos = class _DOMPos {
-    constructor(node2, offset, precise = true) {
-      this.node = node2;
+    constructor(node3, offset, precise = true) {
+      this.node = node3;
       this.offset = offset;
       this.precise = precise;
     }
@@ -35932,11 +35948,11 @@ ${h2.join(`
     }
     return found;
   }
-  function freeNode(node2) {
-    let tile = Tile.get(node2);
+  function freeNode(node3) {
+    let tile = Tile.get(node3);
     if (tile)
-      tile.setDOM(node2.cloneNode());
-    return node2;
+      tile.setDOM(node3.cloneNode());
+    return node3;
   }
   var NullWidget = class extends WidgetType {
     constructor(tag) {
@@ -36182,33 +36198,33 @@ ${h2.join(`
       if (view.docView.posFromDOM(newRange.anchorNode, newRange.anchorOffset) != cursor.from)
         sel.collapse(anchorNode, anchorOffset);
     }
-    posFromDOM(node2, offset) {
-      let tile = this.tile.nearest(node2);
+    posFromDOM(node3, offset) {
+      let tile = this.tile.nearest(node3);
       if (!tile)
-        return this.tile.dom.compareDocumentPosition(node2) & 2 ? 0 : this.view.state.doc.length;
+        return this.tile.dom.compareDocumentPosition(node3) & 2 ? 0 : this.view.state.doc.length;
       let start = tile.posAtStart;
       if (tile.isComposite()) {
         let after;
-        if (node2 == tile.dom) {
+        if (node3 == tile.dom) {
           after = tile.dom.childNodes[offset];
         } else {
-          let bias = maxOffset(node2) == 0 ? 0 : offset == 0 ? -1 : 1;
+          let bias = maxOffset(node3) == 0 ? 0 : offset == 0 ? -1 : 1;
           for (; ; ) {
-            let parent = node2.parentNode;
+            let parent = node3.parentNode;
             if (parent == tile.dom)
               break;
             if (bias == 0 && parent.firstChild != parent.lastChild) {
-              if (node2 == parent.firstChild)
+              if (node3 == parent.firstChild)
                 bias = -1;
               else
                 bias = 1;
             }
-            node2 = parent;
+            node3 = parent;
           }
           if (bias < 0)
-            after = node2;
+            after = node3;
           else
-            after = node2.nextSibling;
+            after = node3.nextSibling;
         }
         if (after == tile.dom.firstChild)
           return start;
@@ -36223,7 +36239,7 @@ ${h2.join(`
           pos += child2.length + child2.breakAfter;
         }
       } else if (tile.isText()) {
-        return node2 == tile.dom ? start + offset : start + (offset ? tile.length : 0);
+        return node3 == tile.dom ? start + offset : start + (offset ? tile.length : 0);
       } else {
         return start;
       }
@@ -36545,10 +36561,10 @@ ${h2.join(`
     let inv = changes.invertedDesc;
     return { range: new ChangedRange(inv.mapPos(from), inv.mapPos(to), from, to), text: textNode };
   }
-  function nextToUneditable(node2, offset) {
-    if (node2.nodeType != 1)
+  function nextToUneditable(node3, offset) {
+    if (node3.nodeType != 1)
       return 0;
-    return (offset && node2.childNodes[offset - 1].contentEditable == "false" ? 1 : 0) | (offset < node2.childNodes.length && node2.childNodes[offset].contentEditable == "false" ? 2 : 0);
+    return (offset && node3.childNodes[offset - 1].contentEditable == "false" ? 1 : 0) | (offset < node3.childNodes.length && node3.childNodes[offset].contentEditable == "false" ? 2 : 0);
   }
   var DecorationComparator$1 = class DecorationComparator {
     constructor() {
@@ -36587,8 +36603,8 @@ ${h2.join(`
     RangeSet.compare(a, b3, diff, comp);
     return comp.changes;
   }
-  function inUneditable(node2, inside) {
-    for (let cur2 = node2; cur2 && cur2 != inside; cur2 = cur2.assignedSlot || cur2.parentNode) {
+  function inUneditable(node3, inside) {
+    for (let cur2 = node3; cur2 && cur2 != inside; cur2 = cur2.assignedSlot || cur2.parentNode) {
       if (cur2.nodeType == 1 && cur2.contentEditable == "false") {
         return true;
       }
@@ -37042,10 +37058,10 @@ ${h2.join(`
       this.findPointBefore(parent, end);
       return this;
     }
-    readTextNode(node2) {
-      let text = node2.nodeValue;
+    readTextNode(node3) {
+      let text = node3.nodeValue;
       for (let point of this.points)
-        if (point.node == node2)
+        if (point.node == node3)
           point.pos = this.text.length + Math.min(point.offset, text.length);
       for (let off = 0, re3 = this.lineSeparator ? null : /\r\n?|\n/g; ; ) {
         let nextBreak = -1, breakSize = 1, m;
@@ -37062,59 +37078,59 @@ ${h2.join(`
         this.lineBreak();
         if (breakSize > 1) {
           for (let point of this.points)
-            if (point.node == node2 && point.pos > this.text.length)
+            if (point.node == node3 && point.pos > this.text.length)
               point.pos -= breakSize - 1;
         }
         off = nextBreak + breakSize;
       }
     }
-    readNode(node2) {
-      let tile = Tile.get(node2);
+    readNode(node3) {
+      let tile = Tile.get(node3);
       let fromView = tile && tile.overrideDOMText;
       if (fromView != null) {
-        this.findPointInside(node2, fromView.length);
+        this.findPointInside(node3, fromView.length);
         for (let i2 = fromView.iter(); !i2.next().done; ) {
           if (i2.lineBreak)
             this.lineBreak();
           else
             this.append(i2.value);
         }
-      } else if (node2.nodeType == 3) {
-        this.readTextNode(node2);
-      } else if (node2.nodeName == "BR") {
-        if (node2.nextSibling)
+      } else if (node3.nodeType == 3) {
+        this.readTextNode(node3);
+      } else if (node3.nodeName == "BR") {
+        if (node3.nextSibling)
           this.lineBreak();
-      } else if (node2.nodeType == 1) {
-        this.readRange(node2.firstChild, null);
+      } else if (node3.nodeType == 1) {
+        this.readRange(node3.firstChild, null);
       }
     }
-    findPointBefore(node2, next) {
+    findPointBefore(node3, next) {
       for (let point of this.points)
-        if (point.node == node2 && node2.childNodes[point.offset] == next)
+        if (point.node == node3 && node3.childNodes[point.offset] == next)
           point.pos = this.text.length;
     }
-    findPointInside(node2, length) {
+    findPointInside(node3, length) {
       for (let point of this.points)
-        if (node2.nodeType == 3 ? point.node == node2 : node2.contains(point.node))
-          point.pos = this.text.length + (isAtEnd(node2, point.node, point.offset) ? length : 0);
+        if (node3.nodeType == 3 ? point.node == node3 : node3.contains(point.node))
+          point.pos = this.text.length + (isAtEnd(node3, point.node, point.offset) ? length : 0);
     }
   };
-  function isAtEnd(parent, node2, offset) {
+  function isAtEnd(parent, node3, offset) {
     for (; ; ) {
-      if (!node2 || offset < maxOffset(node2))
+      if (!node3 || offset < maxOffset(node3))
         return false;
-      if (node2 == parent)
+      if (node3 == parent)
         return true;
-      offset = domIndex(node2) + 1;
-      node2 = node2.parentNode;
+      offset = domIndex(node3) + 1;
+      node3 = node3.parentNode;
     }
   }
-  function isEmptyToEnd(node2, end) {
+  function isEmptyToEnd(node3, end) {
     let widgets;
-    for (; ; node2 = node2.nextSibling) {
-      if (node2 == end || !node2)
+    for (; ; node3 = node3.nextSibling) {
+      if (node3 == end || !node3)
         break;
-      let view = Tile.get(node2);
+      let view = Tile.get(node3);
       if (!(view === null || view === void 0 ? void 0 : view.isWidget()))
         return false;
       if (view)
@@ -37129,8 +37145,8 @@ ${h2.join(`
     return true;
   }
   var DOMPoint = class {
-    constructor(node2, offset) {
-      this.node = node2;
+    constructor(node3, offset) {
+      this.node = node3;
       this.offset = offset;
       this.pos = -1;
     }
@@ -37731,8 +37747,8 @@ ${h2.join(`
       return true;
     if (event.defaultPrevented)
       return false;
-    for (let node2 = event.target, tile; node2 != view.contentDOM; node2 = node2.parentNode)
-      if (!node2 || node2.nodeType == 11 || (tile = Tile.get(node2)) && tile.isWidget() && !tile.isHidden && tile.widget.ignoreEvent(event))
+    for (let node3 = event.target, tile; node3 != view.contentDOM; node3 = node3.parentNode)
+      if (!node3 || node3.nodeType == 11 || (tile = Tile.get(node3)) && tile.isWidget() && !tile.isHidden && tile.widget.ignoreEvent(event))
         return false;
     return true;
   }
@@ -38480,15 +38496,15 @@ ${h2.join(`
       return new BlockInfo(offset, this.length, top2 + this.spaceAbove, this.height - this.spaceAbove, this.breaks);
     }
     replace(_from, _to, nodes) {
-      let node2 = nodes[0];
-      if (nodes.length == 1 && (node2 instanceof _HeightMapText || node2 instanceof HeightMapGap && node2.flags & 4) && Math.abs(this.length - node2.length) < 10) {
-        if (node2 instanceof HeightMapGap)
-          node2 = new _HeightMapText(node2.length, this.height, this.spaceAbove);
+      let node3 = nodes[0];
+      if (nodes.length == 1 && (node3 instanceof _HeightMapText || node3 instanceof HeightMapGap && node3.flags & 4) && Math.abs(this.length - node3.length) < 10) {
+        if (node3 instanceof HeightMapGap)
+          node3 = new _HeightMapText(node3.length, this.height, this.spaceAbove);
         else
-          node2.height = this.height;
+          node3.height = this.height;
         if (!this.outdated)
-          node2.outdated = false;
-        return node2;
+          node3.outdated = false;
+        return node3;
       } else {
         return HeightMap.of(nodes);
       }
@@ -38684,8 +38700,8 @@ ${h2.join(`
       if (from > 0)
         this.decomposeLeft(from, result2);
       let left = result2.length;
-      for (let node2 of nodes)
-        result2.push(node2);
+      for (let node3 of nodes)
+        result2.push(node3);
       if (from > 0)
         mergeGaps(result2, left - 1);
       if (to < this.length) {
@@ -38857,10 +38873,10 @@ ${h2.join(`
       else if (this.writtenTo < this.pos || last == null)
         this.nodes.push(this.blankContent(this.writtenTo, this.pos));
       let pos = from;
-      for (let node2 of this.nodes) {
-        if (node2 instanceof HeightMapText)
-          node2.updateHeight(this.oracle, pos);
-        pos += node2 ? node2.length : 1;
+      for (let node3 of this.nodes) {
+        if (node3 instanceof HeightMapText)
+          node3.updateHeight(this.oracle, pos);
+        pos += node3 ? node3.length : 1;
       }
       return this.nodes;
     }
@@ -41136,8 +41152,8 @@ ${h2.join(`
     for associating positions with DOM events. Will raise an error
     when `node` isn't part of the editor content.
     */
-    posAtDOM(node2, offset = 0) {
-      return this.docView.posFromDOM(node2, offset);
+    posAtDOM(node3, offset = 0) {
+      return this.docView.posFromDOM(node3, offset);
     }
     posAtCoords(coords, precise = true) {
       this.readMeasured();
@@ -42609,9 +42625,9 @@ ${h2.join(`
   function topNodeAt(state2, pos, side) {
     let topLang = state2.facet(language), tree = syntaxTree(state2).topNode;
     if (!topLang || topLang.allowsNesting) {
-      for (let node2 = tree; node2; node2 = node2.enter(pos, side, IterMode.ExcludeBuffers | IterMode.EnterBracketed))
-        if (node2.type.isTop)
-          tree = node2;
+      for (let node3 = tree; node3; node3 = node3.enter(pos, side, IterMode.ExcludeBuffers | IterMode.EnterBracketed))
+        if (node3.type.isTop)
+          tree = node3;
     }
     return tree;
   }
@@ -43236,13 +43252,13 @@ ${h2.join(`
     Get the indentation for the reference line of the given node
     (see [`baseIndent`](https://codemirror.net/6/docs/ref/#language.TreeIndentContext.baseIndent)).
     */
-    baseIndentFor(node2) {
-      let line = this.state.doc.lineAt(node2.from);
+    baseIndentFor(node3) {
+      let line = this.state.doc.lineAt(node3.from);
       for (; ; ) {
-        let atBreak = node2.resolve(line.from);
+        let atBreak = node3.resolve(line.from);
         while (atBreak.parent && atBreak.parent.from == atBreak.from)
           atBreak = atBreak.parent;
-        if (isParent(atBreak, node2))
+        if (isParent(atBreak, node3))
           break;
         line = this.state.doc.lineAt(atBreak.from);
       }
@@ -43295,9 +43311,9 @@ ${h2.join(`
     return context.baseIndent + (closed ? 0 : context.unit * units);
   }
   var foldNodeProp = /* @__PURE__ */ new NodeProp();
-  function foldInside(node2) {
-    let first = node2.firstChild, last = node2.lastChild;
-    return first && first.to < last.from ? { from: first.to, to: last.type.isError ? node2.to : last.from } : null;
+  function foldInside(node3) {
+    let first = node3.firstChild, last = node3.lastChild;
+    return first && first.to < last.from ? { from: first.to, to: last.type.isError ? node3.to : last.from } : null;
   }
   var HighlightStyle = class _HighlightStyle {
     constructor(specs, options) {
@@ -43545,25 +43561,25 @@ ${h2.join(`
     return [bracketMatchingConfig.of(config), bracketMatchingUnique];
   }
   var bracketMatchingHandle = /* @__PURE__ */ new NodeProp();
-  function matchingNodes(node2, dir, brackets) {
-    let byProp = node2.prop(dir < 0 ? NodeProp.openedBy : NodeProp.closedBy);
+  function matchingNodes(node3, dir, brackets) {
+    let byProp = node3.prop(dir < 0 ? NodeProp.openedBy : NodeProp.closedBy);
     if (byProp)
       return byProp;
-    if (node2.name.length == 1) {
-      let index = brackets.indexOf(node2.name);
+    if (node3.name.length == 1) {
+      let index = brackets.indexOf(node3.name);
       if (index > -1 && index % 2 == (dir < 0 ? 1 : 0))
         return [brackets[index + dir]];
     }
     return null;
   }
-  function findHandle(node2) {
-    let hasHandle = node2.type.prop(bracketMatchingHandle);
-    return hasHandle ? hasHandle(node2.node) : node2;
+  function findHandle(node3) {
+    let hasHandle = node3.type.prop(bracketMatchingHandle);
+    return hasHandle ? hasHandle(node3.node) : node3;
   }
   function matchBrackets(state2, pos, dir, config = {}) {
     let maxScanDistance = config.maxScanDistance || DefaultScanDist, brackets = config.brackets || DefaultBrackets;
-    let tree = syntaxTree(state2), node2 = tree.resolveInner(pos, dir);
-    for (let cur2 = node2; cur2; cur2 = cur2.parent) {
+    let tree = syntaxTree(state2), node3 = tree.resolveInner(pos, dir);
+    for (let cur2 = node3; cur2; cur2 = cur2.parent) {
       let matches = matchingNodes(cur2.type, dir, brackets);
       if (matches && cur2.from < cur2.to) {
         let handle = findHandle(cur2);
@@ -43571,7 +43587,7 @@ ${h2.join(`
           return matchMarkedBrackets(state2, pos, dir, cur2, handle, matches, brackets);
       }
     }
-    return matchPlainBrackets(state2, pos, dir, tree, node2.type, maxScanDistance, brackets);
+    return matchPlainBrackets(state2, pos, dir, tree, node3.type, maxScanDistance, brackets);
   }
   function matchMarkedBrackets(_state, _pos, dir, token, handle, matching, brackets) {
     let parent = token.parent, firstToken = { from: handle.from, to: handle.to };
@@ -44331,9 +44347,9 @@ ${h2.join(`
         if (cls)
           li2.className = cls;
         for (let source of this.optionContent) {
-          let node2 = source(completion, this.view.state, this.view, match);
-          if (node2)
-            li2.appendChild(node2);
+          let node3 = source(completion, this.view.state, this.view, match);
+          if (node3)
+            li2.appendChild(node3);
         }
       }
       if (range.from)
@@ -45304,10 +45320,10 @@ ${h2.join(`
     "MatchClause"
   ]);
   function defID(type) {
-    return (node2, def, outer) => {
+    return (node3, def, outer) => {
       if (outer)
         return false;
-      let id2 = node2.node.getChild("VariableName");
+      let id2 = node3.node.getChild("VariableName");
       if (id2)
         def(id2, type);
       return true;
@@ -45316,9 +45332,9 @@ ${h2.join(`
   var gatherCompletions = {
     FunctionDefinition: /* @__PURE__ */ defID("function"),
     ClassDefinition: /* @__PURE__ */ defID("class"),
-    ForStatement(node2, def, outer) {
+    ForStatement(node3, def, outer) {
       if (outer)
-        for (let child2 = node2.node.firstChild; child2; child2 = child2.nextSibling) {
+        for (let child2 = node3.node.firstChild; child2; child2 = child2.nextSibling) {
           if (child2.name == "VariableName")
             def(child2, "variable");
           else if (child2.name == "in")
@@ -45327,23 +45343,23 @@ ${h2.join(`
     },
     ImportStatement(_node, def) {
       var _a2, _b;
-      let { node: node2 } = _node;
-      let isFrom = ((_a2 = node2.firstChild) === null || _a2 === void 0 ? void 0 : _a2.name) == "from";
-      for (let ch = node2.getChild("import"); ch; ch = ch.nextSibling) {
+      let { node: node3 } = _node;
+      let isFrom = ((_a2 = node3.firstChild) === null || _a2 === void 0 ? void 0 : _a2.name) == "from";
+      for (let ch = node3.getChild("import"); ch; ch = ch.nextSibling) {
         if (ch.name == "VariableName" && ((_b = ch.nextSibling) === null || _b === void 0 ? void 0 : _b.name) != "as")
           def(ch, isFrom ? "variable" : "namespace");
       }
     },
-    AssignStatement(node2, def) {
-      for (let child2 = node2.node.firstChild; child2; child2 = child2.nextSibling) {
+    AssignStatement(node3, def) {
+      for (let child2 = node3.node.firstChild; child2; child2 = child2.nextSibling) {
         if (child2.name == "VariableName")
           def(child2, "variable");
         else if (child2.name == ":" || child2.name == "AssignOp")
           break;
       }
     },
-    ParamList(node2, def) {
-      for (let prev = null, child2 = node2.node.firstChild; child2; child2 = child2.nextSibling) {
+    ParamList(node3, def) {
+      for (let prev = null, child2 = node3.node.firstChild; child2; child2 = child2.nextSibling) {
         if (child2.name == "VariableName" && (!prev || !/\*|AssignOp/.test(prev.name)))
           def(child2, "variable");
         prev = child2;
@@ -45353,28 +45369,28 @@ ${h2.join(`
     AsPattern: /* @__PURE__ */ defID("variable"),
     __proto__: null
   };
-  function getScope(doc2, node2) {
-    let cached = cache.get(node2);
+  function getScope(doc2, node3) {
+    let cached = cache.get(node3);
     if (cached)
       return cached;
     let completions = [], top2 = true;
-    function def(node3, type) {
-      let name2 = doc2.sliceString(node3.from, node3.to);
+    function def(node4, type) {
+      let name2 = doc2.sliceString(node4.from, node4.to);
       completions.push({ label: name2, type });
     }
-    node2.cursor(IterMode.IncludeAnonymous).iterate((node3) => {
-      if (node3.name) {
-        let gather = gatherCompletions[node3.name];
-        if (gather && gather(node3, def, top2) || !top2 && ScopeNodes.has(node3.name))
+    node3.cursor(IterMode.IncludeAnonymous).iterate((node4) => {
+      if (node4.name) {
+        let gather = gatherCompletions[node4.name];
+        if (gather && gather(node4, def, top2) || !top2 && ScopeNodes.has(node4.name))
           return false;
         top2 = false;
-      } else if (node3.to - node3.from > 8192) {
-        for (let c of getScope(doc2, node3.node))
+      } else if (node4.to - node4.from > 8192) {
+        for (let c of getScope(doc2, node4.node))
           completions.push(c);
         return false;
       }
     });
-    cache.set(node2, completions);
+    cache.set(node3, completions);
     return completions;
   }
   var Identifier = /^[\w\xa1-\uffff][\w\d\xa1-\uffff]*$/;
@@ -45605,11 +45621,11 @@ ${h2.join(`
   ];
   var globalCompletion = /* @__PURE__ */ ifNotIn(dontComplete, /* @__PURE__ */ completeFromList(/* @__PURE__ */ globals.concat(snippets)));
   function innerBody(context) {
-    let { node: node2, pos } = context;
+    let { node: node3, pos } = context;
     let lineIndent = context.lineIndent(pos, -1);
     let found = null;
     for (; ; ) {
-      let before = node2.childBefore(pos);
+      let before = node3.childBefore(pos);
       if (!before) {
         break;
       } else if (before.name == "Comment") {
@@ -45617,19 +45633,19 @@ ${h2.join(`
       } else if (before.name == "Body" || before.name == "MatchBody") {
         if (context.baseIndentFor(before) + context.unit <= lineIndent)
           found = before;
-        node2 = before;
+        node3 = before;
       } else if (before.name == "MatchClause") {
-        node2 = before;
+        node3 = before;
       } else if (before.type.is("Statement")) {
-        node2 = before;
+        node3 = before;
       } else {
         break;
       }
     }
     return found;
   }
-  function indentBody(context, node2) {
-    let base2 = context.baseIndentFor(node2);
+  function indentBody(context, node3) {
+    let base2 = context.baseIndentFor(node3);
     let line = context.lineAt(context.pos, -1), to = line.from + line.text.length;
     if (/^\s*($|#)/.test(line.text) && context.node.to < to + 100 && !/\S/.test(context.state.sliceDoc(to, context.node.to)) && context.lineIndent(context.pos, -1) <= base2)
       return null;
@@ -45673,8 +45689,8 @@ ${h2.join(`
         }),
         /* @__PURE__ */ foldNodeProp.add({
           "ArrayExpression DictionaryExpression SetExpression TupleExpression": foldInside,
-          Body: (node2, state2) => ({ from: node2.from + 1, to: node2.to - (node2.to == state2.doc.length ? 0 : 1) }),
-          "String FormatString": (node2, state2) => ({ from: state2.doc.lineAt(node2.from).to, to: node2.to })
+          Body: (node3, state2) => ({ from: node3.from + 1, to: node3.to - (node3.to == state2.doc.length ? 0 : 1) }),
+          "String FormatString": (node3, state2) => ({ from: state2.doc.lineAt(node3.from).to, to: node3.to })
         })
       ]
     }),
@@ -45713,9 +45729,9 @@ ${h2.join(`
   }
 
   // src/libs/analyzer/impl/syntax.ts
-  function children(node2) {
+  function children(node3) {
     const result2 = [];
-    for (let child2 = node2.firstChild; child2 !== null; child2 = child2.nextSibling) result2.push(child2);
+    for (let child2 = node3.firstChild; child2 !== null; child2 = child2.nextSibling) result2.push(child2);
     return result2;
   }
   function lineStarts(source) {
@@ -45738,17 +45754,17 @@ ${h2.join(`
   function syntaxErrorsOf(source) {
     const starts = lineStarts(source);
     const findings = [];
-    const visit = (node2) => {
-      if (node2.name === "\u26A0") {
-        const snippet2 = source.slice(node2.from, Math.min(node2.to, node2.from + 12)).trim();
+    const visit = (node3) => {
+      if (node3.name === "\u26A0") {
+        const snippet2 = source.slice(node3.from, Math.min(node3.to, node3.from + 12)).trim();
         findings.push({
           kind: "line",
           message: snippet2 === "" ? "\u8FD9\u91CC\u6709\u8BED\u6CD5\u9519\u8BEF" : `\u8BED\u6CD5\u9519\u8BEF\uFF1A${snippet2}\u2026`,
-          line: lineOf(starts, node2.from)
+          line: lineOf(starts, node3.from)
         });
         return;
       }
-      for (const child2 of children(node2)) visit(child2);
+      for (const child2 of children(node3)) visit(child2);
     };
     visit(pythonLanguage.parser.parse(source).topNode);
     return Object.freeze(findings);
@@ -45757,9 +45773,9 @@ ${h2.join(`
     if (syntaxErrorsOf(source).length > 0) return Object.freeze([]);
     const starts = lineStarts(source);
     const lineAt = (offset) => lineOf(starts, offset);
-    function structuresWithin(node2) {
+    function structuresWithin(node3) {
       const structures = [];
-      for (const child2 of children(node2)) {
+      for (const child2 of children(node3)) {
         if (child2.name === "ForStatement" || child2.name === "WhileStatement") {
           const body = children(child2).find((part) => part.name === "Body");
           if (body === void 0) continue;
@@ -46249,11 +46265,11 @@ ${h2.join(`
   var cursorGroupLeft = (view) => cursorByGroup(view, !ltrAtCursor(view));
   var cursorGroupRight = (view) => cursorByGroup(view, ltrAtCursor(view));
   var segmenter = typeof Intl != "undefined" && Intl.Segmenter ? /* @__PURE__ */ new Intl.Segmenter(void 0, { granularity: "word" }) : null;
-  function interestingNode(state2, node2, bracketProp) {
-    if (node2.type.prop(bracketProp))
+  function interestingNode(state2, node3, bracketProp) {
+    if (node3.type.prop(bracketProp))
       return true;
-    let len = node2.to - node2.from;
-    return len && (len > 2 || /[^\s,.;:]/.test(state2.sliceDoc(node2.from, node2.to))) || node2.firstChild;
+    let len = node3.to - node3.from;
+    return len && (len > 2 || /[^\s,.;:]/.test(state2.sliceDoc(node3.from, node3.to))) || node3.firstChild;
   }
   function moveBySyntax(state2, start, forward) {
     let pos = syntaxTree(state2).resolveInner(start.head);
@@ -46446,9 +46462,9 @@ ${h2.join(`
           stack = stackBefore;
       }
       for (let cur2 = stack; cur2; cur2 = cur2.next) {
-        let { node: node2 } = cur2;
-        if ((node2.from < range.from && node2.to >= range.to || node2.to > range.to && node2.from <= range.from) && cur2.next)
-          return EditorSelection.range(node2.to, node2.from);
+        let { node: node3 } = cur2;
+        if ((node3.from < range.from && node3.to >= range.to || node3.to > range.to && node3.from <= range.from) && cur2.next)
+          return EditorSelection.range(node3.to, node3.from);
       }
       return range;
     });
@@ -48058,8 +48074,8 @@ print("Got", got)
     const runDisabled = running || mode !== "free";
     const runLabel = mode !== "free" ? "\u9884\u8BBE\u7528\u4F8B\u81EA\u52A8\u8FD0\u884C" : running ? "\u6B63\u5728\u8FD0\u884C" : "\u8FD0\u884C";
     const hosts = (0, import_react6.useMemo)(() => {
-      const of = (element) => (node2) => {
-        if (node2 !== null) node2.replaceChildren(element);
+      const of = (element) => (node3) => {
+        if (node3 !== null) node3.replaceChildren(element);
       };
       return {
         editor: of(model.editor.element),
