@@ -13471,7 +13471,7 @@
   // docs/picoworld.css
   var picoworld_default = ".pico-world-demo { min-height: 100dvh; background: var(--pico-paper); color: var(--pico-ink); font: var(--pico-size-sm)/1.5 var(--pico-font-ui); }\n.pico-world-demo__body { padding: var(--pico-space-4); }\n.pico-world-demo__viewport { height: clamp(360px, 65vh, 780px); }\n.pico-world-demo__transport { display: flex; align-items: center; gap: var(--pico-space-2); padding: var(--pico-space-3) 0; flex-wrap: wrap; font-size: var(--pico-size-xs); }\n.pico-world-demo__transport select { background: var(--pico-surface-raised); }\n.pico-world-demo__progress { flex: 1; min-width: 120px; accent-color: var(--pico-accent); }\n.pico-world-demo__assets { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--pico-space-3); }\n.pico-world-demo__asset { padding: var(--pico-space-3) var(--pico-space-4); text-align: left; cursor: pointer; color: var(--pico-ink); }\n.pico-world-demo__asset:hover { border-color: var(--pico-accent); }\n.pico-world-demo__asset-name { font-size: var(--pico-size-sm); }\n.pico-world-demo__asset-description { display: block; color: var(--pico-ink-soft); font-size: var(--pico-size-xs); margin: var(--pico-space-2) 0; }\n.pico-world-demo__code { font: var(--pico-size-xs)/1.5 var(--pico-font-mono); color: var(--pico-accent-deep); }\n.pico-world-demo__note { margin-top: var(--pico-space-4); font-size: var(--pico-size-xs); color: var(--pico-ink-soft); }\n";
 
-  // src/libs/picoworld/assets/catalog.json
+  // src/libs/picoworld/python/picoworld/assets/catalog.json
   var catalog_default = { materials: { soil: { label: "\u6CE5\u571F", color: "#a77b55", pattern: "grain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, grass: { label: "\u8349\u5730", color: "#8dc66d", pattern: "grass", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, sand: { label: "\u6C99\u5B50", color: "#f3d99b", pattern: "grain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, stone: { label: "\u77F3\u5934", color: "#9daec1", pattern: "grain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, brick: { label: "\u7EA2\u7816", color: "#d87565", pattern: "brick", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, wood: { label: "\u6728\u5934", color: "#c69763", pattern: "wood", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, leaves: { label: "\u6811\u53F6", color: "#4fba85", pattern: "grain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, glass: { label: "\u73BB\u7483", color: "#a8e7f0", pattern: "plain", roughness: 0.12, metalness: 0, opacity: 0.45, emissive: "#000000" }, water: { label: "\u6C34", color: "#50badf", pattern: "plain", roughness: 0.18, metalness: 0.1, opacity: 0.62, emissive: "#000000" }, snow: { label: "\u96EA\u767D", color: "#f3f4ed", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, red: { label: "\u73CA\u745A\u7EA2", color: "#ef6e78", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, yellow: { label: "\u67E0\u6AAC\u9EC4", color: "#ffd568", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, blue: { label: "\u5929\u7A7A\u84DD", color: "#68a9e7", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, purple: { label: "\u8461\u8404\u7D2B", color: "#a492de", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, mint: { label: "\u8584\u8377\u7EFF", color: "#77d7b3", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, dark: { label: "\u6DF1\u84DD", color: "#33475c", pattern: "plain", roughness: 0.8, metalness: 0, opacity: 1, emissive: "#000000" }, metal: { label: "\u91D1\u5C5E", color: "#becbda", pattern: "metal", roughness: 0.32, metalness: 0.65, opacity: 1, emissive: "#000000" }, lamp: { label: "\u706F\u5757", color: "#ffeab0", pattern: "plain", roughness: 0.4, metalness: 0, opacity: 1, emissive: "#ffbc45" } }, presets: { rocket: { label: "\u661F\u9645\u5C0F\u706B\u7BAD", description: "\u7EA2\u767D\u673A\u8EAB\u3001\u84DD\u8272\u8237\u7A97\uFF0C\u51C6\u5907\u53BB\u6708\u7403\u3002", voxels: [{ x: -2, y: 0, z: 0, material: "blue" }, { x: -2, y: 0, z: 1, material: "blue" }, { x: -2, y: 0, z: 2, material: "blue" }, { x: -1, y: -1, z: 1, material: "snow" }, { x: -1, y: -1, z: 2, material: "red" }, { x: -1, y: -1, z: 3, material: "snow" }, { x: -1, y: -1, z: 4, material: "snow" }, { x: -1, y: -1, z: 5, material: "snow" }, { x: -1, y: -1, z: 6, material: "snow" }, { x: -1, y: -1, z: 7, material: "red" }, { x: -1, y: 0, z: 1, material: "snow" }, { x: -1, y: 0, z: 2, material: "red" }, { x: -1, y: 0, z: 3, material: "snow" }, { x: -1, y: 0, z: 4, material: "snow" }, { x: -1, y: 0, z: 5, material: "snow" }, { x: -1, y: 0, z: 6, material: "snow" }, { x: -1, y: 0, z: 7, material: "red" }, { x: -1, y: 1, z: 1, material: "snow" }, { x: -1, y: 1, z: 2, material: "red" }, { x: -1, y: 1, z: 3, material: "snow" }, { x: -1, y: 1, z: 4, material: "snow" }, { x: -1, y: 1, z: 5, material: "snow" }, { x: -1, y: 1, z: 6, material: "snow" }, { x: -1, y: 1, z: 7, material: "red" }, { x: 0, y: -2, z: 0, material: "blue" }, { x: 0, y: -2, z: 1, material: "blue" }, { x: 0, y: -2, z: 2, material: "blue" }, { x: 0, y: -2, z: 4, material: "glass" }, { x: 0, y: -2, z: 5, material: "glass" }, { x: 0, y: -1, z: 1, material: "snow" }, { x: 0, y: -1, z: 2, material: "red" }, { x: 0, y: -1, z: 3, material: "snow" }, { x: 0, y: -1, z: 4, material: "snow" }, { x: 0, y: -1, z: 5, material: "snow" }, { x: 0, y: -1, z: 6, material: "snow" }, { x: 0, y: -1, z: 7, material: "red" }, { x: 0, y: 0, z: 0, material: "metal" }, { x: 0, y: 0, z: 1, material: "snow" }, { x: 0, y: 0, z: 2, material: "red" }, { x: 0, y: 0, z: 3, material: "snow" }, { x: 0, y: 0, z: 4, material: "snow" }, { x: 0, y: 0, z: 5, material: "snow" }, { x: 0, y: 0, z: 6, material: "snow" }, { x: 0, y: 0, z: 7, material: "red" }, { x: 0, y: 0, z: 8, material: "red" }, { x: 0, y: 0, z: 9, material: "red" }, { x: 0, y: 1, z: 1, material: "snow" }, { x: 0, y: 1, z: 2, material: "red" }, { x: 0, y: 1, z: 3, material: "snow" }, { x: 0, y: 1, z: 4, material: "snow" }, { x: 0, y: 1, z: 5, material: "snow" }, { x: 0, y: 1, z: 6, material: "snow" }, { x: 0, y: 1, z: 7, material: "red" }, { x: 0, y: 2, z: 0, material: "blue" }, { x: 0, y: 2, z: 1, material: "blue" }, { x: 0, y: 2, z: 2, material: "blue" }, { x: 1, y: -1, z: 1, material: "snow" }, { x: 1, y: -1, z: 2, material: "red" }, { x: 1, y: -1, z: 3, material: "snow" }, { x: 1, y: -1, z: 4, material: "snow" }, { x: 1, y: -1, z: 5, material: "snow" }, { x: 1, y: -1, z: 6, material: "snow" }, { x: 1, y: -1, z: 7, material: "red" }, { x: 1, y: 0, z: 1, material: "snow" }, { x: 1, y: 0, z: 2, material: "red" }, { x: 1, y: 0, z: 3, material: "snow" }, { x: 1, y: 0, z: 4, material: "snow" }, { x: 1, y: 0, z: 5, material: "snow" }, { x: 1, y: 0, z: 6, material: "snow" }, { x: 1, y: 0, z: 7, material: "red" }, { x: 1, y: 1, z: 1, material: "snow" }, { x: 1, y: 1, z: 2, material: "red" }, { x: 1, y: 1, z: 3, material: "snow" }, { x: 1, y: 1, z: 4, material: "snow" }, { x: 1, y: 1, z: 5, material: "snow" }, { x: 1, y: 1, z: 6, material: "snow" }, { x: 1, y: 1, z: 7, material: "red" }, { x: 2, y: 0, z: 0, material: "blue" }, { x: 2, y: 0, z: 1, material: "blue" }, { x: 2, y: 0, z: 2, material: "blue" }] }, robot: { label: "\u6325\u624B\u673A\u5668\u4EBA", description: "\u4EAE\u773C\u775B\u3001\u5C0F\u5929\u7EBF\uFF0C\u4E3E\u8D77\u624B\u5411\u4F60\u6253\u62DB\u547C\u3002", voxels: [{ x: -3, y: 0, z: 2, material: "yellow" }, { x: -3, y: 0, z: 3, material: "yellow" }, { x: -3, y: 0, z: 4, material: "yellow" }, { x: -2, y: 0, z: 0, material: "dark" }, { x: -2, y: 0, z: 2, material: "mint" }, { x: -2, y: 0, z: 3, material: "mint" }, { x: -2, y: 0, z: 4, material: "mint" }, { x: -2, y: 0, z: 5, material: "blue" }, { x: -2, y: 0, z: 6, material: "blue" }, { x: -2, y: 0, z: 7, material: "blue" }, { x: -2, y: 1, z: 0, material: "dark" }, { x: -2, y: 1, z: 2, material: "mint" }, { x: -2, y: 1, z: 3, material: "mint" }, { x: -2, y: 1, z: 4, material: "mint" }, { x: -2, y: 1, z: 5, material: "blue" }, { x: -2, y: 1, z: 6, material: "blue" }, { x: -2, y: 1, z: 7, material: "blue" }, { x: -1, y: -1, z: 6, material: "lamp" }, { x: -1, y: 0, z: 0, material: "dark" }, { x: -1, y: 0, z: 1, material: "metal" }, { x: -1, y: 0, z: 2, material: "mint" }, { x: -1, y: 0, z: 3, material: "mint" }, { x: -1, y: 0, z: 4, material: "mint" }, { x: -1, y: 0, z: 5, material: "blue" }, { x: -1, y: 0, z: 6, material: "blue" }, { x: -1, y: 0, z: 7, material: "blue" }, { x: -1, y: 1, z: 0, material: "dark" }, { x: -1, y: 1, z: 2, material: "mint" }, { x: -1, y: 1, z: 3, material: "mint" }, { x: -1, y: 1, z: 4, material: "mint" }, { x: -1, y: 1, z: 5, material: "blue" }, { x: -1, y: 1, z: 6, material: "blue" }, { x: -1, y: 1, z: 7, material: "blue" }, { x: 0, y: -1, z: 3, material: "yellow" }, { x: 0, y: -1, z: 6, material: "dark" }, { x: 0, y: 0, z: 2, material: "mint" }, { x: 0, y: 0, z: 3, material: "mint" }, { x: 0, y: 0, z: 4, material: "mint" }, { x: 0, y: 0, z: 5, material: "blue" }, { x: 0, y: 0, z: 6, material: "blue" }, { x: 0, y: 0, z: 7, material: "blue" }, { x: 0, y: 0, z: 8, material: "metal" }, { x: 0, y: 0, z: 9, material: "red" }, { x: 0, y: 1, z: 2, material: "mint" }, { x: 0, y: 1, z: 3, material: "mint" }, { x: 0, y: 1, z: 4, material: "mint" }, { x: 0, y: 1, z: 5, material: "blue" }, { x: 0, y: 1, z: 6, material: "blue" }, { x: 0, y: 1, z: 7, material: "blue" }, { x: 1, y: -1, z: 6, material: "lamp" }, { x: 1, y: 0, z: 0, material: "dark" }, { x: 1, y: 0, z: 1, material: "metal" }, { x: 1, y: 0, z: 2, material: "mint" }, { x: 1, y: 0, z: 3, material: "mint" }, { x: 1, y: 0, z: 4, material: "mint" }, { x: 1, y: 0, z: 5, material: "blue" }, { x: 1, y: 0, z: 6, material: "blue" }, { x: 1, y: 0, z: 7, material: "blue" }, { x: 1, y: 1, z: 0, material: "dark" }, { x: 1, y: 1, z: 2, material: "mint" }, { x: 1, y: 1, z: 3, material: "mint" }, { x: 1, y: 1, z: 4, material: "mint" }, { x: 1, y: 1, z: 5, material: "blue" }, { x: 1, y: 1, z: 6, material: "blue" }, { x: 1, y: 1, z: 7, material: "blue" }, { x: 2, y: 0, z: 0, material: "dark" }, { x: 2, y: 0, z: 2, material: "mint" }, { x: 2, y: 0, z: 3, material: "mint" }, { x: 2, y: 0, z: 4, material: "mint" }, { x: 2, y: 0, z: 5, material: "blue" }, { x: 2, y: 0, z: 6, material: "blue" }, { x: 2, y: 0, z: 7, material: "blue" }, { x: 2, y: 1, z: 0, material: "dark" }, { x: 2, y: 1, z: 2, material: "mint" }, { x: 2, y: 1, z: 3, material: "mint" }, { x: 2, y: 1, z: 4, material: "mint" }, { x: 2, y: 1, z: 5, material: "blue" }, { x: 2, y: 1, z: 6, material: "blue" }, { x: 2, y: 1, z: 7, material: "blue" }, { x: 3, y: 0, z: 4, material: "yellow" }, { x: 3, y: 0, z: 5, material: "yellow" }, { x: 3, y: 0, z: 6, material: "yellow" }] }, treehouse: { label: "\u79D8\u5BC6\u6811\u5C4B", description: "\u722C\u4E0A\u5C0F\u68AF\u5B50\uFF0C\u8D70\u8FDB\u6811\u51A0\u4E0A\u7684\u79D8\u5BC6\u57FA\u5730\u3002", voxels: [{ x: -3, y: -3, z: 9, material: "red" }, { x: -3, y: -2, z: 3, material: "leaves" }, { x: -3, y: -2, z: 9, material: "red" }, { x: -3, y: -1, z: 3, material: "leaves" }, { x: -3, y: -1, z: 9, material: "red" }, { x: -3, y: 0, z: 3, material: "leaves" }, { x: -3, y: 0, z: 9, material: "red" }, { x: -3, y: 1, z: 3, material: "leaves" }, { x: -3, y: 1, z: 9, material: "red" }, { x: -3, y: 2, z: 3, material: "leaves" }, { x: -3, y: 2, z: 9, material: "red" }, { x: -3, y: 3, z: 3, material: "leaves" }, { x: -3, y: 3, z: 9, material: "red" }, { x: -2, y: -3, z: 5, material: "wood" }, { x: -2, y: -3, z: 9, material: "red" }, { x: -2, y: -3, z: 10, material: "red" }, { x: -2, y: -2, z: 3, material: "leaves" }, { x: -2, y: -2, z: 5, material: "wood" }, { x: -2, y: -2, z: 6, material: "wood" }, { x: -2, y: -2, z: 7, material: "wood" }, { x: -2, y: -2, z: 8, material: "wood" }, { x: -2, y: -2, z: 9, material: "red" }, { x: -2, y: -2, z: 10, material: "red" }, { x: -2, y: -1, z: 3, material: "leaves" }, { x: -2, y: -1, z: 4, material: "leaves" }, { x: -2, y: -1, z: 5, material: "wood" }, { x: -2, y: -1, z: 6, material: "wood" }, { x: -2, y: -1, z: 7, material: "wood" }, { x: -2, y: -1, z: 8, material: "wood" }, { x: -2, y: -1, z: 9, material: "red" }, { x: -2, y: -1, z: 10, material: "red" }, { x: -2, y: 0, z: 3, material: "leaves" }, { x: -2, y: 0, z: 4, material: "leaves" }, { x: -2, y: 0, z: 5, material: "wood" }, { x: -2, y: 0, z: 6, material: "wood" }, { x: -2, y: 0, z: 7, material: "wood" }, { x: -2, y: 0, z: 8, material: "wood" }, { x: -2, y: 0, z: 9, material: "red" }, { x: -2, y: 0, z: 10, material: "red" }, { x: -2, y: 1, z: 3, material: "leaves" }, { x: -2, y: 1, z: 4, material: "leaves" }, { x: -2, y: 1, z: 5, material: "wood" }, { x: -2, y: 1, z: 6, material: "wood" }, { x: -2, y: 1, z: 7, material: "wood" }, { x: -2, y: 1, z: 8, material: "wood" }, { x: -2, y: 1, z: 9, material: "red" }, { x: -2, y: 1, z: 10, material: "red" }, { x: -2, y: 2, z: 3, material: "leaves" }, { x: -2, y: 2, z: 4, material: "leaves" }, { x: -2, y: 2, z: 5, material: "wood" }, { x: -2, y: 2, z: 6, material: "wood" }, { x: -2, y: 2, z: 7, material: "wood" }, { x: -2, y: 2, z: 8, material: "wood" }, { x: -2, y: 2, z: 9, material: "red" }, { x: -2, y: 2, z: 10, material: "red" }, { x: -2, y: 3, z: 3, material: "leaves" }, { x: -2, y: 3, z: 9, material: "red" }, { x: -2, y: 3, z: 10, material: "red" }, { x: -1, y: -4, z: 0, material: "wood" }, { x: -1, y: -4, z: 1, material: "wood" }, { x: -1, y: -4, z: 2, material: "wood" }, { x: -1, y: -4, z: 3, material: "wood" }, { x: -1, y: -4, z: 4, material: "wood" }, { x: -1, y: -4, z: 5, material: "wood" }, { x: -1, y: -3, z: 5, material: "wood" }, { x: -1, y: -3, z: 9, material: "red" }, { x: -1, y: -3, z: 10, material: "red" }, { x: -1, y: -3, z: 11, material: "red" }, { x: -1, y: -2, z: 3, material: "leaves" }, { x: -1, y: -2, z: 5, material: "wood" }, { x: -1, y: -2, z: 6, material: "wood" }, { x: -1, y: -2, z: 7, material: "wood" }, { x: -1, y: -2, z: 8, material: "wood" }, { x: -1, y: -2, z: 9, material: "red" }, { x: -1, y: -2, z: 10, material: "red" }, { x: -1, y: -2, z: 11, material: "red" }, { x: -1, y: -1, z: 3, material: "leaves" }, { x: -1, y: -1, z: 4, material: "leaves" }, { x: -1, y: -1, z: 5, material: "wood" }, { x: -1, y: -1, z: 9, material: "red" }, { x: -1, y: -1, z: 10, material: "red" }, { x: -1, y: -1, z: 11, material: "red" }, { x: -1, y: 0, z: 3, material: "leaves" }, { x: -1, y: 0, z: 4, material: "leaves" }, { x: -1, y: 0, z: 5, material: "wood" }, { x: -1, y: 0, z: 9, material: "red" }, { x: -1, y: 0, z: 10, material: "red" }, { x: -1, y: 0, z: 11, material: "red" }, { x: -1, y: 1, z: 3, material: "leaves" }, { x: -1, y: 1, z: 4, material: "leaves" }, { x: -1, y: 1, z: 5, material: "wood" }, { x: -1, y: 1, z: 9, material: "red" }, { x: -1, y: 1, z: 10, material: "red" }, { x: -1, y: 1, z: 11, material: "red" }, { x: -1, y: 2, z: 3, material: "leaves" }, { x: -1, y: 2, z: 4, material: "leaves" }, { x: -1, y: 2, z: 5, material: "wood" }, { x: -1, y: 2, z: 6, material: "wood" }, { x: -1, y: 2, z: 7, material: "wood" }, { x: -1, y: 2, z: 8, material: "wood" }, { x: -1, y: 2, z: 9, material: "red" }, { x: -1, y: 2, z: 10, material: "red" }, { x: -1, y: 2, z: 11, material: "red" }, { x: -1, y: 3, z: 3, material: "leaves" }, { x: -1, y: 3, z: 9, material: "red" }, { x: -1, y: 3, z: 10, material: "red" }, { x: -1, y: 3, z: 11, material: "red" }, { x: 0, y: -4, z: 0, material: "yellow" }, { x: 0, y: -4, z: 2, material: "yellow" }, { x: 0, y: -4, z: 4, material: "yellow" }, { x: 0, y: -3, z: 5, material: "wood" }, { x: 0, y: -3, z: 9, material: "red" }, { x: 0, y: -3, z: 10, material: "red" }, { x: 0, y: -3, z: 11, material: "red" }, { x: 0, y: -2, z: 3, material: "leaves" }, { x: 0, y: -2, z: 5, material: "wood" }, { x: 0, y: -2, z: 8, material: "wood" }, { x: 0, y: -2, z: 9, material: "red" }, { x: 0, y: -2, z: 10, material: "red" }, { x: 0, y: -2, z: 11, material: "red" }, { x: 0, y: -1, z: 3, material: "leaves" }, { x: 0, y: -1, z: 4, material: "leaves" }, { x: 0, y: -1, z: 5, material: "wood" }, { x: 0, y: -1, z: 9, material: "red" }, { x: 0, y: -1, z: 10, material: "red" }, { x: 0, y: -1, z: 11, material: "red" }, { x: 0, y: 0, z: 0, material: "wood" }, { x: 0, y: 0, z: 1, material: "wood" }, { x: 0, y: 0, z: 2, material: "wood" }, { x: 0, y: 0, z: 3, material: "leaves" }, { x: 0, y: 0, z: 4, material: "leaves" }, { x: 0, y: 0, z: 5, material: "wood" }, { x: 0, y: 0, z: 9, material: "red" }, { x: 0, y: 0, z: 10, material: "red" }, { x: 0, y: 0, z: 11, material: "red" }, { x: 0, y: 1, z: 0, material: "wood" }, { x: 0, y: 1, z: 1, material: "wood" }, { x: 0, y: 1, z: 2, material: "wood" }, { x: 0, y: 1, z: 3, material: "leaves" }, { x: 0, y: 1, z: 4, material: "leaves" }, { x: 0, y: 1, z: 5, material: "wood" }, { x: 0, y: 1, z: 9, material: "red" }, { x: 0, y: 1, z: 10, material: "red" }, { x: 0, y: 1, z: 11, material: "red" }, { x: 0, y: 2, z: 3, material: "leaves" }, { x: 0, y: 2, z: 4, material: "leaves" }, { x: 0, y: 2, z: 5, material: "wood" }, { x: 0, y: 2, z: 6, material: "wood" }, { x: 0, y: 2, z: 7, material: "wood" }, { x: 0, y: 2, z: 8, material: "wood" }, { x: 0, y: 2, z: 9, material: "red" }, { x: 0, y: 2, z: 10, material: "red" }, { x: 0, y: 2, z: 11, material: "red" }, { x: 0, y: 3, z: 3, material: "leaves" }, { x: 0, y: 3, z: 9, material: "red" }, { x: 0, y: 3, z: 10, material: "red" }, { x: 0, y: 3, z: 11, material: "red" }, { x: 1, y: -4, z: 0, material: "yellow" }, { x: 1, y: -4, z: 2, material: "yellow" }, { x: 1, y: -4, z: 4, material: "yellow" }, { x: 1, y: -3, z: 5, material: "wood" }, { x: 1, y: -3, z: 9, material: "red" }, { x: 1, y: -3, z: 10, material: "red" }, { x: 1, y: -3, z: 11, material: "red" }, { x: 1, y: -2, z: 3, material: "leaves" }, { x: 1, y: -2, z: 5, material: "wood" }, { x: 1, y: -2, z: 8, material: "wood" }, { x: 1, y: -2, z: 9, material: "red" }, { x: 1, y: -2, z: 10, material: "red" }, { x: 1, y: -2, z: 11, material: "red" }, { x: 1, y: -1, z: 3, material: "leaves" }, { x: 1, y: -1, z: 4, material: "leaves" }, { x: 1, y: -1, z: 5, material: "wood" }, { x: 1, y: -1, z: 9, material: "red" }, { x: 1, y: -1, z: 10, material: "red" }, { x: 1, y: -1, z: 11, material: "red" }, { x: 1, y: 0, z: 0, material: "wood" }, { x: 1, y: 0, z: 1, material: "wood" }, { x: 1, y: 0, z: 2, material: "wood" }, { x: 1, y: 0, z: 3, material: "leaves" }, { x: 1, y: 0, z: 4, material: "leaves" }, { x: 1, y: 0, z: 5, material: "wood" }, { x: 1, y: 0, z: 9, material: "red" }, { x: 1, y: 0, z: 10, material: "red" }, { x: 1, y: 0, z: 11, material: "red" }, { x: 1, y: 1, z: 0, material: "wood" }, { x: 1, y: 1, z: 1, material: "wood" }, { x: 1, y: 1, z: 2, material: "wood" }, { x: 1, y: 1, z: 3, material: "leaves" }, { x: 1, y: 1, z: 4, material: "leaves" }, { x: 1, y: 1, z: 5, material: "wood" }, { x: 1, y: 1, z: 9, material: "red" }, { x: 1, y: 1, z: 10, material: "red" }, { x: 1, y: 1, z: 11, material: "red" }, { x: 1, y: 2, z: 3, material: "leaves" }, { x: 1, y: 2, z: 4, material: "leaves" }, { x: 1, y: 2, z: 5, material: "wood" }, { x: 1, y: 2, z: 6, material: "wood" }, { x: 1, y: 2, z: 7, material: "wood" }, { x: 1, y: 2, z: 8, material: "wood" }, { x: 1, y: 2, z: 9, material: "red" }, { x: 1, y: 2, z: 10, material: "red" }, { x: 1, y: 2, z: 11, material: "red" }, { x: 1, y: 3, z: 3, material: "leaves" }, { x: 1, y: 3, z: 9, material: "red" }, { x: 1, y: 3, z: 10, material: "red" }, { x: 1, y: 3, z: 11, material: "red" }, { x: 2, y: -4, z: 0, material: "wood" }, { x: 2, y: -4, z: 1, material: "wood" }, { x: 2, y: -4, z: 2, material: "wood" }, { x: 2, y: -4, z: 3, material: "wood" }, { x: 2, y: -4, z: 4, material: "wood" }, { x: 2, y: -4, z: 5, material: "wood" }, { x: 2, y: -3, z: 5, material: "wood" }, { x: 2, y: -3, z: 9, material: "red" }, { x: 2, y: -3, z: 10, material: "red" }, { x: 2, y: -3, z: 11, material: "red" }, { x: 2, y: -2, z: 3, material: "leaves" }, { x: 2, y: -2, z: 5, material: "wood" }, { x: 2, y: -2, z: 6, material: "wood" }, { x: 2, y: -2, z: 7, material: "wood" }, { x: 2, y: -2, z: 8, material: "wood" }, { x: 2, y: -2, z: 9, material: "red" }, { x: 2, y: -2, z: 10, material: "red" }, { x: 2, y: -2, z: 11, material: "red" }, { x: 2, y: -1, z: 3, material: "leaves" }, { x: 2, y: -1, z: 4, material: "leaves" }, { x: 2, y: -1, z: 5, material: "wood" }, { x: 2, y: -1, z: 9, material: "red" }, { x: 2, y: -1, z: 10, material: "red" }, { x: 2, y: -1, z: 11, material: "red" }, { x: 2, y: 0, z: 3, material: "leaves" }, { x: 2, y: 0, z: 4, material: "leaves" }, { x: 2, y: 0, z: 5, material: "wood" }, { x: 2, y: 0, z: 9, material: "red" }, { x: 2, y: 0, z: 10, material: "red" }, { x: 2, y: 0, z: 11, material: "red" }, { x: 2, y: 1, z: 3, material: "leaves" }, { x: 2, y: 1, z: 4, material: "leaves" }, { x: 2, y: 1, z: 5, material: "wood" }, { x: 2, y: 1, z: 9, material: "red" }, { x: 2, y: 1, z: 10, material: "red" }, { x: 2, y: 1, z: 11, material: "red" }, { x: 2, y: 2, z: 3, material: "leaves" }, { x: 2, y: 2, z: 4, material: "leaves" }, { x: 2, y: 2, z: 5, material: "wood" }, { x: 2, y: 2, z: 6, material: "wood" }, { x: 2, y: 2, z: 7, material: "wood" }, { x: 2, y: 2, z: 8, material: "wood" }, { x: 2, y: 2, z: 9, material: "red" }, { x: 2, y: 2, z: 10, material: "red" }, { x: 2, y: 2, z: 11, material: "red" }, { x: 2, y: 3, z: 3, material: "leaves" }, { x: 2, y: 3, z: 9, material: "red" }, { x: 2, y: 3, z: 10, material: "red" }, { x: 2, y: 3, z: 11, material: "red" }, { x: 3, y: -3, z: 5, material: "wood" }, { x: 3, y: -3, z: 9, material: "red" }, { x: 3, y: -3, z: 10, material: "red" }, { x: 3, y: -2, z: 3, material: "leaves" }, { x: 3, y: -2, z: 5, material: "wood" }, { x: 3, y: -2, z: 6, material: "wood" }, { x: 3, y: -2, z: 7, material: "wood" }, { x: 3, y: -2, z: 8, material: "wood" }, { x: 3, y: -2, z: 9, material: "red" }, { x: 3, y: -2, z: 10, material: "red" }, { x: 3, y: -1, z: 3, material: "leaves" }, { x: 3, y: -1, z: 4, material: "leaves" }, { x: 3, y: -1, z: 5, material: "wood" }, { x: 3, y: -1, z: 6, material: "wood" }, { x: 3, y: -1, z: 7, material: "wood" }, { x: 3, y: -1, z: 8, material: "wood" }, { x: 3, y: -1, z: 9, material: "red" }, { x: 3, y: -1, z: 10, material: "red" }, { x: 3, y: 0, z: 3, material: "leaves" }, { x: 3, y: 0, z: 4, material: "leaves" }, { x: 3, y: 0, z: 5, material: "wood" }, { x: 3, y: 0, z: 6, material: "wood" }, { x: 3, y: 0, z: 7, material: "glass" }, { x: 3, y: 0, z: 8, material: "wood" }, { x: 3, y: 0, z: 9, material: "red" }, { x: 3, y: 0, z: 10, material: "red" }, { x: 3, y: 1, z: 3, material: "leaves" }, { x: 3, y: 1, z: 4, material: "leaves" }, { x: 3, y: 1, z: 5, material: "wood" }, { x: 3, y: 1, z: 6, material: "wood" }, { x: 3, y: 1, z: 7, material: "wood" }, { x: 3, y: 1, z: 8, material: "wood" }, { x: 3, y: 1, z: 9, material: "red" }, { x: 3, y: 1, z: 10, material: "red" }, { x: 3, y: 2, z: 3, material: "leaves" }, { x: 3, y: 2, z: 4, material: "leaves" }, { x: 3, y: 2, z: 5, material: "wood" }, { x: 3, y: 2, z: 6, material: "wood" }, { x: 3, y: 2, z: 7, material: "wood" }, { x: 3, y: 2, z: 8, material: "wood" }, { x: 3, y: 2, z: 9, material: "red" }, { x: 3, y: 2, z: 10, material: "red" }, { x: 3, y: 3, z: 3, material: "leaves" }, { x: 3, y: 3, z: 9, material: "red" }, { x: 3, y: 3, z: 10, material: "red" }, { x: 4, y: -3, z: 9, material: "red" }, { x: 4, y: -2, z: 3, material: "leaves" }, { x: 4, y: -2, z: 9, material: "red" }, { x: 4, y: -1, z: 3, material: "leaves" }, { x: 4, y: -1, z: 9, material: "red" }, { x: 4, y: 0, z: 3, material: "leaves" }, { x: 4, y: 0, z: 9, material: "red" }, { x: 4, y: 1, z: 3, material: "leaves" }, { x: 4, y: 1, z: 9, material: "red" }, { x: 4, y: 2, z: 3, material: "leaves" }, { x: 4, y: 2, z: 9, material: "red" }, { x: 4, y: 3, z: 3, material: "leaves" }, { x: 4, y: 3, z: 9, material: "red" }] }, dinosaur: { label: "\u8584\u8377\u5C0F\u6050\u9F99", description: "\u957F\u5C3E\u5DF4\u3001\u67E0\u6AAC\u9EC4\u80CC\u9CCD\uFF0C\u4E00\u53EA\u53CB\u597D\u7684\u5C0F\u6050\u9F99\u3002", voxels: [{ x: -5, y: 0, z: 1, material: "mint" }, { x: -5, y: 0, z: 2, material: "mint" }, { x: -4, y: 0, z: 2, material: "mint" }, { x: -4, y: 0, z: 3, material: "mint" }, { x: -3, y: 0, z: 2, material: "mint" }, { x: -3, y: 0, z: 3, material: "mint" }, { x: -2, y: -1, z: 0, material: "leaves" }, { x: -2, y: -1, z: 1, material: "leaves" }, { x: -2, y: -1, z: 2, material: "mint" }, { x: -2, y: -1, z: 3, material: "mint" }, { x: -2, y: -1, z: 4, material: "mint" }, { x: -2, y: 0, z: 2, material: "mint" }, { x: -2, y: 0, z: 3, material: "mint" }, { x: -2, y: 0, z: 4, material: "mint" }, { x: -2, y: 0, z: 5, material: "yellow" }, { x: -2, y: 1, z: 0, material: "leaves" }, { x: -2, y: 1, z: 1, material: "leaves" }, { x: -2, y: 1, z: 2, material: "mint" }, { x: -2, y: 1, z: 3, material: "mint" }, { x: -2, y: 1, z: 4, material: "mint" }, { x: -1, y: -1, z: 2, material: "mint" }, { x: -1, y: -1, z: 3, material: "mint" }, { x: -1, y: -1, z: 4, material: "mint" }, { x: -1, y: 0, z: 2, material: "mint" }, { x: -1, y: 0, z: 3, material: "mint" }, { x: -1, y: 0, z: 4, material: "mint" }, { x: -1, y: 1, z: 2, material: "mint" }, { x: -1, y: 1, z: 3, material: "mint" }, { x: -1, y: 1, z: 4, material: "mint" }, { x: 0, y: -1, z: 2, material: "mint" }, { x: 0, y: -1, z: 3, material: "mint" }, { x: 0, y: -1, z: 4, material: "mint" }, { x: 0, y: 0, z: 2, material: "mint" }, { x: 0, y: 0, z: 3, material: "mint" }, { x: 0, y: 0, z: 4, material: "mint" }, { x: 0, y: 0, z: 5, material: "yellow" }, { x: 0, y: 1, z: 2, material: "mint" }, { x: 0, y: 1, z: 3, material: "mint" }, { x: 0, y: 1, z: 4, material: "mint" }, { x: 1, y: -1, z: 2, material: "mint" }, { x: 1, y: -1, z: 3, material: "mint" }, { x: 1, y: -1, z: 4, material: "mint" }, { x: 1, y: 0, z: 2, material: "mint" }, { x: 1, y: 0, z: 3, material: "mint" }, { x: 1, y: 0, z: 4, material: "mint" }, { x: 1, y: 1, z: 2, material: "mint" }, { x: 1, y: 1, z: 3, material: "mint" }, { x: 1, y: 1, z: 4, material: "mint" }, { x: 2, y: -1, z: 0, material: "leaves" }, { x: 2, y: -1, z: 1, material: "leaves" }, { x: 2, y: -1, z: 2, material: "mint" }, { x: 2, y: -1, z: 3, material: "mint" }, { x: 2, y: -1, z: 4, material: "mint" }, { x: 2, y: -1, z: 5, material: "mint" }, { x: 2, y: 0, z: 2, material: "mint" }, { x: 2, y: 0, z: 3, material: "mint" }, { x: 2, y: 0, z: 4, material: "mint" }, { x: 2, y: 0, z: 5, material: "yellow" }, { x: 2, y: 1, z: 0, material: "leaves" }, { x: 2, y: 1, z: 1, material: "leaves" }, { x: 2, y: 1, z: 2, material: "mint" }, { x: 2, y: 1, z: 3, material: "mint" }, { x: 2, y: 1, z: 4, material: "mint" }, { x: 2, y: 1, z: 5, material: "mint" }, { x: 3, y: -1, z: 4, material: "mint" }, { x: 3, y: -1, z: 5, material: "mint" }, { x: 3, y: -1, z: 6, material: "mint" }, { x: 3, y: 0, z: 4, material: "mint" }, { x: 3, y: 0, z: 5, material: "mint" }, { x: 3, y: 0, z: 6, material: "mint" }, { x: 3, y: 1, z: 4, material: "mint" }, { x: 3, y: 1, z: 5, material: "mint" }, { x: 3, y: 1, z: 6, material: "mint" }, { x: 4, y: -2, z: 6, material: "dark" }, { x: 4, y: -1, z: 5, material: "mint" }, { x: 4, y: -1, z: 6, material: "mint" }, { x: 4, y: 0, z: 5, material: "mint" }, { x: 4, y: 0, z: 6, material: "mint" }, { x: 4, y: 1, z: 5, material: "mint" }, { x: 4, y: 1, z: 6, material: "mint" }, { x: 4, y: 2, z: 6, material: "dark" }, { x: 5, y: -1, z: 5, material: "yellow" }, { x: 5, y: -1, z: 6, material: "mint" }, { x: 5, y: 0, z: 5, material: "yellow" }, { x: 5, y: 0, z: 6, material: "mint" }, { x: 5, y: 1, z: 5, material: "yellow" }, { x: 5, y: 1, z: 6, material: "mint" }] }, castle: { label: "\u5F69\u65D7\u57CE\u5821", description: "\u7A7F\u8FC7\u62F1\u95E8\uFF0C\u56DB\u5EA7\u5854\u697C\u56F4\u7740\u81EA\u5DF1\u7684\u5C0F\u5EAD\u9662\u3002", voxels: [{ x: -3, y: -3, z: 0, material: "snow" }, { x: -3, y: -3, z: 1, material: "snow" }, { x: -3, y: -3, z: 2, material: "snow" }, { x: -3, y: -3, z: 3, material: "snow" }, { x: -3, y: -3, z: 4, material: "stone" }, { x: -3, y: -3, z: 5, material: "stone" }, { x: -3, y: -3, z: 6, material: "purple" }, { x: -3, y: -2, z: 0, material: "snow" }, { x: -3, y: -2, z: 1, material: "snow" }, { x: -3, y: -2, z: 2, material: "snow" }, { x: -3, y: -2, z: 3, material: "snow" }, { x: -3, y: -2, z: 4, material: "stone" }, { x: -3, y: -2, z: 5, material: "stone" }, { x: -3, y: -1, z: 0, material: "snow" }, { x: -3, y: -1, z: 1, material: "snow" }, { x: -3, y: -1, z: 2, material: "snow" }, { x: -3, y: -1, z: 3, material: "snow" }, { x: -3, y: 0, z: 0, material: "snow" }, { x: -3, y: 0, z: 1, material: "snow" }, { x: -3, y: 0, z: 2, material: "snow" }, { x: -3, y: 0, z: 3, material: "snow" }, { x: -3, y: 1, z: 0, material: "snow" }, { x: -3, y: 1, z: 1, material: "snow" }, { x: -3, y: 1, z: 2, material: "snow" }, { x: -3, y: 1, z: 3, material: "snow" }, { x: -3, y: 2, z: 0, material: "snow" }, { x: -3, y: 2, z: 1, material: "snow" }, { x: -3, y: 2, z: 2, material: "snow" }, { x: -3, y: 2, z: 3, material: "snow" }, { x: -3, y: 3, z: 0, material: "snow" }, { x: -3, y: 3, z: 1, material: "snow" }, { x: -3, y: 3, z: 2, material: "snow" }, { x: -3, y: 3, z: 3, material: "snow" }, { x: -3, y: 3, z: 4, material: "stone" }, { x: -3, y: 3, z: 5, material: "stone" }, { x: -3, y: 3, z: 6, material: "purple" }, { x: -3, y: 4, z: 0, material: "snow" }, { x: -3, y: 4, z: 1, material: "snow" }, { x: -3, y: 4, z: 2, material: "snow" }, { x: -3, y: 4, z: 3, material: "snow" }, { x: -3, y: 4, z: 4, material: "stone" }, { x: -3, y: 4, z: 5, material: "stone" }, { x: -2, y: -3, z: 0, material: "snow" }, { x: -2, y: -3, z: 1, material: "snow" }, { x: -2, y: -3, z: 2, material: "snow" }, { x: -2, y: -3, z: 3, material: "snow" }, { x: -2, y: -3, z: 4, material: "stone" }, { x: -2, y: -3, z: 5, material: "stone" }, { x: -2, y: -2, z: 0, material: "stone" }, { x: -2, y: -2, z: 1, material: "stone" }, { x: -2, y: -2, z: 2, material: "stone" }, { x: -2, y: -2, z: 3, material: "stone" }, { x: -2, y: -2, z: 4, material: "stone" }, { x: -2, y: -2, z: 5, material: "stone" }, { x: -2, y: -2, z: 6, material: "purple" }, { x: -2, y: 3, z: 0, material: "snow" }, { x: -2, y: 3, z: 1, material: "snow" }, { x: -2, y: 3, z: 2, material: "snow" }, { x: -2, y: 3, z: 3, material: "snow" }, { x: -2, y: 3, z: 4, material: "stone" }, { x: -2, y: 3, z: 5, material: "stone" }, { x: -2, y: 4, z: 0, material: "stone" }, { x: -2, y: 4, z: 1, material: "stone" }, { x: -2, y: 4, z: 2, material: "stone" }, { x: -2, y: 4, z: 3, material: "stone" }, { x: -2, y: 4, z: 4, material: "stone" }, { x: -2, y: 4, z: 5, material: "stone" }, { x: -2, y: 4, z: 6, material: "purple" }, { x: -1, y: -3, z: 0, material: "snow" }, { x: -1, y: -3, z: 1, material: "snow" }, { x: -1, y: -3, z: 2, material: "snow" }, { x: -1, y: -3, z: 3, material: "snow" }, { x: -1, y: 3, z: 0, material: "snow" }, { x: -1, y: 3, z: 1, material: "snow" }, { x: -1, y: 3, z: 2, material: "snow" }, { x: -1, y: 3, z: 3, material: "snow" }, { x: 0, y: -3, z: 3, material: "snow" }, { x: 0, y: 3, z: 0, material: "snow" }, { x: 0, y: 3, z: 1, material: "snow" }, { x: 0, y: 3, z: 2, material: "snow" }, { x: 0, y: 3, z: 3, material: "snow" }, { x: 1, y: -3, z: 3, material: "snow" }, { x: 1, y: 3, z: 0, material: "snow" }, { x: 1, y: 3, z: 1, material: "snow" }, { x: 1, y: 3, z: 2, material: "snow" }, { x: 1, y: 3, z: 3, material: "snow" }, { x: 2, y: -3, z: 0, material: "snow" }, { x: 2, y: -3, z: 1, material: "snow" }, { x: 2, y: -3, z: 2, material: "snow" }, { x: 2, y: -3, z: 3, material: "snow" }, { x: 2, y: 3, z: 0, material: "snow" }, { x: 2, y: 3, z: 1, material: "snow" }, { x: 2, y: 3, z: 2, material: "snow" }, { x: 2, y: 3, z: 3, material: "snow" }, { x: 3, y: -3, z: 0, material: "snow" }, { x: 3, y: -3, z: 1, material: "snow" }, { x: 3, y: -3, z: 2, material: "snow" }, { x: 3, y: -3, z: 3, material: "snow" }, { x: 3, y: -3, z: 4, material: "stone" }, { x: 3, y: -3, z: 5, material: "stone" }, { x: 3, y: -3, z: 6, material: "purple" }, { x: 3, y: -2, z: 0, material: "stone" }, { x: 3, y: -2, z: 1, material: "stone" }, { x: 3, y: -2, z: 2, material: "stone" }, { x: 3, y: -2, z: 3, material: "stone" }, { x: 3, y: -2, z: 4, material: "stone" }, { x: 3, y: -2, z: 5, material: "stone" }, { x: 3, y: 3, z: 0, material: "snow" }, { x: 3, y: 3, z: 1, material: "snow" }, { x: 3, y: 3, z: 2, material: "snow" }, { x: 3, y: 3, z: 3, material: "snow" }, { x: 3, y: 3, z: 4, material: "stone" }, { x: 3, y: 3, z: 5, material: "stone" }, { x: 3, y: 3, z: 6, material: "wood" }, { x: 3, y: 3, z: 7, material: "wood" }, { x: 3, y: 3, z: 8, material: "wood" }, { x: 3, y: 3, z: 9, material: "wood" }, { x: 3, y: 4, z: 0, material: "stone" }, { x: 3, y: 4, z: 1, material: "stone" }, { x: 3, y: 4, z: 2, material: "stone" }, { x: 3, y: 4, z: 3, material: "stone" }, { x: 3, y: 4, z: 4, material: "stone" }, { x: 3, y: 4, z: 5, material: "stone" }, { x: 4, y: -3, z: 0, material: "snow" }, { x: 4, y: -3, z: 1, material: "snow" }, { x: 4, y: -3, z: 2, material: "snow" }, { x: 4, y: -3, z: 3, material: "snow" }, { x: 4, y: -3, z: 4, material: "stone" }, { x: 4, y: -3, z: 5, material: "stone" }, { x: 4, y: -2, z: 0, material: "snow" }, { x: 4, y: -2, z: 1, material: "snow" }, { x: 4, y: -2, z: 2, material: "snow" }, { x: 4, y: -2, z: 3, material: "snow" }, { x: 4, y: -2, z: 4, material: "stone" }, { x: 4, y: -2, z: 5, material: "stone" }, { x: 4, y: -2, z: 6, material: "purple" }, { x: 4, y: -1, z: 0, material: "snow" }, { x: 4, y: -1, z: 1, material: "snow" }, { x: 4, y: -1, z: 2, material: "snow" }, { x: 4, y: -1, z: 3, material: "snow" }, { x: 4, y: 0, z: 0, material: "snow" }, { x: 4, y: 0, z: 1, material: "snow" }, { x: 4, y: 0, z: 2, material: "snow" }, { x: 4, y: 0, z: 3, material: "snow" }, { x: 4, y: 1, z: 0, material: "snow" }, { x: 4, y: 1, z: 1, material: "snow" }, { x: 4, y: 1, z: 2, material: "snow" }, { x: 4, y: 1, z: 3, material: "snow" }, { x: 4, y: 2, z: 0, material: "snow" }, { x: 4, y: 2, z: 1, material: "snow" }, { x: 4, y: 2, z: 2, material: "snow" }, { x: 4, y: 2, z: 3, material: "snow" }, { x: 4, y: 3, z: 0, material: "snow" }, { x: 4, y: 3, z: 1, material: "snow" }, { x: 4, y: 3, z: 2, material: "snow" }, { x: 4, y: 3, z: 3, material: "snow" }, { x: 4, y: 3, z: 4, material: "stone" }, { x: 4, y: 3, z: 5, material: "stone" }, { x: 4, y: 3, z: 8, material: "red" }, { x: 4, y: 3, z: 9, material: "red" }, { x: 4, y: 4, z: 0, material: "snow" }, { x: 4, y: 4, z: 1, material: "snow" }, { x: 4, y: 4, z: 2, material: "snow" }, { x: 4, y: 4, z: 3, material: "snow" }, { x: 4, y: 4, z: 4, material: "stone" }, { x: 4, y: 4, z: 5, material: "stone" }, { x: 4, y: 4, z: 6, material: "purple" }, { x: 5, y: 3, z: 8, material: "red" }, { x: 5, y: 3, z: 9, material: "red" }] } } };
 
   // src/libs/picoworld/impl/card.tsx
@@ -26799,99 +26799,6 @@
       return new _BoxGeometry(data.width, data.height, data.depth, data.widthSegments, data.heightSegments, data.depthSegments);
     }
   };
-  var _v0 = /* @__PURE__ */ new Vector3();
-  var _v1$1 = /* @__PURE__ */ new Vector3();
-  var _normal = /* @__PURE__ */ new Vector3();
-  var _triangle = /* @__PURE__ */ new Triangle();
-  var EdgesGeometry = class extends BufferGeometry {
-    /**
-     * Constructs a new edges geometry.
-     *
-     * @param {?BufferGeometry} [geometry=null] - The geometry.
-     * @param {number} [thresholdAngle=1] - An edge is only rendered if the angle (in degrees)
-     * between the face normals of the adjoining faces exceeds this value.
-     */
-    constructor(geometry = null, thresholdAngle = 1) {
-      super();
-      this.type = "EdgesGeometry";
-      this.parameters = {
-        geometry,
-        thresholdAngle
-      };
-      if (geometry !== null) {
-        const precisionPoints = 4;
-        const precision = Math.pow(10, precisionPoints);
-        const thresholdDot = Math.cos(DEG2RAD * thresholdAngle);
-        const indexAttr = geometry.getIndex();
-        const positionAttr = geometry.getAttribute("position");
-        const indexCount = indexAttr ? indexAttr.count : positionAttr.count;
-        const indexArr = [0, 0, 0];
-        const vertKeys = ["a", "b", "c"];
-        const hashes = new Array(3);
-        const edgeData = {};
-        const vertices = [];
-        for (let i = 0; i < indexCount; i += 3) {
-          if (indexAttr) {
-            indexArr[0] = indexAttr.getX(i);
-            indexArr[1] = indexAttr.getX(i + 1);
-            indexArr[2] = indexAttr.getX(i + 2);
-          } else {
-            indexArr[0] = i;
-            indexArr[1] = i + 1;
-            indexArr[2] = i + 2;
-          }
-          const { a, b, c } = _triangle;
-          a.fromBufferAttribute(positionAttr, indexArr[0]);
-          b.fromBufferAttribute(positionAttr, indexArr[1]);
-          c.fromBufferAttribute(positionAttr, indexArr[2]);
-          _triangle.getNormal(_normal);
-          hashes[0] = `${Math.round(a.x * precision)},${Math.round(a.y * precision)},${Math.round(a.z * precision)}`;
-          hashes[1] = `${Math.round(b.x * precision)},${Math.round(b.y * precision)},${Math.round(b.z * precision)}`;
-          hashes[2] = `${Math.round(c.x * precision)},${Math.round(c.y * precision)},${Math.round(c.z * precision)}`;
-          if (hashes[0] === hashes[1] || hashes[1] === hashes[2] || hashes[2] === hashes[0]) {
-            continue;
-          }
-          for (let j = 0; j < 3; j++) {
-            const jNext = (j + 1) % 3;
-            const vecHash0 = hashes[j];
-            const vecHash1 = hashes[jNext];
-            const v0 = _triangle[vertKeys[j]];
-            const v1 = _triangle[vertKeys[jNext]];
-            const hash = `${vecHash0}_${vecHash1}`;
-            const reverseHash = `${vecHash1}_${vecHash0}`;
-            if (reverseHash in edgeData && edgeData[reverseHash]) {
-              if (_normal.dot(edgeData[reverseHash].normal) <= thresholdDot) {
-                vertices.push(v0.x, v0.y, v0.z);
-                vertices.push(v1.x, v1.y, v1.z);
-              }
-              edgeData[reverseHash] = null;
-            } else if (!(hash in edgeData)) {
-              edgeData[hash] = {
-                index0: indexArr[j],
-                index1: indexArr[jNext],
-                normal: _normal.clone()
-              };
-            }
-          }
-        }
-        for (const key in edgeData) {
-          if (edgeData[key]) {
-            const { index0, index1 } = edgeData[key];
-            _v0.fromBufferAttribute(positionAttr, index0);
-            _v1$1.fromBufferAttribute(positionAttr, index1);
-            vertices.push(_v0.x, _v0.y, _v0.z);
-            vertices.push(_v1$1.x, _v1$1.y, _v1$1.z);
-          }
-        }
-        this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-      }
-    }
-    copy(source) {
-      super.copy(source);
-      this.parameters = Object.assign({}, source.parameters);
-      return this;
-    }
-  };
   var PlaneGeometry = class _PlaneGeometry extends BufferGeometry {
     /**
      * Constructs a new plane geometry.
@@ -34376,12 +34283,12 @@
     }
     return "vec3 " + functionName + "( vec3 color ) { return " + toneMappingName + "ToneMapping( color ); }";
   }
-  var _v02 = /* @__PURE__ */ new Vector3();
+  var _v0 = /* @__PURE__ */ new Vector3();
   function getLuminanceFunction() {
-    ColorManagement.getLuminanceCoefficients(_v02);
-    const r = _v02.x.toFixed(4);
-    const g = _v02.y.toFixed(4);
-    const b = _v02.z.toFixed(4);
+    ColorManagement.getLuminanceCoefficients(_v0);
+    const r = _v0.x.toFixed(4);
+    const g = _v0.y.toFixed(4);
+    const b = _v0.z.toFixed(4);
     return [
       "float luminance( const in vec3 rgb ) {",
       `	const vec3 weights = vec3( ${r}, ${g}, ${b} );`,
@@ -42943,6 +42850,17 @@ ${shader.vertexShader}`.replace(
     }
   };
 
+  // src/libs/picoworld/impl/motion.ts
+  function cellMotion(before, after, reverse, progress) {
+    const t = Math.max(0, Math.min(1, reverse ? 1 - progress : progress));
+    const ease = t * t * (3 - 2 * t);
+    const beforeMaterial = before.water ? "water" : before.material;
+    const afterMaterial = after.water ? "water" : after.material;
+    const beforeOffset = beforeMaterial && !afterMaterial && !before.water ? -5 * ease || 0 : 0;
+    const afterOffset = afterMaterial && !beforeMaterial && !after.water ? 5 * (1 - ease) : 0;
+    return reverse ? { sourceOffset: afterOffset, targetOffset: beforeOffset } : { sourceOffset: beforeOffset, targetOffset: afterOffset };
+  }
+
   // node_modules/three/examples/jsm/lines/LineSegmentsGeometry.js
   var _box = new Box3();
   var _vector = new Vector3();
@@ -43941,11 +43859,32 @@ ${shader.vertexShader}`.replace(
 
   // src/libs/picoworld/impl/appearance.ts
   function createHoverOutline() {
-    const box = new BoxGeometry(1.015, 1.015, 1.015);
-    const edges = new EdgesGeometry(box);
-    const geometry = new LineSegmentsGeometry().setPositions(edges.getAttribute("position").array);
-    edges.dispose();
-    box.dispose();
+    const geometry = new LineSegmentsGeometry().setPositions([
+      -0.5,
+      -0.5,
+      0.5,
+      0.5,
+      -0.5,
+      0.5,
+      0.5,
+      -0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      -0.5,
+      0.5,
+      0.5,
+      -0.5,
+      0.5,
+      0.5,
+      -0.5,
+      -0.5,
+      0.5
+    ]);
     const material = new LineMaterial({ linewidth: 3, worldUnits: false, depthTest: false, depthWrite: false });
     const outline = new LineSegments2(geometry, material);
     outline.renderOrder = 10;
@@ -43988,28 +43927,31 @@ ${shader.vertexShader}`.replace(
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = PCFSoftShadowMap;
       this.renderer.outputColorSpace = SRGBColorSpace;
+      this.renderer.toneMapping = ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.05;
       this.renderer.domElement.style.cssText = "display:block;width:100%;height:100%;touch-action:none";
       this.renderer.domElement.setAttribute("aria-label", "Pico \u4E09\u7EF4\u4E16\u754C\uFF0C\u62D6\u52A8\u65CB\u8F6C\uFF0C\u6EDA\u8F6E\u7F29\u653E");
       this.host.append(this.renderer.domElement);
       this.camera.up.set(0, 0, 1);
-      this.camera.position.set(32, -48, 25);
+      this.camera.position.set(12, -18, 9);
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.target.set(0, 0, 2);
+      this.controls.target.set(0, 0, 0);
       this.controls.enableDamping = true;
       this.controls.screenSpacePanning = false;
       this.controls.minDistance = 6;
       this.controls.maxDistance = 95;
       this.controls.minPolarAngle = MathUtils.degToRad(65);
       this.controls.maxPolarAngle = MathUtils.degToRad(85);
-      const sky = new HemisphereLight("#ffffff", "#b9a48d", 2.3);
+      const sky = new HemisphereLight("#ffffff", "#a9b6b5", 1.7);
       sky.position.set(0, 0, 50);
       this.scene.add(sky);
-      const sun = new DirectionalLight("#fff4d9", 3);
+      const sun = new DirectionalLight("#fff7e8", 2.1);
       sun.position.set(-18, -25, 45);
       sun.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048);
       Object.assign(sun.shadow.camera, { left: -35, right: 35, top: 35, bottom: -35, far: 140 });
       sun.shadow.bias = -3e-4;
+      sun.shadow.radius = 4;
       this.scene.add(sun);
       this.ground = new GroundSurface(this.materials.get("soil"));
       this.scene.add(this.ground);
@@ -44045,7 +43987,7 @@ ${shader.vertexShader}`.replace(
     controls;
     materials = createMaterials();
     poweredMaterials = /* @__PURE__ */ new Map();
-    geometry = new BoxGeometry(0.985, 0.985, 0.985);
+    geometry = new BoxGeometry(1, 1, 1);
     meshes = /* @__PURE__ */ new Map();
     incoming = /* @__PURE__ */ new Map();
     raycaster = new Raycaster();
@@ -44058,7 +44000,7 @@ ${shader.vertexShader}`.replace(
     updateAppearance = () => {
       this.scene.background?.dispose();
       this.scene.background = createSky(readTokenColor(this.host, "--pico-world-sky-top"), readTokenColor(this.host, "--pico-world-sky-horizon"));
-      this.highlight.material.color.copy(readTokenColor(this.host, "--pico-ink-soft"));
+      this.highlight.material.color.copy(readTokenColor(this.host, "--pico-accent"));
     };
     observer;
     move;
@@ -44128,13 +44070,17 @@ ${shader.vertexShader}`.replace(
       }
     }
     transition(change, reverse, progress) {
-      const ease = progress * progress * (3 - 2 * progress);
       for (const cell of change.cells) {
         const key = keyOf(cell.x, cell.y, cell.z);
         const old = this.meshes.get(key);
-        if (old) old.scale.setScalar(Math.max(1e-3, 1 - ease));
+        const motion = cellMotion(cell.before ?? defaultCell(cell.z), cell.after ?? defaultCell(cell.z), reverse, progress);
         const value = (reverse ? cell.before : cell.after) ?? defaultCell(cell.z);
         const material = value.water ? "water" : value.material;
+        if (old) {
+          old.scale.setScalar(1);
+          old.position.z = cell.z + 0.5 + motion.sourceOffset;
+          old.visible = !material;
+        }
         if (!material) continue;
         let mesh = this.incoming.get(key);
         if (!mesh) {
@@ -44142,22 +44088,35 @@ ${shader.vertexShader}`.replace(
           this.incoming.set(key, mesh);
           this.scene.add(mesh);
         }
-        mesh.scale.setScalar(Math.max(1e-3, ease));
-        mesh.position.z = cell.z + 0.5 + (material === "water" ? 0 : 5 * (1 - ease));
+        mesh.scale.setScalar(1);
+        mesh.position.z = cell.z + 0.5 + motion.targetOffset;
       }
     }
     clearTransition() {
       for (const mesh of this.incoming.values()) this.scene.remove(mesh);
       this.incoming.clear();
-      for (const mesh of this.meshes.values()) mesh.scale.setScalar(1);
+      for (const mesh of this.meshes.values()) {
+        mesh.visible = true;
+        mesh.scale.setScalar(1);
+        const cell = mesh.userData.cell;
+        mesh.position.z = cell.z + 0.5;
+      }
     }
     render() {
       this.controls.update();
-      this.ground.position.set(this.camera.position.x, this.camera.position.y, 0);
       this.scene.updateMatrixWorld(true);
       this.camera.updateMatrixWorld(true);
       this.pick();
       this.renderer.render(this.scene, this.camera);
+    }
+    resetOrigin() {
+      const damping = this.controls.enableDamping;
+      this.controls.enableDamping = false;
+      this.controls.update();
+      this.controls.target.set(0, 0, 0);
+      this.camera.position.set(12, -18, 9);
+      this.controls.update();
+      this.controls.enableDamping = damping;
     }
     pick() {
       let position = null;
@@ -44168,19 +44127,19 @@ ${shader.vertexShader}`.replace(
         if (hit) {
           if (hit.object === this.ground) {
             const x = Math.floor(hit.point.x), y = Math.floor(hit.point.y);
-            position = { x, y };
+            position = { x, y, z: -1 };
             this.highlight.position.set(x + 0.5, y + 0.5, -0.5);
             this.highlight.scale.setScalar(1);
           } else {
-            const { x, y } = hit.object.userData.cell;
-            position = { x, y };
+            const { x, y, z } = hit.object.userData.cell;
+            position = { x, y, z };
             this.highlight.position.copy(hit.object.position);
             this.highlight.scale.copy(hit.object.scale);
           }
         }
       }
       this.highlight.visible = position !== null;
-      const key = position ? `${position.x},${position.y}` : "";
+      const key = position ? `${position.x},${position.y},${position.z}` : "";
       if (key !== this.hoverKey) {
         this.hoverKey = key;
         this.onHover(position);
@@ -44245,8 +44204,82 @@ ${shader.vertexShader}`.replace(
     }
   };
 
+  // src/libs/picoworld/impl/playback.ts
+  function resolveWorldTransition(current, target, requested) {
+    if (requested !== void 0) return requested;
+    return Math.abs(target - current) <= 1 ? "animate" : "snap";
+  }
+
+  // src/libs/picoworld/impl/orientation.ts
+  var AXES = ["x", "y", "z"];
+  function projectWorldAxes(camera, anchor) {
+    const view = camera.quaternion.clone().normalize().conjugate();
+    const projection = camera.projectionMatrix.elements;
+    const axes = AXES.map((axis, index) => {
+      const direction = new Vector3().setComponent(index, 1).applyQuaternion(view);
+      return {
+        axis,
+        x: (projection[0] * direction.x + anchor.x * direction.z) * anchor.width,
+        y: -(projection[5] * direction.y + anchor.y * direction.z) * anchor.height,
+        depth: direction.z
+      };
+    });
+    const scale = Math.max(...axes.map((axis) => Math.hypot(axis.x, axis.y)), 1e-10);
+    return axes.map((axis) => ({ ...axis, x: axis.x / scale, y: axis.y / scale }));
+  }
+  var OrientationIndicator = class {
+    constructor(svg) {
+      this.svg = svg;
+      this.parts = Object.fromEntries(AXES.map((axis) => {
+        const group = svg.querySelector(`[data-axis="${axis}"]`);
+        return [axis, {
+          group,
+          line: group.querySelector("[data-line]"),
+          head: group.querySelector("[data-head]"),
+          label: group.querySelector("text")
+        }];
+      }));
+    }
+    svg;
+    projectionKey = "";
+    parts;
+    update(camera, viewport) {
+      const rect = viewport.getBoundingClientRect(), widget = this.svg.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const anchor = {
+        x: (widget.left + widget.width / 2 - rect.left) / rect.width * 2 - 1,
+        y: 1 - (widget.top + widget.height / 2 - rect.top) / rect.height * 2,
+        width: rect.width,
+        height: rect.height
+      };
+      const key = [
+        ...camera.quaternion.toArray(),
+        ...camera.projectionMatrix.elements,
+        anchor.x,
+        anchor.y,
+        anchor.width,
+        anchor.height
+      ].join(",");
+      if (key === this.projectionKey) return;
+      this.projectionKey = key;
+      for (const { axis, x, y, depth } of projectWorldAxes(camera, anchor).sort((a, b) => a.depth - b.depth)) {
+        const { group, line, head, label } = this.parts[axis];
+        const endX = 48 + 26 * x, endY = 48 + 26 * y;
+        const length = Math.hypot(x, y);
+        const ux = length > 1e-3 ? x / length : 0;
+        const uy = length > 1e-3 ? y / length : -1;
+        line.setAttribute("d", `M48 48 L${endX} ${endY}`);
+        head.setAttribute("d", length < 0.05 ? "" : `M${endX - ux * 4 - uy * 2} ${endY - uy * 4 + ux * 2} L${endX} ${endY} L${endX - ux * 4 + uy * 2} ${endY - uy * 4 - ux * 2}`);
+        label.setAttribute("x", String(endX + ux * 10));
+        label.setAttribute("y", String(endY + uy * 10));
+        group.setAttribute("opacity", depth < 0 ? "0.72" : "1");
+        this.svg.append(group);
+      }
+    }
+  };
+
   // src/libs/picoworld/impl/card.css
-  var card_default = ".pico-world-card {\n  --pico-world-sky-top: var(--pico-accent);\n  --pico-world-sky-horizon: color-mix(in srgb, var(--pico-on-accent) 70%, var(--pico-accent));\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  height: 100%;\n  min-width: 0;\n  min-height: 0;\n  overflow: hidden;\n  color: var(--pico-ink);\n  background: var(--pico-surface);\n  font: var(--pico-size-xs)/1.4 var(--pico-font-ui);\n  user-select: none;\n}\n.pico-world-card__canvas { position: relative; flex: 1; min-height: 0; overflow: hidden; }\n.pico-world-card__canvas canvas { display: block; width: 100%; height: 100%; touch-action: none; }\n.pico-world-card__coordinates {\n  position: absolute;\n  left: var(--pico-space-3);\n  bottom: var(--pico-space-3);\n  padding: var(--pico-space-1) var(--pico-space-2);\n  border-radius: var(--pico-radius-sm);\n  color: var(--pico-ink-soft);\n  background: var(--pico-surface-raised);\n  font-family: var(--pico-font-mono);\n  font-variant-numeric: tabular-nums;\n  pointer-events: none;\n}\n.pico-world-card__error {\n  position: absolute;\n  inset: var(--pico-space-4);\n  padding: var(--pico-space-4);\n  border-radius: var(--pico-radius);\n  background: var(--pico-hue-error-bg);\n  color: var(--pico-hue-error-ink);\n}\n";
+  var card_default = ".pico-world-card {\n  --pico-world-overlay-inset: var(--pico-space-3);\n  --pico-world-sky-top: var(--pico-accent);\n  --pico-world-sky-horizon: color-mix(in srgb, var(--pico-on-accent) 70%, var(--pico-accent));\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  height: 100%;\n  min-width: 0;\n  min-height: 0;\n  overflow: hidden;\n  color: var(--pico-ink);\n  background: var(--pico-surface);\n  font: var(--pico-size-xs)/1.4 var(--pico-font-ui);\n  user-select: none;\n}\n.pico-world-card__canvas { position: relative; flex: 1; min-height: 0; overflow: hidden; }\n.pico-world-card__canvas canvas { display: block; width: 100%; height: 100%; touch-action: none; }\n.pico-world-card__coordinates {\n  position: absolute;\n  left: var(--pico-world-overlay-inset);\n  bottom: var(--pico-world-overlay-inset);\n  padding: 6px 9px;\n  border-radius: var(--pico-radius-sm);\n  color: var(--pico-ink-soft);\n  background: color-mix(in srgb, var(--pico-surface-raised) 72%, transparent);\n  font-family: var(--pico-font-ui);\n  font-variant-numeric: tabular-nums;\n  pointer-events: none;\n  opacity: 0.78;\n  font-size: calc(var(--pico-size-xs) + 2px);\n}\n.pico-world-card__axis-gizmo {\n  position: absolute;\n  left: var(--pico-world-overlay-inset);\n  bottom: calc(var(--pico-world-overlay-inset) + 12px);\n  width: 96px;\n  height: 96px;\n  padding: 0;\n  border: 0;\n  border-radius: var(--pico-radius);\n  background: transparent;\n  color: var(--pico-ink-soft);\n  cursor: pointer;\n  opacity: 0.86;\n  transition: opacity var(--pico-duration-fast), filter var(--pico-duration-fast);\n}\n.pico-world-card__axis-gizmo:hover,\n.pico-world-card__axis-gizmo:focus-visible {\n  opacity: 1;\n  background: transparent;\n  filter: brightness(1.12);\n}\n.pico-world-card__axis-gizmo svg { display: block; width: 100%; height: 100%; }\n.pico-world-axis { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }\n.pico-world-axis--x { color: #d95757; }\n.pico-world-axis--y { color: #3a9b68; }\n.pico-world-axis--z { color: #4b80d1; }\n.pico-world-axis-label { fill: currentColor; font: 500 13px var(--pico-font-ui); }\n.pico-world-card__error {\n  position: absolute;\n  inset: var(--pico-space-4);\n  padding: var(--pico-space-4);\n  border-radius: var(--pico-radius);\n  background: var(--pico-hue-error-bg);\n  color: var(--pico-hue-error-ink);\n}\n";
 
   // src/libs/picoworld/impl/card.tsx
   var import_jsx_runtime9 = __toESM(require_jsx_runtime());
@@ -44269,7 +44302,9 @@ ${shader.vertexShader}`.replace(
       if (![duration, catchUp].every((value) => Number.isFinite(value) && value > 0)) {
         throw new RangeError("PicoWorld animation durations must be finite and positive");
       }
-      if (this.history !== props.history || props.transition === "snap" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const distance = Math.abs(props.position - this.position);
+      const seek = resolveWorldTransition(this.position, props.position, props.transition) === "snap";
+      if (this.history !== props.history || seek || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         this.queue = [];
         this.timeline.reset();
         this.consumed = 0;
@@ -44282,7 +44317,7 @@ ${shader.vertexShader}`.replace(
         return;
       }
       this.tick(now);
-      const count = Math.abs(props.position - this.position);
+      const count = distance;
       if (count === 0) return;
       while (this.position < props.position) this.queue.push({ change: props.history.at(this.position++), reverse: false });
       while (this.position > props.position) this.queue.push({ change: props.history.at(--this.position), reverse: true });
@@ -44304,15 +44339,16 @@ ${shader.vertexShader}`.replace(
   function PicoWorldCardImpl(props) {
     const host = (0, import_react9.useRef)(null);
     const player = (0, import_react9.useRef)(null);
+    const axes = (0, import_react9.useRef)(null);
     const latest = (0, import_react9.useRef)(props);
     latest.current = props;
-    const [hover, setHover] = (0, import_react9.useState)(null);
+    const [hover, setHover] = (0, import_react9.useState)({ x: 0, y: 0, z: 0 });
     const [error2, setError] = (0, import_react9.useState)(null);
     (0, import_react9.useEffect)(() => {
       let scene;
       try {
         scene = new WorldScene(host.current, (position) => {
-          setHover(position);
+          if (position) setHover(position);
           latest.current.onHoverCell?.(position);
         });
       } catch (error3) {
@@ -44320,11 +44356,13 @@ ${shader.vertexShader}`.replace(
         return;
       }
       const controller = new Player(scene);
+      const indicator = new OrientationIndicator(axes.current);
       player.current = controller;
       let frame = 0;
       const render = (now) => {
         controller.tick(now);
         scene.render();
+        indicator.update(scene.camera, host.current);
         frame = requestAnimationFrame(render);
       };
       frame = requestAnimationFrame(render);
@@ -44344,7 +44382,12 @@ ${shader.vertexShader}`.replace(
     return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("section", { "aria-label": "Pico World", className: `pico-world-card ${props.surface === "flush" ? "" : "pico-card"} ${props.className ?? ""}`, children: [
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("style", { children: card_default }),
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { ref: host, className: "pico-world-card__canvas" }),
-      hover && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "pico-world-card__coordinates", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { type: "button", className: "pico-world-card__axis-gizmo", "aria-label": "\u56DE\u5230\u4E16\u754C\u539F\u70B9", onClick: () => player.current?.scene.resetOrigin(), children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("svg", { ref: axes, viewBox: "0 0 96 96", "aria-hidden": "true", children: ["x", "y", "z"].map((axis) => /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("g", { "data-axis": axis, className: `pico-world-axis--${axis}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("path", { "data-line": true, className: "pico-world-axis" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("path", { "data-head": true, className: "pico-world-axis" }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("text", { className: "pico-world-axis-label", textAnchor: "middle", dominantBaseline: "central", children: axis })
+      ] }, axis)) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "pico-world-card__coordinates", children: [
         "(",
         hover.x,
         ", ",
@@ -44358,10 +44401,10 @@ ${shader.vertexShader}`.replace(
     ] });
   }
 
-  // src/libs/picoworld/__init__.py
+  // src/libs/picoworld/python/picoworld/__init__.py
   var init_default = '"""PicoWorld\uFF1A\u901A\u8FC7\u79BB\u6563 Python \u64CD\u4F5C\u6539\u53D8\u7684\u4E09\u7EF4\u6C99\u76D8\uFF0C\u4E16\u754C\u72B6\u6001\u3001\u7269\u7406\u7ED3\u7B97\u548C\u64CD\u4F5C\u65E5\u5FD7\u5168\u90E8\u7531 Python \u7EF4\u62A4\u3002\n\n\u5206\u5C42\uFF1AVoxel \u63CF\u8FF0\u4E00\u4E2A\u4F53\u7D20\uFF0CStructure \u63CF\u8FF0\u76F8\u5BF9\u5750\u6807\u4E0B\u7684\u591A\u4F53\u7D20\u7ED3\u6784\uFF0C\nPicoWorld \u7BA1\u7406\u72EC\u7ACB\u4E16\u754C\u3002export() \u8FD4\u56DE\u7ED1\u5B9A\u5F53\u524D\u5B9E\u4F8B\u7684 lambda \u5B57\u5178\uFF0C\u5916\u5C42\u901A\u8FC7\nglobals().update(w.export()) \u6CE8\u5165\u5B66\u751F\u51FD\u6570\uFF1B\u5185\u90E8\u63A5\u53E3\u4E0D\u4F9D\u8D56\u5168\u5C40\u5355\u4F8B\u3001\u7F16\u8F91\u5668\u3001\u6E32\u67D3\u5668\u6216\u771F\u5B9E\u65F6\u95F4\u3002\n\n\u4E16\u754C\u4F7F\u7528\u6574\u6570\u7F51\u683C\uFF0Cx\u3001y \u4E3A\u6C34\u5E73\u5750\u6807\uFF0Cz \u5411\u4E0A\u3002\u521D\u59CB\u5730\u8868\u9AD8\u5EA6\u4E3A 0\uFF0Cz < 0\n\u9ED8\u8BA4\u662F soil\uFF0Cz >= 0 \u9ED8\u8BA4\u662F\u7A7A\u6C14\u3002\u4E16\u754C\u65E0\u9650\u5EF6\u4F38\uFF0C\u4F7F\u7528\u6709\u9650\u7684\u7A00\u758F\u4FEE\u6539\u8868\u793A\u3002\n\u7ED3\u6784\u53EF\u4EE5\u6709\u591A\u683C\u5360\u5730\u3001\u7A7A\u9699\u548C\u60AC\u6311\uFF0C\u4E0D\u9650\u5236\u4E3A\u9AD8\u5EA6\u56FE\uFF1B\u4E0D\u6A21\u62DF\u8FDE\u7EED\u521A\u4F53\u7269\u7406\u3002\n\n\u6BCF\u4E2A\u4FEE\u6539\u64CD\u4F5C\u539F\u5B50\u5730\u5B8C\u6210\uFF0C\u4ECE\u4E00\u4E2A\u7A33\u5B9A\u72B6\u6001\u5230\u53E6\u4E00\u4E2A\u7A33\u5B9A\u72B6\u6001\u3002\u64CD\u4F5C\u5931\u8D25\u4E0D\u6539\u53D8\n\u4E16\u754C\u3002\u540C\u6837\u7684\u521D\u59CB\u72B6\u6001\u548C\u64CD\u4F5C\u5E8F\u5217\u4EA7\u751F\u540C\u6837\u7684\u7ED3\u679C\uFF0C\u4E0D\u4F9D\u8D56\u5E27\u7387\u3001\u65F6\u949F\u6216\u968F\u673A\u6570\u3002\n\u91CD\u529B\u3001\u6392\u6C34\u7B49\u89C4\u5219\u5728\u64CD\u4F5C\u8FD4\u56DE\u524D\u7ED3\u7B97\uFF1B\u6E32\u67D3\u52A8\u753B\u4E0D\u5C5E\u4E8E\u4E16\u754C\u72B6\u6001\u3002\n\nrain \u662F\u4E00\u6B21\u65E0\u9650\u4F9B\u6C34\u7684\u7ED3\u7B97\uFF1A\u586B\u6EE1\u6709\u56F4\u6321\u7684\u6D3C\u5730\uFF0C\u6C34\u4F4D\u7531\u6EA2\u51FA\u53E3\u51B3\u5B9A\u3002\n\u65E0\u7A77\u8FDC\u5904\u5F00\u653E\u6392\u6C34\uFF0C\u539F\u59CB\u5E73\u5730\u4E0D\u4F1A\u79EF\u6C34\u3002\u4E0D\u662F\u6307\u5B9A\u6C34\u91CF\uFF0C\u4E5F\u4E0D\u662F\u5F00\u59CB\u6301\u7EED\u964D\u96E8\u3002\n\u968F\u540E\u6539\u52A8\u5730\u5F62\u65F6\u91CD\u65B0\u7ED3\u7B97\u5DF2\u6709\u6C34\u7684\u6392\u6C34\uFF0C\u4E0D\u81EA\u52A8\u8865\u5145\u65B0\u7684\u96E8\u6C34\u3002\n\nrun() \u65E0\u53C2\u6570\uFF0C\u662F\u5B66\u751F\u7A0B\u5E8F\u7684\u7EC8\u6B62\u64CD\u4F5C\uFF1A\u5148\u63D0\u4EA4\u4E16\u754C\u8FDB\u5165 running \u6A21\u5F0F\u7684\u53D8\u5316\uFF0C\n\u518D\u901A\u8FC7\u8FD0\u884C\u5668\u8BC6\u522B\u7684\u4E13\u7528\u7EC8\u6B62\u4FE1\u53F7\u6B63\u5E38\u7ED3\u675F\u5B66\u751F\u7A0B\u5E8F\uFF0C\u4E0D\u6267\u884C\u540E\u7EED\u8BED\u53E5\u3001\u4E0D\u7B49\u5F85\u52A8\u753B\u3002\n\u8BE5\u4FE1\u53F7\u5E94\u7EE7\u627F BaseException\uFF0C\u7531\u8FD0\u884C\u5668\u4F5C\u4E3A\u6210\u529F\u5904\u7406\uFF0C\u4E0D\u80FD\u4F7F\u7528 os._exit \u6216\u6740\u8FDB\u7A0B\u3002\n\u5361\u7247\u6839\u636E\u7EC8\u6B62\u4F4D\u7F6E\u7684\u4E16\u754C\u663E\u793A\u542F\u52A8\u72B6\u6001\uFF1B\u56DE\u9000\u5230 run \u4E4B\u524D\u6062\u590D building \u6A21\u5F0F\u3002\n\u7535\u8DEF\u5143\u4EF6\u3001\u8FDE\u63A5\u548C\u542F\u52A8\u540E\u7684\u5C55\u793A\u534F\u8BAE\u5C1A\u5F85\u8BBE\u8BA1\uFF0C\u4E0D\u9884\u8BBE\u903B\u8F91\u6B65\u6570\u6216\u540E\u53F0 Python \u5FAA\u73AF\u3002\n\nWorldChange \u662F\u53EF JSON \u5E8F\u5217\u5316\u3001\u53EF\u9006\u7684\u539F\u5B50\u53D8\u5316\uFF0C\u4E0E index.tsx \u4E2D\u7C7B\u578B\u540C\u5F62\u3002\n\u6BCF\u6B21\u64CD\u4F5C\u901A\u8FC7\u5199\u5165\u65E5\u5FD7\u8BB0\u5F55\u5B9E\u9645\u6539\u53D8\u683C\u5B50\u7684 before/after\uFF0C\u4E0D\u6BD4\u8F83\u5B8C\u6574\u4E16\u754C\u526F\u672C\uFF1B\u6A21\u5F0F\u53D8\u5316\n\u4E5F\u8FDB\u5165\u540C\u4E00\u4E2A\u8BB0\u5F55\u3002trace \u4FDD\u5B58\u4E00\u6B21\u5171\u4EAB\u589E\u91CF\u65E5\u5FD7\uFF0C\u6BCF\u4E2A\u7A0B\u5E8F\u843D\u70B9\u53EA\u4FDD\u5B58\u65E5\u5FD7\u6E38\u6807\u3002\n\u7A7A\u95F4\u4E3A O(\u53D8\u5316\u8BB0\u5F55\u6570 + \u5B9E\u9645\u683C\u5B50\u53D8\u66F4\u603B\u6570)\uFF0C\u4E0D\u9010\u6B65\u4FDD\u5B58\u5B8C\u6574\u4E16\u754C\u6216\u7D2F\u8BA1\u65E5\u5FD7\u526F\u672C\u3002\n\u67E5\u8BE2\u548C export \u4E0D\u4EA7\u751F\u53D8\u5316\u3002changes \u662F\u53EA\u8BFB\u3001\u53EA\u8FFD\u52A0\u7684\u65E5\u5FD7\uFF0C\u8FD0\u884C\u5668\u81EA\u52A8\u8BB0\u5F55\u5176\u957F\u5EA6\uFF0C\n\u6267\u884C\u7ED3\u675F\u540E\u4E00\u6B21\u6027\u5E8F\u5217\u5316\uFF1B\u6B63\u5E38\u7EC8\u6B62\u3001\u5F02\u5E38\u3001\u7B49\u5F85\u8F93\u5165\u548C\u8D85\u9650\u5747\u4FDD\u7559\u5DF2\u7ECF\u63D0\u4EA4\u7684\u64CD\u4F5C\u3002\n\u4E0D\u63D0\u4F9B drain_changes\uFF0C\u4E5F\u4E0D\u8981\u6C42\u5B66\u751F\u6216\u9875\u9762\u624B\u52A8\u6536\u96C6\u3002\n"""\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Literal, NoReturn, TypedDict\nfrom collections.abc import Sequence\nimport sys\n\n\n@dataclass(frozen=True)\nclass Voxel:\n    """\u4E00\u4E2A\u5355\u4F4D\u7ACB\u65B9\u4F53\uFF1B\u5728\u4E16\u754C\u4E2D\u5750\u6807\u4E3A\u7EDD\u5BF9\u5750\u6807\uFF0C\u5728 Structure \u4E2D\u4E3A\u76F8\u5BF9\u5750\u6807\u3002\n\n    material \u662F\u53EF\u6269\u5C55\u7684\u6750\u8D28\u6807\u8BC6\uFF0C\u4E0D\u628A\u672A\u6765\u7684\u5EFA\u7B51\u6216\u7535\u8DEF\u90E8\u4EF6\u9501\u6B7B\u5728\u679A\u4E3E\u91CC\u3002\n    """\n\n    x: int\n    y: int\n    z: int\n    material: str\n\n\n@dataclass(frozen=True)\nclass Structure:\n    """\u4EE5\u5C40\u90E8\u539F\u70B9\u5B9A\u4F4D\u7684\u975E\u7A7A\u4F53\u7D20\u96C6\u5408\uFF1B\u5750\u6807\u552F\u4E00\uFF0C\u5141\u8BB8\u7A7A\u9699\u548C\u8D1F\u5750\u6807\u3002\n\n    drop \u5C06\u5C40\u90E8\u539F\u70B9\u7684 x\u3001y \u5BF9\u9F50\u76EE\u6807\u683C\uFF0C\u6574\u4F53\u7AD6\u76F4\u4E0B\u964D\u5230\u9996\u6B21\u63A5\u89E6\u652F\u6491\u7684\u4F4D\u7F6E\u3002\n    \u4E0D\u5C06\u5404\u4E2A\u4F53\u7D20\u5206\u522B\u4E0B\u843D\uFF0C\u4E0D\u81EA\u52A8\u65CB\u8F6C\u7ED3\u6784\u3002\n    """\n\n    relative_voxels: tuple[Voxel, ...]\n\n\nclass CellState(TypedDict):\n    """\u5B8C\u6574\u683C\u5B50\u5185\u5BB9\uFF1Bmaterial=None \u8868\u793A\u7A7A\u6C14\uFF0Cwater \u4E0E\u56FA\u4F53\u4E0D\u80FD\u5171\u5B58\u3002\n\n    powered \u9884\u7559\u901A\u7535\u7ED3\u679C\uFF0C\u521D\u671F\u4E3A False\u3002\u5750\u6807\u7531 CellChange \u5355\u72EC\u643A\u5E26\u3002\n    """\n\n    material: str | None\n    water: bool\n    powered: bool\n\n\nclass CellChange(TypedDict):\n    """\u540C\u4E00\u5750\u6807\u5728\u64CD\u4F5C\u524D\u540E\u7684\u8986\u76D6\uFF1BNone \u8868\u793A\u9ED8\u8BA4\u4E16\u754C\uFF0C\u4E0D\u662F\u5220\u9664\u56FA\u4F53\u3002\n\n    z < 0 \u7684\u56FA\u4F53\u6D88\u5931\u5FC5\u987B\u5199\u5165\u663E\u5F0F\u7A7A\u6C14\u5185\u5BB9\uFF1Bafter=None \u4F1A\u6062\u590D\u9ED8\u8BA4 soil\u3002\n    z >= 0 \u5220\u9664\u8986\u76D6\u5219\u6062\u590D\u9ED8\u8BA4\u7A7A\u6C14\u3002\u53CD\u5411\u5E94\u7528\u65F6\u4EA4\u6362 before \u4E0E after\u3002\n    """\n\n    x: int\n    y: int\n    z: int\n    before: CellState | None\n    after: CellState | None\n\n\nclass WorldChange(TypedDict):\n    """\u4E00\u6B21\u539F\u5B50\u64CD\u4F5C\u7684\u53EF\u9006\u589E\u91CF\uFF1Bcells \u5750\u6807\u552F\u4E00\u3001\u6309 (x, y, z) \u6392\u5E8F\u3002\n\n    \u53EA\u5305\u542B\u5185\u5BB9\u786E\u5B9E\u53D8\u5316\u7684\u683C\u5B50\uFF1B\u6A21\u5F0F\u53D8\u5316\u5141\u8BB8 cells \u4E3A\u7A7A\u3002\u6CA1\u6709\u4EFB\u4F55\u53D8\u5316\u65F6\u4E0D\u53D1\u51FA\n    \u8BB0\u5F55\u3002\u53D8\u66F4\u4E00\u7ECF\u4EA4\u4ED8\u5373\u4E0D\u53EF\u4FEE\u6539\uFF1B\u56DE\u653E\u6309\u8BB0\u5F55\u987A\u5E8F\uFF0C\u5012\u9000\u6309\u8BB0\u5F55\u9006\u5E8F\u3002\n    """\n\n    cells: list[CellChange]\n    mode_before: Literal["building", "running"]\n    mode_after: Literal["building", "running"]\n\nclass WorldStarted(BaseException):\n    """\u72EC\u7ACB Python \u73AF\u5883\u4E2D run() \u7684\u6B63\u5E38\u7EC8\u6B62\u4FE1\u53F7\uFF1BPico \u8FD0\u884C\u5668\u4E2D\u4F7F\u7528\u901A\u7528 finish()\u3002"""\n\n\nclass PicoWorld:\n    """\u72EC\u7ACB\u3001\u786E\u5B9A\u6027\u7684\u4E16\u754C\u3002\u516C\u5F00\u64CD\u4F5C\u6BCF\u6B21\u81EA\u52A8\u63D0\u4EA4\u6700\u591A\u4E00\u6761 WorldChange\u3002\n\n    \u6574\u6570\u53C2\u6570\u4E0D\u63A5\u53D7 bool\uFF0C\u6DF1\u5EA6\u548C\u534A\u5F84\u5FC5\u987B\u4E3A\u6B63\u3002\u5931\u8D25\uFF08\u5305\u62EC\u8FD0\u884C\u8D85\u9650\uFF09\u56DE\u6EDA\u5F53\u524D\n    \u64CD\u4F5C\uFF0C\u5386\u53F2\u5DF2\u5B8C\u6210\u64CD\u4F5C\u4FDD\u7559\u3002\u5171\u4EAB\u9762\u7684\u516D\u90BB\u57DF\u8FDE\u901A\u56FA\u4F53\u89C6\u4F5C\u4E00\u4E2A\u521A\u6027\u7ED3\u6784\uFF1B\u652F\u6491\u79FB\u9664\u540E\uFF0C\u60AC\u7A7A\n    \u8FDE\u901A\u5206\u91CF\u6309\u6700\u4F4E z\u3001\u6700\u5C0F\u5750\u6807\u987A\u5E8F\u6574\u4F53\u4E0B\u843D\uFF0C\u76F4\u5230\u63A5\u89E6\u4E0B\u65B9\u56FA\u4F53\uFF0C\u4E0D\u65CB\u8F6C\u6216\u6EDA\u52A8\u3002\n    """\n\n    def __init__(self) -> None:\n        """\u521B\u5EFA\u65E0\u9650\u5E73\u5730\uFF0C\u81EA\u52A8\u6CE8\u518C\u5230\u5F53\u524D Pico trace\uFF1B\u72EC\u7ACB Python \u4E2D\u4E5F\u53EF\u4F7F\u7528\u3002"""\n        from ._impl import WorldCore\n        self._core = WorldCore()\n        self._runtime = sys.modules.get("_pico_runtime")\n        if self._runtime is not None:\n            self._runtime.register_trace_resource("picoworld", self.changes)\n\n    @property\n    def changes(self) -> Sequence[WorldChange]:\n        """\u5185\u90E8\u53EA\u8BFB\u65E5\u5FD7\uFF1Alen \u4E3A O(1)\uFF0C\u7D22\u5F15\u8BFB\u53D6\u8FD4\u56DE\u72EC\u7ACB\u8BB0\u5F55\uFF0C\u4E0D\u590D\u5236\u7D2F\u8BA1\u5386\u53F2\u3002\n\n        \u8FD0\u884C\u5668\u4FDD\u5B58\u6B64\u5E8F\u5217\u5F15\u7528\u5E76\u81EA\u52A8\u91C7\u6837\u6E38\u6807\uFF1B\u5361\u7247\u6309 before/after \u91CD\u653E\u3002\n        \u4E0D\u5BFC\u51FA\u7ED9\u5B66\u751F\uFF0C\u8BFB\u53D6\u4E0D\u4F1A\u6D88\u8D39\u8BB0\u5F55\u6216\u63A8\u8FDB\u4E16\u754C\u3002\n        """\n        return self._core.changes\n\n    def drop(self, x: int, y: int, structure: Structure) -> None:\n        """\u7ED3\u6784\u4ECE\u4E0A\u65B9\u6574\u4F53\u843D\u5230\u9996\u6B21\u63A5\u89E6\u7684\u4F4D\u7F6E\uFF0C\u968F\u540E\u7ED3\u7B97\u6392\u6C34\uFF1B\u4E0D\u81EA\u52A8\u8865\u5145\u96E8\u6C34\u3002"""\n        self._core.drop(x, y, structure)\n\n    def dig(self, x: int, y: int, depth: int = 1) -> None:\n        """\u4ECE\u6700\u9AD8\u56FA\u4F53\u683C\u5411\u4E0B\u79FB\u9664 depth \u5C42\uFF1B\u8303\u56F4\u5185\u7A7A\u6C14\u8BA1\u5165\u6DF1\u5EA6\u3002"""\n        self._core.dig(x, y, depth)\n\n    def bomb(self, x: int, y: int, radius: int = 2) -> None:\n        """\u4EE5\u76EE\u6807\u5217\u6700\u9AD8\u56FA\u4F53\u683C\u4E3A\u7403\u5FC3\uFF0C\u79FB\u9664\u683C\u4E2D\u5FC3\u8DDD\u79BB <= radius \u7684\u56FA\u4F53\u3002\n\n        \u65E0\u5F15\u4FE1\u6216\u7B49\u5F85\u3002\u7206\u7834\u3001\u65AD\u88C2\u4E0B\u843D\u548C\u6392\u6C34\u5171\u540C\u5F62\u6210\u4E00\u6B21\u539F\u5B50\u53D8\u5316\u3002\n        """\n        self._core.bomb(x, y, radius)\n\n    def rain(self) -> None:\n        """\u65E0\u9650\u964D\u96E8\u4E00\u6B21\u7ED3\u7B97\u5230\u6EA2\u6D41\u6C34\u4F4D\uFF1B\u5F00\u653E\u5E73\u5730\u4E0D\u79EF\u6C34\uFF0C\u5C01\u95ED\u7A7A\u8154\u4E0D\u4F1A\u51ED\u7A7A\u8FDB\u6C34\u3002\n\n        \u4FEE\u6539\u5730\u5F62\u540E\u5DF2\u6709\u6C34\u5728\u53EF\u8FDE\u901A\u4F4E\u5904\u91CD\u65B0\u5206\u5E03\uFF0C\u591A\u4F59\u6C34\u6392\u8D70\uFF1B\u6709\u9650\u6C34\u91CF\u65E0\u6CD5\u94FA\u6EE1\n        \u540C\u9AD8\u4E00\u5C42\u65F6\uFF0C\u6309 (z, x, y) \u987A\u5E8F\u5360\u683C\uFF0C\u4FDD\u8BC1\u7ED3\u679C\u786E\u5B9A\u3002\u6C34\u53EA\u901A\u8FC7\u5171\u4EAB\u9762\u8FDE\u901A\u3002\n        """\n        self._core.rain()\n\n    def run(self) -> NoReturn:\n        """\u63D0\u4EA4 running \u6A21\u5F0F\u5E76\u7EC8\u6B62\u5B66\u751F\u7A0B\u5E8F\uFF0C\u540E\u7EED\u8BED\u53E5\u4E0D\u6267\u884C\uFF0C\u4E0D\u7B49\u5F85\u52A8\u753B\u3002\n\n        \u5F53\u524D\u53EA\u4FEE\u6539\u6A21\u5F0F\uFF1BTNT \u7269\u4EF6\u3001\u7535\u8DEF\u548C\u4FE1\u53F7\u4F20\u64AD\u7559\u5F85\u4EE5\u540E\u5B9E\u73B0\u3002\n        """\n        self._core.start()\n        if self._runtime is not None:\n            self._runtime.finish()\n        raise WorldStarted()\n\n    def voxel_at(self, x: int, y: int, z: int) -> Voxel | None:\n        """\u5185\u90E8\u56FA\u4F53\u67E5\u8BE2\uFF1B\u7A7A\u6C14\u548C\u6C34\u8FD4\u56DE None\uFF0C\u4E0D\u5BFC\u51FA\u7ED9\u5B66\u751F\u3002"""\n        return self._core.voxel_at(x, y, z)\n\n    def surface_height(self, x: int, y: int) -> int:\n        """\u5185\u90E8\u67E5\u8BE2\uFF1A\u6700\u9AD8\u56FA\u4F53\u9876\u9762\u7684 z + 1\uFF0C\u9ED8\u8BA4\u5E73\u5730\u4E3A 0\u3002"""\n        return self._core.surface_height(x, y)\n\n    def water_depth(self, x: int, y: int) -> int:\n        """\u5185\u90E8\u67E5\u8BE2\uFF1A\u8BE5\u5217\u6C34\u683C\u603B\u6570\uFF0C\u5206\u5C42\u79EF\u6C34\u4E5F\u8BA1\u5165\u3002"""\n        return self._core.water_depth(x, y)\n\n    def structure(self, item: str) -> Structure:\n        """\u5185\u90E8\u8D44\u4EA7\u89E3\u6790\uFF1A\u6750\u8D28\u540D\u751F\u6210\u5355\u683C\uFF0C\u9884\u8BBE\u540D\u751F\u6210\u5B8C\u6574\u7ED3\u6784\uFF1B\u672A\u77E5\u540D\u629B ValueError\u3002"""\n        return self._core.structure(item)\n\n    def export(self) -> dict[str, Callable[..., object]]:\n        """\u4EC5\u5BFC\u51FA\u5B66\u751F\u6784\u5EFA\u51FD\u6570\uFF0C\u53EF\u76F4\u63A5 globals().update(w.export())\u3002\n\n        \u6240\u6709\u503C\u5747\u4E3A lambda\uFF1Bdrop \u89E3\u6790\u8D44\u4EA7\u540D\uFF0C\u5176\u4F59\u53C2\u6570\u76F4\u63A5\u8F6C\u53D1\u3002\u67E5\u8BE2\u3001\u65E5\u5FD7\u548C\n        \u4F53\u7D20\u7C7B\u578B\u4E0D\u5BFC\u51FA\uFF0C\u4E0D\u6355\u83B7\u5F02\u5E38\u6216 run \u7684\u7EC8\u6B62\u4FE1\u53F7\u3002\n        """\n        return {\n            "drop": lambda x, y, item="soil": self.drop(x, y, self.structure(item)),\n            "dig": lambda *args, **kwargs: self.dig(*args, **kwargs),\n            "bomb": lambda *args, **kwargs: self.bomb(*args, **kwargs),\n            "rain": lambda *args, **kwargs: self.rain(*args, **kwargs),\n            "run": lambda: self.run(),\n        }\n';
 
-  // src/libs/picoworld/_impl.py
+  // src/libs/picoworld/python/picoworld/_impl.py
   var impl_default = `"""Sparse world storage and atomic operations; public contract lives in __init__.py."""
 from collections.abc import Sequence
 from copy import deepcopy
@@ -44599,7 +44642,7 @@ class WorldCore:
                 return
 `;
 
-  // src/libs/picoworld/_water.py
+  // src/libs/picoworld/python/picoworld/_water.py
   var water_default = `"""Discrete flood/escape levels and finite-water redistribution. No display clock."""
 from heapq import heappop, heappush
 
