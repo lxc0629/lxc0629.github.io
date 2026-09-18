@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="./pico.svg" type="image/svg+xml">
+  <title>24 点</title>
+  <link rel="stylesheet" href="./pico.css">
+</head>
+<body class="pico-root">
+  <div id="root"></div>
+  <script>window.__PICO_PYODIDE_BASE__ = new URL("./pyodide/", location.href).href;</script>
+  <script type="module">
+// pico-entry-ns:24point-gpt
+import { createElement } from "./libs/react.js";
+import { createRoot } from "./libs/react.js";
+import { HostChromeProvider, webChrome } from "./pico.js";
+
+// playgrounds/24point-gpt.generated.tsx
+import { useEffect, useMemo, useState } from "./libs/react.js";
+import { createState, derive } from "./pico.js";
+import { PlaygroundShell, Widget, useValue } from "./pico.js";
+import { useProgram } from "./pico.js";
+import { jsx, jsxs } from "./libs/react.js";
+var cardPath = (card) => {
+  const rank = { 1: "ace", 11: "jack", 12: "queen", 13: "king" }[card.value] ?? card.value;
+  return `assets/playing-cards/${rank}_of_${card.suit}.svg`;
+};
+var ink = "var(--pico-ink)";
+var accent = "var(--pico-accent-deep)";
+var errorInk = "var(--pico-hue-error-strong)";
+var surface = "var(--pico-surface-raised)";
+function treeLayout(nodes) {
+  const leaves = nodes.filter((node) => node.left === void 0);
+  const levels = /* @__PURE__ */ new Map();
+  const points = /* @__PURE__ */ new Map();
+  for (const node of [...nodes].reverse()) {
+    const level = levels.get(node.id) ?? 0;
+    levels.set(node.id, level);
+    if (node.left !== void 0) {
+      levels.set(node.left, level + 1);
+      levels.set(node.right, level + 1);
+    }
+  }
+  const depth = Math.max(1, ...levels.values());
+  for (const node of nodes) {
+    const x = node.left === void 0 ? 95 + leaves.indexOf(node) * 530 / Math.max(1, leaves.length - 1) : (points.get(node.left).x + points.get(node.right).x) / 2;
+    points.set(node.id, {
+      x: leaves.length === 1 ? 360 : x,
+      y: nodes.length === 1 ? 380 : 195 + levels.get(node.id) * 370 / depth
+    });
+  }
+  return points;
+}
+function Cross({ x, y, label }) {
+  return /* @__PURE__ */ jsxs("g", { transform: `translate(${x} ${y})`, role: "img", "aria-label": label, children: [
+    /* @__PURE__ */ jsx("title", { children: label }),
+    /* @__PURE__ */ jsx("circle", { r: "15", fill: surface }),
+    /* @__PURE__ */ jsx("path", { d: "M-6-6 6 6 M6-6-6 6", fill: "none", stroke: errorInk, strokeWidth: "3", strokeLinecap: "round" })
+  ] });
+}
+function WorldSvg({ cards, calculation, frame, hand = false }) {
+  const nodes = calculation?.nodes ?? [];
+  const points = treeLayout(nodes);
+  const visible = new Set(frame?.visible ?? []);
+  const errors = new Set(frame?.errors ?? []);
+  const active = new Set(frame?.focus ?? []);
+  return /* @__PURE__ */ jsxs(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 720 680",
+      width: "100%",
+      height: "100%",
+      role: "img",
+      "aria-label": "24 \u70B9\u5361\u724C\u4E0E\u8BA1\u7B97\u6811",
+      style: { display: "block", fontFamily: "var(--pico-font-mono)" },
+      children: [
+        /* @__PURE__ */ jsx("style", { children: `
+      .point24-card { transition: transform 650ms var(--pico-ease-out); }
+      .point24-result { transition: opacity 450ms ease; }
+      @media (prefers-reduced-motion: reduce) {
+        .point24-card { transition-duration: 80ms; }
+        .point24-result { transition-duration: 80ms; }
+      }
+    ` }),
+        nodes.filter((node) => node.left !== void 0).map((node) => {
+          const p = points.get(node.id);
+          const left = points.get(node.left);
+          const right = points.get(node.right);
+          const operatorY = left.y;
+          return /* @__PURE__ */ jsxs("g", { className: "point24-result", opacity: visible.has(node.id) ? 1 : 0, children: [
+            /* @__PURE__ */ jsx(
+              "path",
+              {
+                d: `M${left.x} ${left.y} L${p.x} ${p.y} L${right.x} ${right.y}`,
+                stroke: "var(--pico-ink-soft)",
+                strokeWidth: "1.7",
+                fill: "none"
+              }
+            ),
+            /* @__PURE__ */ jsx("rect", { x: (left.x + right.x) / 2 - 20, y: operatorY - 23, width: "40", height: "46", fill: surface }),
+            /* @__PURE__ */ jsx("text", { x: (left.x + right.x) / 2, y: operatorY + 10, textAnchor: "middle", fontSize: "32", fill: ink, children: node.op })
+          ] }, node.id);
+        }),
+        cards.map((card, index) => {
+          const leaf = nodes.find((node) => node.card === index);
+          const moved = leaf && frame?.taken.includes(leaf.id);
+          const p = moved ? points.get(leaf.id) : hand ? { x: 240 + index * 80, y: 345 + Math.abs(index - 1.5) * 18 } : { x: 458 + index * 66, y: 67 };
+          const scale = hand ? 1.55 : moved ? Math.min(1, 4 / nodes.filter((node) => node.left === void 0).length) : 0.62;
+          const angle = hand ? (index - 1.5) * 10 : 0;
+          const highlighted = leaf && active.has(leaf.id) && (frame?.phase === "highlight" || frame?.phase === "move");
+          return /* @__PURE__ */ jsxs("g", { className: "point24-card", transform: `translate(${p.x} ${p.y}) rotate(${angle}) scale(${scale})`, children: [
+            highlighted && /* @__PURE__ */ jsx("rect", { x: "-48", y: "-67", width: "96", height: "134", rx: "8", fill: "var(--pico-accent-wash)", stroke: accent, strokeWidth: "3" }),
+            /* @__PURE__ */ jsx("image", { href: cardPath(card), x: "-42", y: "-61", width: "84", height: "122" }),
+            moved && errors.has(leaf.id) && /* @__PURE__ */ jsx(Cross, { x: 35, y: -52, label: leaf.error ?? "\u7ED3\u679C\u4E0D\u662F 24" }),
+            frame?.remaining.includes(index) && /* @__PURE__ */ jsx(Cross, { x: 35, y: -52, label: "\u8FD9\u5F20\u724C\u5C1A\u672A\u4F7F\u7528" })
+          ] }, index);
+        }),
+        nodes.map((node) => {
+          const p = points.get(node.id);
+          const isLeaf = node.left === void 0;
+          if (isLeaf && node.card !== -1) return null;
+          const show = isLeaf ? frame?.taken.includes(node.id) : visible.has(node.id);
+          return /* @__PURE__ */ jsxs("g", { className: isLeaf ? void 0 : "point24-result", opacity: show ? 1 : 0, children: [
+            /* @__PURE__ */ jsx("rect", { x: p.x - 52, y: p.y - 31, width: "104", height: "62", rx: "8", fill: surface }),
+            /* @__PURE__ */ jsx(
+              "rect",
+              {
+                x: p.x - 52,
+                y: p.y - 31,
+                width: "104",
+                height: "62",
+                rx: "8",
+                fill: active.has(node.id) && frame?.phase === "calculate" ? "var(--pico-accent-wash)" : surface
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "text",
+              {
+                x: p.x,
+                y: p.y + 12,
+                textAnchor: "middle",
+                fontSize: node.value.length > 5 ? 26 : 38,
+                fill: ink,
+                children: node.value
+              }
+            ),
+            errors.has(node.id) && /* @__PURE__ */ jsx(Cross, { x: p.x + 51, y: p.y - 25, label: node.error ?? "\u7ED3\u679C\u4E0D\u662F 24" }),
+            frame?.success && node.id === nodes.at(-1)?.id && /* @__PURE__ */ jsxs("g", { transform: `translate(${p.x + 57} ${p.y - 10})`, children: [
+              /* @__PURE__ */ jsx("title", { children: "\u6B63\u786E" }),
+              /* @__PURE__ */ jsx("path", { d: "m-8 0 6 6 12-14", fill: "none", stroke: "var(--pico-hue-branch-strong)", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })
+            ] })
+          ] }, node.id);
+        }),
+        calculation?.message && /* @__PURE__ */ jsxs("text", { x: "360", y: "350", textAnchor: "middle", fill: errorInk, fontSize: "22", children: [
+          "\u2717 ",
+          calculation.message
+        ] })
+      ]
+    }
+  );
+}
+var initialSource = `# \u4F7F\u7528\u53F3\u4FA7\u7684\u5361\u724C\uFF0C\u5199\u51FA\u80FD\u8BA1\u7B97\u51FA 24 \u7684\u8868\u8FBE\u5F0F
+# \u6570\u5B57\u8BF7\u4F7F\u7528 1, 2, ... 10, J, Q, K
+# \u8FD0\u7B97\u8BF7\u4F7F\u7528\u52A0\u6CD5 +\u3001\u51CF\u6CD5 -\u3001\u4E58\u6CD5 *\u3001\u9664\u6CD5 /
+1 + 1 + 1 + 1`;
+var cases = [
+  [3, 8, 6, 5],
+  [1, 2, 3, 4],
+  [10, 12, 3, 1],
+  [13, 9, 10, 4],
+  [11, 7, 5, 4]
+].map((values) => values.map((value, index) => ({ value, suit: ["diamonds", "clubs", "hearts", "spades"][index] })));
+var evaluator = String.raw`
+import ast as _ast
+from fractions import Fraction as _Fraction
+import _pico_runtime as _runtime
+
+
+def _calculate24(source, cards):
+    nodes, frames, values = [], [], {}
+    used, taken, visible, errors = [], [], [], []
+
+    def frame(phase, focus=(), remaining=(), success=False):
+        frames.append(dict(phase=phase, focus=list(focus), taken=list(taken),
+                           visible=list(visible), errors=list(errors),
+                           remaining=list(remaining), success=success))
+
+    def validate(node):
+        if isinstance(node, _ast.Constant) and type(node.value) is int:
+            if not 0 <= node.value <= 999:
+                raise ValueError("请使用卡牌上的数字")
+            return
+        if isinstance(node, _ast.Name) and node.id in ("J", "Q", "K"):
+            return
+        if isinstance(node, _ast.BinOp) and type(node.op) in (_ast.Add, _ast.Sub, _ast.Mult, _ast.Div):
+            validate(node.left)
+            validate(node.right)
+            return
+        raise ValueError("只使用数字、J Q K、括号和 + − × ÷")
+
+    def build(node):
+        if isinstance(node, (_ast.Constant, _ast.Name)):
+            number = node.value if isinstance(node, _ast.Constant) else dict(J=11, Q=12, K=13)[node.id]
+            card = next((i for i, value in enumerate(cards) if value == number and i not in used), -1)
+            item = dict(number=number, value=str(number), card=card)
+            if card == -1:
+                item["error"] = "这张牌已经用过" if number in cards else "题目中没有这张牌"
+            else:
+                used.append(card)
+            value = _Fraction(number)
+        else:
+            left, right = build(node.left), build(node.right)
+            a, b = values[left], values[right]
+            symbol = {_ast.Add: "+", _ast.Sub: "−", _ast.Mult: "×", _ast.Div: "÷"}[type(node.op)]
+            item = dict(left=left, right=right, op=symbol)
+            value = None
+            if a is not None and b is not None:
+                if isinstance(node.op, _ast.Div) and b == 0:
+                    item["error"] = "不能除以 0"
+                else:
+                    value = {_ast.Add: lambda: a+b, _ast.Sub: lambda: a-b,
+                             _ast.Mult: lambda: a*b, _ast.Div: lambda: a/b}[type(node.op)]()
+            item["value"] = str(value) if value is not None else "—"
+        item["id"] = len(nodes)
+        nodes.append(item)
+        values[item["id"]] = value
+        return item["id"]
+
+    def take(ids):
+        for i in ids:
+            if "error" in nodes[i]:
+                errors.append(i)
+                taken.append(i)
+        frame("highlight", ids)
+        for i in ids:
+            if i not in taken:
+                taken.append(i)
+        frame("move", ids)
+        frame("pause")
+
+    def compute(i):
+        node = nodes[i]
+        if "left" not in node:
+            take([i])
+            return
+        left, right = node["left"], node["right"]
+        if "left" not in nodes[left] and "left" not in nodes[right]:
+            take([left, right])
+        else:
+            compute(left)
+            compute(right)
+        visible.append(i)
+        if "error" in node or (i == len(nodes)-1 and values[i] != 24):
+            errors.append(i)
+        frame("calculate", [i])
+        frame("pause")
+
+    try:
+        if len(source) > 2000:
+            raise ValueError("请写一个简短的单行表达式")
+        tree = _ast.parse(source)
+        if len(tree.body) != 1 or not isinstance(tree.body[0], _ast.Expr):
+            raise ValueError("请写一个单行表达式")
+        expression = tree.body[0]
+        if expression.lineno != expression.end_lineno:
+            raise ValueError("请把表达式写在同一行")
+        validate(expression.value)
+        leaves = sum(isinstance(n, (_ast.Constant, _ast.Name)) for n in _ast.walk(expression.value))
+        if leaves > 6:
+            raise ValueError("只有四张牌，每张只能使用一次")
+        root = build(expression.value)
+        if values[root] != 24:
+            nodes[root].setdefault("error", "结果不是 24")
+        frame("pool")
+        compute(root)
+        if root not in errors and "error" in nodes[root]:
+            errors.append(root)
+        remaining = [i for i in range(4) if i not in used]
+        frame("end", remaining=remaining, success=not errors and not remaining and values[root] == 24)
+        return dict(nodes=nodes, frames=frames, message="")
+    except (SyntaxError, ValueError, RecursionError) as error:
+        message = "表达式语法有误" if isinstance(error, SyntaxError) else str(error)
+        frame("end")
+        return dict(nodes=[], frames=frames, message=message)
+`;
+function makeRequest(source, cards) {
+  return {
+    source,
+    trigger: "manual",
+    prelude: `${evaluator}
+_p24 = _calculate24(${JSON.stringify(source)}, ${JSON.stringify(cards.map((card) => card.value))})
+_runtime.register_trace_resource("point24", [_p24])
+J, Q, K = 11, 12, 13`,
+    options: { trace: { events: [], observe: null }, timeoutMs: 1500, maxTraceSteps: 100 }
+  };
+}
+function calculationFromTrace(trace) {
+  const count = trace.finalState.resources?.point24 ?? 0;
+  const record = trace.resources.point24?.[count - 1];
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    return { nodes: [], frames: [], message: "\u8BA1\u7B97\u7ED3\u679C\u4E0D\u53EF\u7528\uFF0C\u8BF7\u91CD\u65B0\u8FD0\u884C" };
+  }
+  return record;
+}
+function frameAt(calculation, index) {
+  return { current: calculation.frames[index] ?? null, next: calculation.frames[index + 1] ?? null };
+}
+var frameDuration = (frame) => ({
+  pool: 800,
+  highlight: 650,
+  move: 800,
+  calculate: 700,
+  pause: 450,
+  end: 0
+})[frame.phase];
+function Replay({ cards, calculation, hand }) {
+  const [cursor, setCursor] = useState({ calculation: null, index: 0 });
+  const index = cursor.calculation === calculation ? cursor.index : 0;
+  const { current, next } = calculation ? frameAt(calculation, index) : { current: null, next: null };
+  useEffect(() => {
+    if (!current || !next) return;
+    const timer = setTimeout(() => setCursor({ calculation, index: index + 1 }), frameDuration(current));
+    return () => clearTimeout(timer);
+  }, [calculation, current, next, index]);
+  return /* @__PURE__ */ jsx(WorldSvg, { cards, calculation, frame: current, hand: hand && !calculation });
+}
+var progressKey = `pico:24point-gpt:completed:${cases.map((cards) => cards.map((card) => card.value).join(",")).join(";")}`;
+function readCompleted() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(progressKey) ?? "[]");
+    return new Set(Array.isArray(saved) ? saved.filter((value) => typeof value === "string" && cases.some((_, index) => String(index) === value)) : []);
+  } catch {
+    return /* @__PURE__ */ new Set();
+  }
+}
+function Root() {
+  const model = useMemo(() => {
+    const source = createState(initialSource);
+    const selected2 = createState("0");
+    const request = derive([source, selected2], (text, choice) => makeRequest(text, cases[Number(choice)]));
+    return { source, selected: selected2, request };
+  }, []);
+  const program = useProgram(model.request, model.source.set);
+  const selected = useValue(model.selected);
+  const [completed, setCompleted] = useState(readCompleted);
+  const [hasRun, setHasRun] = useState(false);
+  const execution = program?.execution;
+  const calculation = useMemo(() => execution?.status === "ready" ? calculationFromTrace(execution.result.trace) : null, [execution]);
+  const successful = calculation?.frames.at(-1)?.success === true;
+  const isCompleted = (choice) => completed.has(choice) || choice === selected && successful;
+  useEffect(() => {
+    if (successful) setCompleted((previous) => previous.has(selected) ? previous : /* @__PURE__ */ new Set([...previous, selected]));
+  }, [successful, selected]);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(progressKey, JSON.stringify([...completed]));
+    } catch {
+    }
+  }, [completed]);
+  const cards = cases[Number(selected)];
+  return /* @__PURE__ */ jsx(
+    PlaygroundShell,
+    {
+      name: "24 \u70B9",
+      id: "24point-gpt",
+      source: model.source,
+      editorRatio: 0.4,
+      onResetEditor: program?.resetEditor,
+      editor: program ? /* @__PURE__ */ jsx(Widget, { widget: program.editor }) : null,
+      toolbar: [{ controls: [{
+        kind: "choices",
+        label: "\u9898\u76EE",
+        value: selected,
+        choices: cases.map((_, index) => ({
+          value: String(index),
+          title: `\u7B2C ${index + 1} \u9898${isCompleted(String(index)) ? "\uFF0C\u5DF2\u5B8C\u6210" : ""}`,
+          label: /* @__PURE__ */ jsxs("span", { style: { color: isCompleted(String(index)) ? "var(--pico-hue-branch-strong)" : void 0 }, children: [
+            index + 1,
+            isCompleted(String(index)) && /* @__PURE__ */ jsx("span", { "aria-label": "\u6B63\u786E", children: " \u2713" })
+          ] })
+        })),
+        onChange: (value) => {
+          model.selected.set(value);
+          setHasRun(false);
+        }
+      }, {
+        kind: "button",
+        icon: "play",
+        label: "\u8FD0\u884C",
+        disabled: !program || execution?.status === "pending",
+        onClick: () => {
+          setHasRun(true);
+          program?.run();
+        }
+      }] }],
+      panels: [{
+        key: "world",
+        title: "\u5361\u724C",
+        icon: "viz",
+        flush: true,
+        content: /* @__PURE__ */ jsx("div", { className: "pico-scene", children: execution?.status === "failed" ? /* @__PURE__ */ jsx("div", { role: "alert", style: { color: errorInk }, children: "\u2717 \u8FD0\u884C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5" }) : /* @__PURE__ */ jsx(Replay, { cards, calculation, hand: !hasRun }) })
+      }],
+      initialOpen: ["world"]
+    }
+  );
+}
+
+// pico-entry-ns:24point-gpt
+createRoot(document.getElementById("root")).render(createElement(HostChromeProvider, { value: webChrome }, createElement(Root)));
+</script>
+  </body>
+</html>
