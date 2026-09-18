@@ -1,11 +1,5 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="./pico.svg" type="image/svg+xml">
-  <title>Pico | Python Playgrounds</title>
-  <style>/* Pico VI：token + 跨页面共享基元。
+* { box-sizing: border-box; margin: 0; padding: 0; } html, body { height: 100%; }
+/* Pico VI：token + 跨页面共享基元。
    分节：token → 基础 → 骨架 → 卡片与分隔条 → 按钮与输入 → 顶部栏 → 场景与错误。
    原则：
    - 组件样式不进本文件：留在组件内，只消费 --pico-* token；
@@ -415,58 +409,3 @@
   .pico-root { scroll-behavior: auto; }
   .pico-swap { transition: none; }
 }
-</style>
-  <style>
-    html { min-height: 100%; }
-    body { min-height: 100vh; min-height: 100dvh; }
-    .index-page { width: min(calc(100% - 32px), 920px); margin: 0 auto; padding: 40px 0 64px; }
-    .index-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
-    .index-logo { width: 48px; height: 48px; border-radius: 12px; }
-    .index-brand strong { display: block; font: 700 var(--pico-size-lg)/1.2 var(--pico-font-ui); }
-    .index-brand span { display: block; color: var(--pico-ink-soft); font-size: var(--pico-size-sm); }
-    h1 { margin: 0 0 8px; font: 700 var(--pico-size-xl)/1.2 var(--pico-font-ui); }
-    .index-intro { margin: 0 0 24px; color: var(--pico-ink-soft); font-size: var(--pico-size-sm); }
-    .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px; }
-    .index-card { min-height: 144px; justify-content: space-between; padding: 24px; color: inherit; text-decoration: none; }
-    .index-card strong { font: 650 var(--pico-size-md)/1.4 var(--pico-font-ui); }
-    .index-card span { color: var(--pico-ink-soft); font: var(--pico-size-xs)/1.4 var(--pico-font-mono); }
-    .index-card:hover { border-color: var(--pico-accent); transform: translateY(-2px); }
-    .index-card:active { transform: translateY(0); }
-    .index-card:focus-visible { outline: 2px solid var(--pico-accent); outline-offset: 3px; }
-    @media (max-width: 600px) {
-      .index-page { padding-top: 24px; }
-      .index-brand { margin-bottom: 32px; }
-    }
-  </style>
-</head>
-<body class="pico-root">
-  <div class="index-page">
-    <header class="index-brand">
-      <img class="index-logo" src="./pico.svg" alt="">
-      <div><strong>Pico</strong><span>Python Playgrounds</span></div>
-    </header>
-    <main>
-      <h1>选择一个 Playground</h1>
-      <p class="index-intro">打开一个页面开始学习和实验。</p>
-      <nav class="index-grid" aria-label="Playground 导航">
-<a class="pico-card index-card" href="./24point.html">
-  <strong>24 点</strong>
-  <span>24point.html</span>
-</a>
-<a class="pico-card index-card" href="./hanoi.html">
-  <strong>Tower of Hanoi</strong>
-  <span>hanoi.html</span>
-</a>
-<a class="pico-card index-card" href="./hello.html">
-  <strong>Hello, Python!</strong>
-  <span>hello.html</span>
-</a>
-<a class="pico-card index-card" href="./picoworld.html">
-  <strong>Pico World</strong>
-  <span>picoworld.html</span>
-</a>
-      </nav>
-    </main>
-  </div>
-</body>
-</html>
