@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="../pico.svg" type="image/svg+xml">
+  <title>Hello, Python!</title>
+  <link rel="stylesheet" href="../pico.css">
+</head>
+<body class="pico-root">
+  <div id="root"></div>
+  <script>window.__PICO_PYODIDE_BASES__ = ["https://cdn.npmmirror.com/packages/pyodide/314.0.3/files/","../pyodide/"].map((base) => new URL(base, location.href).href);</script>
+  <script type="module">
+// pico-entry-ns:hello
+import { createElement } from "../libs/react.js";
+import { createRoot } from "../libs/react.js";
+import { HostChromeProvider, webChrome } from "../pico.js";
+
+// playgrounds/hello/hello.generated.tsx
+import { useMemo } from "../libs/react.js";
+import { createState, derive } from "../pico.js";
+import { PlaygroundShell, Widget } from "../pico.js";
+import { useProgram } from "../pico.js";
+import { jsx } from "../libs/react.js";
+var STARTER = `hello = int(
+    "40988139186197822331169136684580776850378068696367"
+    "90339031035427709601936987418360190289990610395534"
+    "64343097562622369147702949617029155161432801649123"
+    "89906812792336414280401095468542582925589674135377"
+    "49628963711922168114292411571578753158511504528396"
+    "95512648293114740732760593192277743071574269310306"
+    "91970996349677247008390504859524095479401640114749"
+    "58459554804234851412388070631807579859866070258787"
+    "30657554664043354826586364509205327992724027210551"
+    "44509471955796141388112183668614066147380450146782"
+    "26404433135372265104882928524368481485012453030935"
+    "38619463983765011577993188866082991448946419223423"
+    "38595078605636154194925117268771998222774866619069"
+    "55803479409952698293309399808995134576753088267231"
+    "84123672166924537176089183836269607635317999771159"
+    "45604457232759827003086461284126232446991359924358"
+    "57570405666143891705998336207082239925543233741997"
+    "85427596095279687390435560264629828750632614279198"
+    "58230416617305848257202174672487118986927089804561"
+    "59618343100942104761337746719747317962141531003293"
+    "79075839903148344320990630516493889845253352833964"
+    "70416865224139653163536234265037997780154002928280"
+    "13754797057206760959278874300355857913366899255285"
+    "37394744618517751064054524907927627299331735912122"
+    "1619893890195466"
+)
+
+n = (hello.bit_length() + 7) // 8
+hello = hello.to_bytes(n, "big").decode()
+print(hello)
+`;
+function Root() {
+  const model = useMemo(() => {
+    const source = createState(STARTER);
+    const request = derive([source], (source2) => ({
+      source: source2,
+      trigger: "manual",
+      options: {
+        stdin: { kind: "interactive", value: "" },
+        trace: { events: ["call", "stmt", "return"], observe: { globals: true, locals: true } },
+        timeoutMs: 3e3,
+        maxTraceSteps: 2e3
+      }
+    }));
+    return { source, request };
+  }, []);
+  const program = useProgram(model.request, model.source.set);
+  if (program === null) return null;
+  const running = program.execution.status === "pending";
+  return /* @__PURE__ */ jsx(
+    PlaygroundShell,
+    {
+      name: "Hello, Python!",
+      id: "hello",
+      source: model.source,
+      onResetEditor: program.resetEditor,
+      editorRatio: 0.5,
+      initialOpen: ["output"],
+      toolbar: [{ controls: [
+        { kind: "button", icon: "play", label: running ? "\u6B63\u5728\u8FD0\u884C" : "\u8FD0\u884C", disabled: running, onClick: program.run }
+      ] }],
+      editor: /* @__PURE__ */ jsx(Widget, { widget: program.editor }),
+      panels: [
+        { key: "debug", icon: "debug", title: "\u8C03\u8BD5", content: /* @__PURE__ */ jsx(Widget, { widget: program.debugger }) },
+        { key: "output", icon: "output", title: "\u8F93\u51FA", content: /* @__PURE__ */ jsx(Widget, { widget: program.terminal }) }
+      ]
+    }
+  );
+}
+
+// pico-entry-ns:hello
+createRoot(document.getElementById("root")).render(createElement(HostChromeProvider, { value: webChrome }, createElement(Root)));
+</script>
+  </body>
+</html>

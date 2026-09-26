@@ -395,6 +395,32 @@ function derive(inputs, compute) {
   return deriveImpl(inputs, compute);
 }
 
+// src/libs/host.ts
+function isFunction(value) {
+  return typeof value === "function";
+}
+function draftOf(value) {
+  if (typeof value !== "object" || value === null) return null;
+  const record = value;
+  const initial = record.initial;
+  if (initial !== null && typeof initial !== "string") return null;
+  if (!isFunction(record.save) || !isFunction(record.clear)) return null;
+  return {
+    initial,
+    save: record.save.bind(record),
+    clear: record.clear.bind(record)
+  };
+}
+function hostBridge(scope) {
+  if (typeof scope !== "object" || scope === null) return null;
+  const injected = scope.__PICO_HOST__;
+  if (typeof injected !== "object" || injected === null) return null;
+  const record = injected;
+  const draft = draftOf(record.draft);
+  if (draft === null || !isFunction(record.home)) return null;
+  return { draft, home: record.home.bind(record) };
+}
+
 // src/libs/components.tsx
 import {
   Children,
@@ -459,6 +485,7 @@ function panelWatermark(svg) {
 // src/libs/icons.ts
 var PANEL_ICONS = {
   output: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M4.3 6.2l2.2 1.8-2.2 1.8M8.3 10.2h3.2"/></svg>',
+  play: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 3.5 12 8l-6.5 4.5z"/></svg>',
   debug: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="4" r="1.8"/><path d="M6.4 5.5C5 6.1 4.2 7.3 4.2 8.9c0 2.2 1.6 4 3.8 4s3.8-1.8 3.8-4c0-1.6-.8-2.8-2.2-3.4"/><path d="M8 6.5v6.4M6.1 5.9L4 4.6M9.9 5.9L12 4.6M4.3 8.8H2.2M11.7 8.8h2.1M5.1 11.4l-1.9 1.5M10.9 11.4l1.9 1.5"/></svg>'
 };
 
@@ -749,7 +776,7 @@ var TOOLBAR_ICONS = {
     /* @__PURE__ */ jsx("path", { d: "M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9z" }),
     /* @__PURE__ */ jsx("path", { d: "M2.5 4.9L8 8l5.5-3.1M8 8v6.2" })
   ] }),
-  play: /* @__PURE__ */ jsx("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ jsx("path", { d: "M5.5 3.5 12 8l-6.5 4.5z" }) }),
+  play: /* @__PURE__ */ jsx("span", { style: { display: "contents" }, dangerouslySetInnerHTML: { __html: PANEL_ICONS.play } }),
   download: /* @__PURE__ */ jsx("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ jsx("path", { d: "M8 2.5v7.2M4.8 6.9L8 10.1l3.2-3.2M3 11.5v.6a1.6 1.6 0 0 0 1.6 1.6h6.8a1.6 1.6 0 0 0 1.6-1.6v-.6" }) }),
   close: /* @__PURE__ */ jsx("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ jsx("path", { d: "M4 4l8 8M12 4l-8 8" }) }),
   new: /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
@@ -792,6 +819,15 @@ function ControlView({ control }) {
     }
   );
 }
+function HostHomeButton() {
+  if (typeof window === "undefined") return null;
+  const home = hostBridge(window)?.home;
+  if (home === void 0) return null;
+  return /* @__PURE__ */ jsx("button", { type: "button", className: "pico-home", "aria-label": "\u8FD4\u56DE\u8BFE\u7A0B\u5217\u8868", title: "\u8FD4\u56DE\u8BFE\u7A0B\u5217\u8868", onClick: home, children: /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+    /* @__PURE__ */ jsx("path", { d: "M2.6 7.5 8 3.1l5.4 4.4V13a.6.6 0 0 1-.6.6H3.2a.6.6 0 0 1-.6-.6z" }),
+    /* @__PURE__ */ jsx("path", { d: "M6.3 13.6V9.7h3.4v3.9" })
+  ] }) });
+}
 function TopBarImpl({ brand, name, onResetEditor, groups }) {
   const list = groups ?? [];
   const bar = useRef(null);
@@ -813,6 +849,7 @@ function TopBarImpl({ brand, name, onResetEditor, groups }) {
   }, []);
   return /* @__PURE__ */ jsxs("header", { ref: bar, className: "pico-topbar", "aria-label": "playground \u5DE5\u5177\u680F", children: [
     /* @__PURE__ */ jsxs("div", { className: "pico-topbar-left", children: [
+      /* @__PURE__ */ jsx(HostHomeButton, {}),
       /* @__PURE__ */ jsx(BrandMenu, { brand: brand ?? "Pico Playground", onResetEditor }),
       name !== void 0 && /* @__PURE__ */ jsx("div", { className: "pico-topbar-title", children: name })
     ] }),
@@ -2035,20 +2072,15 @@ function draftStorageKey(pathname, search = "", hash = "") {
 function textOrEmpty(value) {
   return typeof value === "string" ? value : "";
 }
-function isBridge(value) {
-  if (typeof value !== "object" || value === null) return false;
-  const record = value;
-  return (record.initial === null || typeof record.initial === "string") && typeof record.save === "function" && typeof record.clear === "function";
-}
 function createDraftBackend(scope) {
   if (typeof scope !== "object" || scope === null) return null;
   const window2 = scope;
-  const injected = window2.__PICO_DRAFT__;
-  if (isBridge(injected)) {
+  const injected = hostBridge(window2)?.draft;
+  if (injected !== void 0 && injected !== null) {
     return {
       load: () => injected.initial,
-      save: (text, dirty) => {
-        void injected.save(text, dirty);
+      save: (text) => {
+        void injected.save(text);
       },
       clear: () => {
         void injected.clear();
@@ -2088,6 +2120,30 @@ function createDraftBackend(scope) {
 
 // src/libs/runner/runner.ts
 import { loadPyodide } from "./libs/pyodide.js";
+
+// src/libs/runner/pyodideBases.ts
+function pyodideBases(scope) {
+  if (Array.isArray(scope.__PICO_PYODIDE_BASES__)) {
+    return scope.__PICO_PYODIDE_BASES__.filter(
+      (base) => typeof base === "string" && base.length > 0
+    );
+  }
+  const single = scope.__PICO_PYODIDE_BASE__;
+  return typeof single === "string" && single.length > 0 ? [single] : [];
+}
+async function loadFirstPyodide(bases, load) {
+  if (bases.length === 0) return await load(void 0);
+  let last;
+  for (const base of bases) {
+    try {
+      return await load(base);
+    } catch (error2) {
+      console.warn(`Pyodide \u4ECE ${base} \u52A0\u8F7D\u5931\u8D25\uFF0C\u6539\u7528\u4E0B\u4E00\u4E2A\u6765\u6E90`, error2);
+      last = error2;
+    }
+  }
+  throw last;
+}
 
 // src/libs/runner/trace.ts
 function clone(value) {
@@ -2196,8 +2252,10 @@ var queue = Promise.resolve();
 var runId = 0;
 function pyodide() {
   if (pyodidePromise === void 0) {
-    const base = globalThis.__PICO_PYODIDE_BASE__;
-    pyodidePromise = (typeof base === "string" ? loadPyodide({ indexURL: base }) : loadPyodide()).catch((error2) => {
+    pyodidePromise = loadFirstPyodide(
+      pyodideBases(globalThis),
+      (base) => base === void 0 ? loadPyodide() : loadPyodide({ indexURL: base })
+    ).catch((error2) => {
       pyodidePromise = void 0;
       throw error2;
     });
@@ -2393,6 +2451,12 @@ function runProgramImpl(files, options) {
 function runProgram(files, options) {
   return runProgramImpl(files, options);
 }
+function appendedStdin(value, line) {
+  const terminated = value === "" || value.endsWith("\n") ? value : `${value}
+`;
+  return `${terminated}${line}
+`;
+}
 function warmupProgram() {
   return warmupProgramImpl();
 }
@@ -2477,7 +2541,7 @@ function createExecution(input, debounceMs = 400) {
         ...current.request,
         options: {
           ...current.request.options,
-          stdin: { kind: "interactive", value: stdin.value + (stdin.value !== "" && !stdin.value.endsWith("\n") ? "\n" : "") + line + "\n" }
+          stdin: { kind: "interactive", value: appendedStdin(stdin.value, line) }
         }
       });
     },
@@ -2864,7 +2928,6 @@ function useProgramImpl(request, onEdit, debuggerOptions) {
     void warmupProgram();
     const draft = createDraftBackend(typeof window === "undefined" ? void 0 : window);
     const saved = draft?.load() ?? null;
-    const originalText = initialSource.replace(/\r?\n$/, "");
     const editor = new Editor(saved === null ? request.getSnapshot().source : `${saved}
 `);
     if (saved !== null && saved !== request.getSnapshot().source) edit.current(saved);
@@ -2933,7 +2996,7 @@ function useProgramImpl(request, onEdit, debuggerOptions) {
     const stopState = state2.subscribe(publish);
     const stopEdit = editor.source.subscribe(() => {
       edit.current(editor.text);
-      draft?.save(editor.text, editor.text !== originalText);
+      draft?.save(editor.text);
     });
     const stopSource = request.subscribe(() => {
       const source = request.getSnapshot().source;
@@ -2974,6 +3037,7 @@ export {
   Trace,
   Widget,
   analyzeProgram,
+  appendedStdin,
   asset,
   bareChrome,
   createState,

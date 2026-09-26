@@ -326,6 +326,25 @@
   margin-right: auto;
   min-width: 0;
 }
+/* 桌面宿主在顶栏最左端的返回入口。浏览器里 `HostHomeButton` 返回 null，没有这个元素；
+   它是页面里唯一的宿主导航，所以用强调色，让"能回去"这件事一眼可见。 */
+.pico-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-left: -4px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--pico-accent);
+  cursor: pointer;
+  transition: background var(--pico-duration-fast), color var(--pico-duration-fast);
+}
+.pico-home:hover { background: color-mix(in srgb, var(--pico-accent) 14%, transparent); color: var(--pico-accent-deep); }
+.pico-home svg { width: 16px; height: 16px; }
+
 .pico-topbar-brand {
   display: inline-flex;
   align-items: center;
