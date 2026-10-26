@@ -34,7 +34,7 @@ scale remains 1.05741. The original editable source is preserved unmodified. The
 red (`#c52228`) and blue (`#173c78`). Added descriptive SVG titles. No scripts,
 event handlers, or external resource references are used.
 
-Regenerate all 56 files with `python3 public/assets/playing-cards/extract.py`.
+Regenerate all 56 files with `python3 assets/playing-cards/extract.py`.
 The extraction script and source are included so these derived SVG assets
 can be inspected, edited, and redistributed under LGPL-2.1. Keep the authors,
 license, source, and this notice with redistributions of the artwork.

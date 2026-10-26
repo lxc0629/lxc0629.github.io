@@ -1,27 +1,157 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="../pico.svg" type="image/svg+xml">
-  <title>24 点</title>
-  <link rel="stylesheet" href="../pico.css">
-</head>
-<body class="pico-root">
-  <div id="root"></div>
-  <script>window.__PICO_PYODIDE_BASES__ = ["https://cdn.npmmirror.com/packages/pyodide/314.0.3/files/","../pyodide/"].map((base) => new URL(base, location.href).href);</script>
-  <script type="module">
-// pico-entry-ns:24point-gpt
-import { createElement } from "../libs/react.js";
-import { createRoot } from "../libs/react.js";
-import { HostChromeProvider, webChrome } from "../pico.js";
+// playgrounds/24point/24point.generated.tsx
+import { useEffect, useState } from "../libs/react.js";
+import { on, stateful } from "../pico.js";
+import { Source } from "../pico.js";
+import { python as execution } from "../pico.js";
+import { playback as playback2 } from "../pico.js";
+import { PlaygroundShell, Widget } from "../pico.js";
+import { usePlayground } from "../pico.js";
 
-// playgrounds/24point/24point-gpt.generated.tsx
-import { useEffect, useMemo, useState } from "../libs/react.js";
-import { createState, derive } from "../pico.js";
-import { PlaygroundShell, Widget, useValue } from "../pico.js";
-import { useProgram } from "../pico.js";
-import { jsx, jsxs } from "../libs/react.js";
+// playgrounds/shared/python/index.ts
+import { python as python2, pythonPreload } from "../pico.js";
+import { playback } from "../pico.js";
+import { terminal } from "../pico.js";
+import { debugger as debuggerComponent, variableTimeline } from "../pico.js";
+import { selection } from "../pico.js";
+
+// playgrounds/shared/python/editor.ts
+import { EditorState } from "../libs/codemirror.js";
+import { globalCompletion, localCompletionSource, python } from "../libs/codemirror.js";
+import { autocompletion } from "../libs/codemirror.js";
+var cleanPaste = EditorState.transactionFilter.of((tr) => {
+  if (!tr.isUserEvent("input.paste")) return tr;
+  const specs = [];
+  let modified = false;
+  tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+    const text = inserted.toString();
+    const doc = tr.startState.doc;
+    const line = doc.lineAt(fromA);
+    const lineText = line.text;
+    if (/^\s*$/.test(lineText) && lineText.length > 0 && /^\s+/.test(text)) {
+      specs.push({ changes: { from: line.from, to: line.to, insert: text } });
+      modified = true;
+      return;
+    }
+    const prefix = doc.sliceString(line.from, fromA);
+    if (/^\s+$/.test(prefix) && /^\s+/.test(text)) {
+      specs.push({ changes: { from: line.from, to: toA, insert: text } });
+      modified = true;
+      return;
+    }
+    specs.push({ changes: { from: fromA, to: toA, insert: text } });
+  });
+  if (!modified) return tr;
+  return specs;
+});
+var pythonEditorOptions = {
+  extensions: [cleanPaste, python(), autocompletion({ override: [globalCompletion, localCompletionSource] })]
+};
+
+// playgrounds/shared/python/index.ts
+function pythonOptions(options = {}) {
+  return {
+    filename: "main.py",
+    editor: pythonEditorOptions,
+    preload: [pythonPreload],
+    commands: { run: { type: "python.run" }, reset: { type: "python.reset" }, clear: { type: "python.clear" } },
+    assemble({ bus, editor, own, observe }) {
+      const output = own(terminal.create(bus));
+      const debugging = own(debuggerComponent.create(options.debugger ?? {}, bus));
+      const focus = own(selection.create(bus));
+      bus.emit({ type: "terminal.init" }, "application.start");
+      bus.emit({ type: "debugger.init" }, "application.start");
+      own({ dispose: bus.subscribe(["editor.selected"], (event) => {
+        const from = Math.min(event.anchor, event.head);
+        const to = Math.max(event.anchor, event.head);
+        bus.emit({ type: "selection.select", selection: from === to ? null : { kind: "source", source: editor.state.source, from, to } }, "editor");
+      }) });
+      const playing = own(playback.create(options.playback ?? {}, bus));
+      let checkedSource = editor.state.source;
+      own({ dispose: bus.subscribe(["python.execute"], (event) => {
+        checkedSource = event.source.code;
+      }) });
+      const execution2 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed"], () => {
+        const { position } = playing.state;
+        const result = execution2.state.result;
+        const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
+        const diagnostics = [];
+        const lines = checkedSource.split("\n");
+        if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
+          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
+        }
+        const selected = focus.state.current;
+        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
+        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
+        bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
+      }) });
+      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
+      observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
+      observe("selection", () => focus.state, ["selection.changed"]);
+      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+    }
+  };
+}
+
+// playgrounds/24point/24point.generated.tsx
+import { Fragment, jsx, jsxs } from "../libs/react.js";
+var persistent = /* @__PURE__ */ new WeakSet();
+var point24gpt = stateful("point24gpt", (options) => {
+  const state = { source: options.source ?? initialSource, choice: "0", completed: [...options.completed ?? (options.persist ? readCompleted() : [])] };
+  if (options.persist) persistent.add(state);
+  return state;
+}, [
+  on("editor.changed", (state, event, { emit }) => {
+    state.source = event.source;
+    emit({ type: "python.clear" });
+  }),
+  on("python.run", (state, _event, { emit }) => {
+    const request = makeRequest(state.source, cases[Number(state.choice)]);
+    emit({ type: "python.execute", source: new Source(request.source, request), options: request.options });
+  }),
+  on("point24gpt.select", (state, event, { emit }) => {
+    if (event.choice === state.choice || !cases.some((_, index) => String(index) === event.choice)) return;
+    state.choice = event.choice;
+    emit({ type: "python.clear" });
+  }),
+  on("python.changed", (state, event, { emit }) => {
+    if (event.result.status !== "ready" || !event.result.value || state.completed.includes(state.choice)) return;
+    if (calculationFromTrace(event.result.value.trace).frames.at(-1)?.success === true) {
+      state.completed = [...state.completed, state.choice];
+      if (persistent.has(state)) {
+        try {
+          window.localStorage.setItem(progressKey, JSON.stringify(state.completed));
+        } catch {
+        }
+      }
+      emit({ type: "point24gpt.completed", choice: state.choice });
+    }
+  })
+]);
+function createExample(bus) {
+  const course = point24gpt.create({}, bus);
+  const player = playback2.create({}, bus);
+  const runner = execution.create({}, bus);
+  return () => {
+    runner.dispose();
+    player.dispose();
+    course.dispose();
+  };
+}
+var examples = {
+  /** 初始代码原样运行：四张 1 都不是牌池里的牌，走校验失败路径。 */
+  starter: { create: createExample, events: [
+    { type: "python.run" }
+  ] },
+  /** 切到第 2 题并改成 `(1+2+3)*4`：完整走成功路径并产生完成通知。 */
+  edited: { create: createExample, events: [
+    { type: "point24gpt.select", choice: "1" },
+    { type: "editor.changed", source: "(1+2+3)*4" },
+    { type: "python.run" }
+  ] }
+};
 var cardPath = (card) => {
   const rank = { 1: "ace", 11: "jack", 12: "queen", 13: "king" }[card.value] ?? card.value;
   return `assets/playing-cards/${rank}_of_${card.suit}.svg`;
@@ -177,7 +307,6 @@ import ast as _ast
 from fractions import Fraction as _Fraction
 import _pico_runtime as _runtime
 
-
 def _calculate24(source, cards):
     nodes, frames, values = [], [], {}
     used, taken, visible, errors = [], [], [], []
@@ -285,10 +414,10 @@ def _calculate24(source, cards):
         frame("end")
         return dict(nodes=[], frames=frames, message=message)
 `;
+var layoutOptions = { open: ["world"], ratio: 0.4 };
 function makeRequest(source, cards) {
   return {
     source,
-    trigger: "manual",
     prelude: `${evaluator}
 _p24 = _calculate24(${JSON.stringify(source)}, ${JSON.stringify(cards.map((card) => card.value))})
 _runtime.register_trace_resource("point24", [_p24])
@@ -335,80 +464,69 @@ function readCompleted() {
     return /* @__PURE__ */ new Set();
   }
 }
-function Root() {
-  const model = useMemo(() => {
-    const source = createState(initialSource);
-    const selected2 = createState("0");
-    const request = derive([source, selected2], (text, choice) => makeRequest(text, cases[Number(choice)]));
-    return { source, selected: selected2, request };
-  }, []);
-  const program = useProgram(model.request, model.source.set);
-  const selected = useValue(model.selected);
-  const [completed, setCompleted] = useState(readCompleted);
-  const [hasRun, setHasRun] = useState(false);
-  const execution = program?.execution;
-  const calculation = useMemo(() => execution?.status === "ready" ? calculationFromTrace(execution.result.trace) : null, [execution]);
-  const successful = calculation?.frames.at(-1)?.success === true;
-  const isCompleted = (choice) => completed.has(choice) || choice === selected && successful;
-  useEffect(() => {
-    if (successful) setCompleted((previous) => previous.has(selected) ? previous : /* @__PURE__ */ new Set([...previous, selected]));
-  }, [successful, selected]);
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(progressKey, JSON.stringify([...completed]));
-    } catch {
-    }
-  }, [completed]);
+var savedOptions = { persist: true };
+var mountOptions = { ...pythonOptions(), filename: "24point-gpt.py", layout: layoutOptions };
+var starter = initialSource;
+function Root(host = {}) {
+  const view = usePlayground(point24gpt, { ...savedOptions, source: host.source ?? initialSource }, { ...mountOptions, ...host.options });
+  const selected = view?.state.choice ?? "0";
+  const hasRun = view?.parts.python.result.status === "pending" || view?.parts.python.result.status === "ready" && view.parts.python.result.value !== null;
+  const execution2 = view?.parts.python.result;
+  const calculation = view?.parts.playback.trace ? calculationFromTrace(view.parts.playback.trace) : null;
+  const isCompleted = (choice) => view?.state.completed.includes(choice) === true;
+  if (!view) return /* @__PURE__ */ jsx(Fragment, {});
   const cards = cases[Number(selected)];
   return /* @__PURE__ */ jsx(
     PlaygroundShell,
     {
       name: "24 \u70B9",
-      id: "24point-gpt",
-      source: model.source,
-      editorRatio: 0.4,
-      onResetEditor: program?.resetEditor,
-      editor: program ? /* @__PURE__ */ jsx(Widget, { widget: program.editor }) : null,
-      toolbar: [{ controls: [{
+      layout: view.layout,
+      onEvent: view.send,
+      menu: view.menu,
+      editor: view ? /* @__PURE__ */ jsx(Widget, { widget: view.editor }) : null,
+      toolbar: [...view.toolbar, { controls: [{
         kind: "choices",
         label: "\u9898\u76EE",
         value: selected,
         choices: cases.map((_, index) => ({
           value: String(index),
+          event: { type: "point24gpt.select", choice: String(index) },
           title: `\u7B2C ${index + 1} \u9898${isCompleted(String(index)) ? "\uFF0C\u5DF2\u5B8C\u6210" : ""}`,
           label: /* @__PURE__ */ jsxs("span", { style: { color: isCompleted(String(index)) ? "var(--pico-hue-branch-strong)" : void 0 }, children: [
             index + 1,
             isCompleted(String(index)) && /* @__PURE__ */ jsx("span", { "aria-label": "\u6B63\u786E", children: " \u2713" })
           ] })
-        })),
-        onChange: (value) => {
-          model.selected.set(value);
-          setHasRun(false);
-        }
+        }))
       }, {
         kind: "button",
         icon: "play",
         label: "\u8FD0\u884C",
-        disabled: !program || execution?.status === "pending",
-        onClick: () => {
-          setHasRun(true);
-          program?.run();
-        }
+        disabled: !view || execution2?.status === "pending",
+        event: { type: "python.run" }
       }] }],
       panels: [{
         key: "world",
         title: "\u5361\u724C",
         icon: "viz",
         flush: true,
-        content: /* @__PURE__ */ jsx("div", { className: "pico-scene", children: execution?.status === "failed" ? /* @__PURE__ */ jsx("div", { role: "alert", style: { color: errorInk }, children: "\u2717 \u8FD0\u884C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5" }) : /* @__PURE__ */ jsx(Replay, { cards, calculation, hand: !hasRun }) })
-      }],
-      initialOpen: ["world"]
+        content: /* @__PURE__ */ jsx("div", { className: "pico-scene", children: execution2?.status === "failed" ? /* @__PURE__ */ jsx("div", { role: "alert", style: { color: errorInk }, children: "\u2717 \u8FD0\u884C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5" }) : /* @__PURE__ */ jsx(Replay, { cards, calculation, hand: !hasRun }) })
+      }]
     }
   );
 }
-
-// pico-entry-ns:24point-gpt
-createRoot(document.getElementById("root")).render(createElement(HostChromeProvider, { value: webChrome }, createElement(Root)));
-</script>
-  </body>
-</html>
+export {
+  Root,
+  WorldSvg,
+  calculationFromTrace,
+  cardPath,
+  cases,
+  evaluator,
+  examples,
+  frameAt,
+  frameDuration,
+  initialSource,
+  makeRequest,
+  point24gpt,
+  starter,
+  treeLayout
+};

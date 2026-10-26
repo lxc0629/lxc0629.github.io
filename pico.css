@@ -1,4 +1,4 @@
-* { box-sizing: border-box; margin: 0; padding: 0; } html, body { height: 100%; }
+* { box-sizing: border-box; margin: 0; padding: 0; } html, body, #root { height: 100%; }
 /* Pico VI：token + 跨页面共享基元。
    分节：token → 基础 → 骨架 → 卡片与分隔条 → 按钮与输入 → 顶部栏 → 场景与错误。
    原则：
