@@ -1,0 +1,30 @@
+{
+  "course": "turtle-art",
+  "concepts": ["loop", "branch", "function"],
+  "teaches": "用 turtle 把循环、条件和计算变成几何图案：外角 360 / 边数闭合多边形，循环变量决定长度、角度与颜色，函数复用一段绘图动作。",
+  "answerStyle": "先让学生看画板上最新的一笔和海龟的位置、朝向，再解释一个变量怎样影响它；不直接给出完整图案的代码。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "turn-angle-is-interior",
+      "signs": ["left(", "angle", "内角", "不闭合"],
+      "guide": "让学生数一圈要转多少度：每次转的是外角，转角乘以次数必须是 360。"
+    },
+    {
+      "id": "goto-draws-a-line",
+      "signs": ["goto(", "penup", "多了一条线"],
+      "guide": "指给学生看落笔状态：想移动但不画线，要先抬笔再 goto。"
+    },
+    {
+      "id": "star-import-shadows-names",
+      "signs": ["from turtle import *", "radians", "NameError", "TypeError"],
+      "guide": "from turtle import * 会带进 radians、degrees 等同名函数，覆盖自己导入的名字；改用 pi 或限定名字。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么五边形转 72 度而不是 108 度？",
+      "reply": "每次 left 转的是外角。画完一圈，海龟总共转了几度？再除以边数试试。"
+    }
+  ]
+}

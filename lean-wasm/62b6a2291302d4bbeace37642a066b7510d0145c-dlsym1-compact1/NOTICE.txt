@@ -1,0 +1,12 @@
+Lean 4 WebAssembly runtime
+
+Lean is copyright Microsoft Corporation and the Lean contributors, licensed
+under Apache-2.0 (see LICENSE).
+
+Browser build: https://github.com/cauli/lean4
+Source commit: 62b6a2291302d4bbeace37642a066b7510d0145c
+Artifact revision: dlsym1-compact1
+Artifact host: https://lean.cau.li/lean-wasm
+
+The build downloads and verifies the pinned binary and Init library artifacts.
+The generated dist/lean-wasm directory is required when publishing the static site.

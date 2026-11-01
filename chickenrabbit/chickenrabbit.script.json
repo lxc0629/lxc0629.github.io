@@ -1,0 +1,23 @@
+{
+  "id": "chickenrabbit", "title": "从抬腿实验写出鸡兔同笼", "from": "", "mode": "instruction", "auto": true,
+  "steps": [
+    {"title":"先把问题写成两个观测","concepts":["value"],"stage":{"panels":["viz"],"focus":"viz"},"say":[
+      {"say":"笼子里只有鸡和兔。我们暂时看不到各有几只，只知道一共有 10 个头、28 条腿。先把这两个事实放进一个二元组。","write":"observation = (10, 28)\n"},
+      {"say":"下标 0 取第一个值，也就是头数。","write":"observation = (10, 28)\n\nheads = observation[0]\n"},
+      {"say":"下标 1 取腿数。到这里，代码只是在忠实记录题目，没有开始猜答案。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n"}]},
+    {"title":"策略一：每只动物都抬两条腿","concepts":["value"],"say":[
+      {"say":"鸡只有两条腿，兔有四条。让每只动物都抬起两条腿，鸡就没有腿着地，兔还剩两条。我们把这个思想直接写成一次世界动作。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(2)\n"},
+      {"say":"动作发生后，再读取此刻着地的腿数。注意顺序：先改变世界，再观察结果。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(2)\ngrounded = count_grounded_legs()\n"}]},
+    {"title":"着地腿只来自兔子","concepts":["value"],"say":[
+      {"say":"现在每只兔贡献两条着地腿，每只鸡贡献零条，所以 `grounded // 2` 就是兔子数量。整除表达了结果必须是完整的只数。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(2)\ngrounded = count_grounded_legs()\nrabbits = grounded // 2\n"},
+      {"say":"总头数减去兔子数，就是鸡的数量。每个变量保存推理中的一个事实，每个表达式对应一步等量关系。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(2)\ngrounded = count_grounded_legs()\nrabbits = grounded // 2\nchickens = heads - rabbits\n"}]},
+    {"title":"运行第一种策略","concepts":["value"],"stage":{"panels":["viz","debug"],"focus":"viz"},"do":[{"action":"code.run"}],"say":"运行后，所有动物抬起两条腿；`grounded` 是 8，`rabbits` 是 4，`chickens` 是 6。答案正确后，笼子才揭示真实数量。"},
+    {"title":"用 Debugger 看数据怎样出现","concepts":["value"],"stage":{"panels":["viz","debug"],"focus":"debug"},"do":[{"action":"code.locate","args":{"line":6,"occurrence":1}},{"action":"annotation.show","args":{"kind":"note","at":{"line":6},"text":"先执行抬腿动作，世界才改变"}}],"say":"现在停在抬腿语句。继续单步时先看到 World 姿态变化；执行下一行，`grounded` 才获得读数。Debugger 让我们区分“发出动作”和“读取结果”两个时刻。"},
+    {"title":"沿着变量继续到答案","concepts":["value"],"do":[{"action":"code.locate","args":{"line":7,"occurrence":1}},{"action":"annotation.show","args":{"kind":"mark","at":{"variable":"grounded"}}}],"say":"执行第 7 行后，变量栏出现 `grounded = 8`。后两行不再操作世界，只把实验事实转换成兔子数和鸡数。程序控制流与数学推理在这里一一对应。"},
+    {"title":"策略二：只抬一条腿","concepts":["value"],"stage":{"panels":["viz"]},"say":[
+      {"say":"现在换一个实验：每只动物只抬一条腿。动作参数先从 2 改成 1。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(1)\ngrounded = count_grounded_legs()\nrabbits = grounded // 2\nchickens = heads - rabbits\n"},
+      {"say":"公式也要跟着改变。每只动物先共有 1 条着地腿；减去 heads 后，剩下的是每只兔额外的 2 条。","write":"observation = (10, 28)\n\nheads = observation[0]\nlegs = observation[1]\n\nraise_legs(1)\ngrounded = count_grounded_legs()\nrabbits = (grounded - heads) // 2\nchickens = heads - rabbits\n"}]},
+    {"title":"运行第二种策略并比较","concepts":["value"],"stage":{"panels":["viz","debug"],"focus":"debug"},"do":[{"action":"code.run"},{"action":"code.locate","args":{"line":7,"occurrence":1}}],"say":"这次 `grounded` 是 18。表达式先算 `18 - 10 = 8`，再除以 2，仍得到 4 只兔。两种程序答案相同，中间变量不同，因为实验策略不同。"},
+    {"title":"编程思想来自对问题的建模","concepts":["value"],"stage":{"panels":["viz","debug"],"focus":"viz"},"say":"两种写法都经历：记录观测 → 设计动作 → 读取新事实 → 用公式消去一种动物 → 算出另一种动物。函数调用表达实验，变量保存观察，算术表达推理；改变实验时，依赖它的公式必须一起改变。"}
+  ]
+}

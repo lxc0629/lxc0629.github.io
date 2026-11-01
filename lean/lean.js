@@ -5,6 +5,10 @@ import { event, on, stateful } from "../pico.js";
 import { PlaygroundShell, Widget } from "../pico.js";
 import { usePlayground } from "../pico.js";
 import { lean } from "../pico.js";
+import { playbackHost } from "../session.js";
+import { useSession } from "../session.js";
+import { playground } from "../session.js";
+import { source } from "../session.js";
 
 // playgrounds/lean/sierpinski.lean
 var sierpinski_default = "-- \u8C22\u5C14\u5BBE\u65AF\u57FA\u4E09\u89D2\u5F62\uFF1A\u6A2A\u7EB5\u5750\u6807\u7684\u4E8C\u8FDB\u5236\u4E2D\u4E0D\u80FD\u6709\u91CD\u53E0\u7684 1\u3002\n-- x \u5411\u53F3\uFF0Cy \u5411\u4E0B\uFF1Btrue \u662F\u9ED1\u8272\uFF0Cfalse \u662F\u767D\u8272\u3002\ndef f (x y : Int) : Bool :=\n  decide (1 \u2264 x \u2227 x \u2264 100 \u2227 1 \u2264 y \u2227 y \u2264 100 \u2227\n    ((x - 1).toNat &&& (y - 1).toNat) = 0)\n\n-- \u5BF9\u6240\u6709\u6574\u6570\uFF08\u5305\u62EC\u753B\u5E03\u5916\uFF09\u6210\u7ACB\uFF0C\u4E0D\u53EA\u662F\u68C0\u67E5 10,000 \u4E2A\u70B9\u3002\ntheorem transpose (x y : Int) : f x y = f y x := by\n  simp only [f, Nat.and_comm (x - 1).toNat (y - 1).toNat, and_left_comm]\n\n-- \u753B\u5E03\u5916\u59CB\u7EC8\u662F\u767D\u8272\u3002\ntheorem outside (x y : Int)\n    (h : x < 1 \u2228 100 < x \u2228 y < 1 \u2228 100 < y) :\n    f x y = false := by\n  have bounds : \xAC (1 \u2264 x \u2227 x \u2264 100 \u2227 1 \u2264 y \u2227 y \u2264 100) := by\n    omega\n  simp only [f, decide_eq_false_iff_not]\n  intro \u27E8hx, hx', hy, hy', _\u27E9\n  exact bounds \u27E8hx, hx', hy, hy'\u27E9\n\n";
@@ -21,8 +25,8 @@ var pixels_default = `
 
 // playgrounds/lean/lean.generated.tsx
 import { Fragment, jsx, jsxs } from "../libs/react.js";
-function leanEditorDiagnostics(source, diagnostics) {
-  const lines = source.split("\n");
+function leanEditorDiagnostics(source2, diagnostics) {
+  const lines = source2.split("\n");
   let start = 0;
   const starts = lines.map((line) => {
     const offset2 = start;
@@ -167,7 +171,7 @@ function pixelImage(result) {
   if (rows.length !== 100 || rows.some((row) => row.length !== 100)) return null;
   return { width: 100, height: 100, pixels: rows.join("") };
 }
-var leanPicture = stateful("leanPicture", (source) => ({ source, message: null }), [
+var leanPicture = stateful("leanPicture", (source2) => ({ source: source2, message: null }), [
   on("editor.changed", (state, event2, { emit }) => {
     state.source = event2.source;
     emit({ type: "lean.clear" });
@@ -235,8 +239,11 @@ function LeanStatus({ state }) {
   ] }) : passed ? /* @__PURE__ */ jsx("div", { role: "status", style: { display: "flex", alignItems: "center", gap: 16 }, children: /* @__PURE__ */ jsx("svg", { role: "img", "aria-label": "\u68C0\u67E5\u901A\u8FC7", viewBox: "0 0 64 64", width: "80", height: "80", style: { flexShrink: 0, color: "#16a34a" }, children: /* @__PURE__ */ jsx("path", { d: "M12 33 26 47 53 17", fill: "none", stroke: "currentColor", strokeWidth: "7", strokeLinecap: "round", strokeLinejoin: "round" }) }) }) : /* @__PURE__ */ jsx("p", { role: "status", children: result.status === "failed" ? String(result.error instanceof Error ? result.error.message : result.error) : checked ? checked.exitCode !== 0 ? "Lean \u68C0\u67E5\u5931\u8D25" : "\u68C0\u67E5\u5B8C\u6210\uFF0C\u6709\u8B66\u544A\uFF08\u53EF\u80FD\u5305\u542B\u672A\u5B8C\u6210\u7684\u8BC1\u660E\uFF09" : "\u70B9\u51FB\u201C\u68C0\u67E5\u5E76\u7ED8\u56FE\u201D\uFF0C\u8FD0\u884C Lean \u5B9A\u4E49\u548C\u8BC1\u660E\u3002" }) });
 }
 var starter = sierpinski_default;
+var NO_RUN = Object.freeze({ trace: null, analysis: null, position: null, playing: false, rate: 1 });
+var LEAN_SESSION = Object.freeze({ features: Object.freeze([playbackHost.with(NO_RUN), playground, source]) });
 function Root(host = {}) {
   const app = usePlayground(leanPicture, host.source ?? sierpinski_default, { filename: "sierpinski.lean", layout, commands, assemble, editor: leanEditor, ...host.options });
+  useSession(app, LEAN_SESSION);
   if (!app) return null;
   const result = app.parts.lean.result;
   const running = result.status === "pending";

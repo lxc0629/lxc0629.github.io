@@ -1,0 +1,25 @@
+{
+  "course": "bomb",
+  "concepts": ["debug", "branch"],
+  "teaches": "把拆弹手册翻译成逐根搜索、短路条件、命中后 break 和阶段间 reset 的状态机程序。",
+  "answerStyle": "先核对当前阶段与探针状态，再解释一个条件或动作顺序，不跳过安全前置条件。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "and-always-runs-both-sides",
+      "signs": ["and", "get_voltage"],
+      "guide": "让学生定位颜色不匹配的一轮，观察右侧 get_voltage 没有执行。"
+    },
+    {
+      "id": "break-optional-after-cut",
+      "signs": ["break", "cut("],
+      "guide": "说明剪线后状态机只允许复位或结束；缺少 break 会让循环继续移动探针。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么颜色不对时不能测电压？",
+      "reply": "把 get_voltage 放在 and 右边，左侧为 False 就会短路。第一次白线经过 if 时，电压牌有没有出现？"
+    }
+  ]
+}

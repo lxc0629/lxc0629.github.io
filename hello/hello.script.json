@@ -1,0 +1,127 @@
+{
+  "id": "hello",
+  "title": "亲手还原藏在整数里的文字",
+  "from": "",
+  "mode": "instruction",
+  "auto": true,
+  "steps": [
+    {
+      "title": "先看一个能读懂的小例子","concepts":["value"],
+      "say": [
+        {
+          "say": "正式代码把一幅很长的文字图藏进大整数。先用同样方法藏短单词：310939249775 是 Hello 的五个字节按大端序排成的数。",
+          "write": "hello = 310939249775\n"
+        }
+      ]
+    },
+    {
+      "title": "算整数需要多少字节","concepts":["value"],
+      "say": [
+        {
+          "say": "bit_length 给出至少需要多少个二进制位。一个字节 8 位，用 `(位数 + 7) // 8` 向上取整。",
+          "write": "hello = 310939249775\n\nn = (hello.bit_length() + 7) // 8\n"
+        }
+      ]
+    },
+    {
+      "title": "从整数还原字节和文字","concepts":["value"],
+      "say": [
+        {
+          "say": "to_bytes 需要长度和顺序。big 表示最高位字节在前。",
+          "write": "hello = 310939249775\n\nn = (hello.bit_length() + 7) // 8\nraw = hello.to_bytes(n, \"big\")\n"
+        },
+        {
+          "say": "decode 把原始字节按 UTF-8 解释成 str，print 才产生输出。",
+          "write": "hello = 310939249775\n\nn = (hello.bit_length() + 7) // 8\nraw = hello.to_bytes(n, \"big\")\ntext = raw.decode()\nprint(text)\n"
+        }
+      ]
+    },
+    {
+      "title": "运行转换链","concepts":["value"],
+      "stage": {
+        "panels": [
+          "debug",
+          "output"
+        ],
+        "focus": "output"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "输出是 Hello。四个变量分别保存整数、长度、字节和文字，让每次表示转换都能被观察。"
+    },
+    {
+      "title": "Debugger 看类型逐步出现","concepts":["value","debug"],
+      "stage": {
+        "panels": [
+          "debug",
+          "output"
+        ],
+        "focus": "debug"
+      },
+      "do": [
+        {
+          "action": "code.locate",
+          "args": {
+            "line": 3,
+            "occurrence": 1
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "mark",
+            "at": {
+              "variable": "hello"
+            }
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "mark",
+            "at": {
+              "variable": "n"
+            }
+          }
+        }
+      ],
+      "say": "停在长度计算处，hello 仍是 int。继续单步，raw 出现为 bytes，text 出现为 str。变量名只是名字，值才有类型。"
+    },
+    {
+      "title": "理解正式课程代码","concepts":["value"],
+      "say": "正式 starter 只是把同一过程压缩了：相邻数字字符串拼接后交给 int；大整数算长度、to_bytes、decode，最后重新绑定到 hello。数据更长，转换模型相同。"
+    },
+    {
+      "title": "换错字节序做对比","concepts":["value"],
+      "say": [
+        {
+          "say": "把 big 改成 little。整数相同，但还原出的字节顺序反转。",
+          "write": "hello = 310939249775\n\nn = (hello.bit_length() + 7) // 8\nraw = hello.to_bytes(n, \"little\")\ntext = raw.decode()\nprint(text)\n"
+        }
+      ]
+    },
+    {
+      "title": "用错误追查上一步","concepts":["value","debug"],
+      "stage": {
+        "panels": [
+          "debug",
+          "output"
+        ],
+        "focus": "debug"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "错误落在 decode，但根因是上一行选择了错误字节序。Debugger 告诉我们异常发生点，追因还要回看产生该值的语句。"
+    },
+    {
+      "title": "回顾表示转换","concepts":["value"],
+      "say": "信息经过 int → bytes → str 三种表示。每个 API 都规定输入、输出和顺序；写出中间变量，是理解紧凑代码的可靠方法。"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "course": "24point",
+  "title": "24 点",
+  "concepts": [
+    {
+      "id": "enumerate",
+      "label": "枚举",
+      "aliases": [
+        "穷举",
+        "暴力",
+        "试遍",
+        "所有可能",
+        "组合",
+        "排列"
+      ]
+    },
+    {
+      "id": "recursion",
+      "label": "递归",
+      "aliases": [
+        "递归出口",
+        "基本情况",
+        "自己调用自己",
+        "调用栈"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "enumerate",
+    "recursion"
+  ],
+  "lectures": [
+    {
+      "id": "24point",
+      "title": "从四张牌写出一棵运算树",
+      "steps": [
+        {
+          "step": 0,
+          "title": "先写最小的子问题",
+          "say": "第一题是 3、8、6、5。先让 3 和 8 相乘，得到中间结果 24。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "构造另一支并组合",
+          "say": "6 减 5 得到 1；括号把它声明为独立子表达式。最后把两个子结果相乘。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "运行正确表达式",
+          "say": "动画先消费 3、8，再消费 6、5，最后根节点算出 24。四张牌恰好从牌池消失。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "源码怎样变成树",
+          "say": "只有一行源码，但解析器先建立树，再按叶子和内部节点求值。Debugger 指向整条表达式，World 展开这一行内部的计算结构。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "括号不是装饰",
+          "say": "去掉关键括号，写成连续乘法再减 5。优先级和结合方向让运算树发生变化。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "运行错误结构",
+          "say": "四张牌仍各用一次，但根节点不是 24。“输入合法”和“运算结构正确”是两条独立约束。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "制造重复用牌",
+          "say": "把最后的 5 换成 3，会重复使用 3，同时遗漏 5。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "牌池记录输入约束",
+          "say": "第二个 3 无牌可取，5 仍留在牌池。World 用牌的身份补足了普通算术结果看不到的信息。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "恢复并回顾",
+          "say": "恢复正确运算树并再次运行。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 9,
+          "title": "表达式就是程序结构",
+          "say": "叶子选择输入，括号决定组合，内部节点保存局部结果，根节点给出答案。运行把隐含的语法树变成可观察事实。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

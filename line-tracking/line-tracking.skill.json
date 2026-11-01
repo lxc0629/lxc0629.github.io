@@ -1,0 +1,25 @@
+{
+  "course": "line-tracking",
+  "concepts": ["motion", "loop"],
+  "teaches": "用循环反复读取左右传感器，按从特殊到一般的分支顺序选择转向和前进动作。",
+  "answerStyle": "把一轮控制拆成读取、分类、动作，始终对照当前传感器值和小车位置。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "broad-branch-first",
+      "signs": ["or", "black", "elif"],
+      "guide": "指出双黑也满足任一侧为黑，让学生比较分支顺序并先处理双黑路口。"
+    },
+    {
+      "id": "turn-without-forward",
+      "signs": ["turn_left", "turn_right", "forward"],
+      "guide": "区分原地转向与前进一步；每轮循环必须最终 forward 才能离开当前格。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么双黑要写在 or 前面？",
+      "reply": "双黑时，`left == black or right == black` 也为 True。如果 or 分支先出现，程序还会走到双黑分支吗？"
+    }
+  ]
+}

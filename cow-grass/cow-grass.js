@@ -37,12 +37,10 @@ function asset(id) {
 }
 
 // playgrounds/cow-grass/cow-grass.generated.tsx
-import { PlaygroundShell, Widget } from "../pico.js";
 import { on, stateful } from "../pico.js";
 import { Source } from "../pico.js";
 import { python as python3 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
-import { usePlayground } from "../pico.js";
 
 // playgrounds/shared/python/index.ts
 import { python as python2, pythonPreload } from "../pico.js";
@@ -107,34 +105,282 @@ function pythonOptions(options = {}) {
       own({ dispose: bus.subscribe(["python.execute"], (event) => {
         checkedSource = event.source.code;
       }) });
-      const execution = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      const execution2 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
-        const result = execution.state.result;
+        const result = execution2.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
-      observe("python", () => ({ ...execution.state }), ["python.changed"]);
+      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
       observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
       observe("selection", () => focus.state, ["selection.changed"]);
-      return { python: execution.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
     }
   };
 }
 
 // playgrounds/cow-grass/cow-grass.generated.tsx
-import { Fragment, jsx, jsxs } from "../libs/react.js";
-var layoutOptions = { open: ["pasture", "debug"], ratio: 0.4 };
+import { playbackHost as playbackHost2 } from "../session.js";
+import { SessionPage } from "../session.js";
+
+// playgrounds/shared/python/session.ts
+import { createElement } from "../libs/react.js";
+import { mockAiPort } from "../session.js";
+import { Widget } from "../pico.js";
+import { feature, playbackHost, provided, selectionHost } from "../session.js";
+import { stage } from "../session.js";
+import { source } from "../session.js";
+import { draftViews } from "../session.js";
+import { hintViews } from "../session.js";
+import { execution } from "../session.js";
+import { navigate } from "../session.js";
+import { liveVariables } from "../session.js";
+import { traceQueries } from "../session.js";
+import { annotations, registerAnchorResolver } from "../session.js";
+import { annotationViews, debuggerAnchors, terminalAnchors } from "../session.js";
+import { tour } from "../session.js";
+import { sessionContext } from "../session.js";
+import { playground } from "../session.js";
+import { playgroundSnapshot } from "../session.js";
+import { sessionEvidence } from "../session.js";
+import { ai } from "../session.js";
+import { aiViews } from "../session.js";
+import { script } from "../session.js";
+import { scriptRail } from "../session.js";
+import { aiScript } from "../session.js";
+import { worldPanel } from "../session.js";
+var pythonHost = provided("python.parts");
+var OUTPUT_PANEL = "output";
+var DEBUG_PANEL = "debug";
+var PYTHON_RAN = { on: "python.changed", until: (event) => event.result.status !== "pending" };
+var pythonViews = feature("python.views", {
+  requires: [pythonHost, playbackHost, annotations, playground],
+  create: ({ get, own }) => {
+    const parts = get(pythonHost);
+    const playing = get(playbackHost);
+    const run2 = () => playing.trace;
+    for (const resolver of [debuggerAnchors(parts.debugger, run2), terminalAnchors(parts.terminal, run2)]) {
+      own({ dispose: registerAnchorResolver(get(playground), resolver) });
+    }
+  },
+  queries: [{ id: "python.result", run: ({ get }) => resultOf(get(pythonHost)?.python ?? null) }],
+  views: [
+    { slot: "panel", key: OUTPUT_PANEL, icon: "output", title: "\u8F93\u51FA", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).terminal }) },
+    { slot: "panel", key: DEBUG_PANEL, icon: "debug", title: "\u8C03\u8BD5", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).debugger }) }
+  ]
+});
+function resultOf(python4) {
+  const result = python4?.result ?? null;
+  if (result === null || result.status === "pending") return { status: "pending" };
+  if (result.status === "failed") return { status: "failed", error: String(result.error) };
+  if (result.value === null) return { status: "none" };
+  const { trace, returncode, error, waiting } = result.value;
+  const end = trace.at(trace.steps.length + 1);
+  const tail = (text) => (text ?? "").slice(-2e3);
+  return {
+    status: "ready",
+    returncode,
+    steps: trace.steps.length,
+    error: error === null ? null : { message: error.message, line: error.line },
+    waiting: waiting?.prompt ?? null,
+    stdout: tail(end.stdout),
+    stderr: tail(end.stderr)
+  };
+}
+function pythonSession(options) {
+  const features = [
+    stage,
+    source,
+    draftViews,
+    hintViews,
+    execution.with({ run: { type: "python.run" }, settle: PYTHON_RAN }),
+    navigate.with({ debuggerPanel: DEBUG_PANEL }),
+    liveVariables,
+    traceQueries,
+    annotations,
+    annotationViews,
+    tour,
+    sessionContext,
+    sessionEvidence,
+    playground,
+    playgroundSnapshot,
+    ...options.ai === void 0 ? [] : [ai.with(options.ai), aiViews],
+    script.with(options.script ?? {}),
+    scriptRail.with({ library: options.scripts ?? [] }),
+    ...options.ai === void 0 ? [] : [aiScript.with({ narrate: false })],
+    worldPanel(options.world),
+    pythonViews,
+    ...options.domain ?? []
+  ];
+  return Object.freeze({
+    features: Object.freeze(features),
+    provide: (view) => [
+      playbackHost.with(view.parts.playback),
+      selectionHost.with(view.parts.selection),
+      pythonHost.with({ python: view.parts.python, terminal: view.parts.terminal, debugger: view.parts.debugger }),
+      ...options.provide?.(view) ?? []
+    ],
+    editorExtensions: pythonEditorOptions.extensions
+  });
+}
+function courseAi(answers) {
+  return {
+    port: mockAiPort((request) => request.kind === "explain" ? { title: "\u8FD9\u4E00\u6B65\u5728\u505A\u4EC0\u4E48", text: answers.explain, primary: { action: "selection.locate", label: "\u5B9A\u4F4D\u5230\u6267\u884C" } } : { title: "\u53EF\u4EE5\u4ECE\u8FD9\u91CC\u60F3\u8D77", text: answers.question }, { delayMs: 300 })
+  };
+}
+
+// playgrounds/cow-grass/cow-grass.script.json
+var cow_grass_script_default = {
+  id: "cow-grass",
+  title: "\u4ECE\u6BCF\u65E5\u53D8\u5316\u5199\u51FA\u7267\u573A\u6A21\u62DF",
+  from: "",
+  mode: "instruction",
+  auto: true,
+  steps: [
+    {
+      title: "\u5B9A\u4E49\u72B6\u6001\u548C\u53C2\u6570",
+      concepts: ["value"],
+      stage: {
+        panels: [
+          "viz"
+        ]
+      },
+      say: [
+        {
+          say: "grass \u662F\u53D8\u5316\u7684\u72B6\u6001\uFF1Bgrowth\u3001cows\u3001eat \u51B3\u5B9A\u53D8\u5316\u901F\u5EA6\uFF1Bday \u8BB0\u5F55\u65F6\u95F4\u3002",
+          write: "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n"
+        }
+      ]
+    },
+    {
+      title: "\u5199\u51FA\u4E00\u5929\u7684\u751F\u957F",
+      concepts: ["value"],
+      say: [
+        {
+          say: "\u4E00\u5929\u5148\u957F\u8349\u3002\u8D4B\u503C\u8BFB\u53D6\u65E7 grass\uFF0C\u52A0\u4E0A growth\uFF0C\u518D\u5199\u56DE\u65B0\u503C\u3002",
+          write: "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\ngrass = grass + growth\n"
+        }
+      ]
+    },
+    {
+      title: "\u6263\u9664\u6574\u7FA4\u725B\u7684\u91C7\u98DF",
+      concepts: ["value"],
+      say: [
+        {
+          say: "\u6574\u7FA4\u603B\u98DF\u91CF\u662F cows * eat\u3002\u4E58\u6CD5\u5148\u7B97\uFF0C\u518D\u4ECE\u5F53\u524D\u8349\u91CF\u6263\u9664\uFF0C\u6700\u540E\u65E5\u671F\u524D\u8FDB\u3002",
+          write: "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\ngrass = grass + growth\ngrass = grass - cows * eat\nday = day + 1\n"
+        }
+      ]
+    },
+    {
+      title: "\u8FD0\u884C\u4E00\u5929",
+      concepts: ["value"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "viz"
+      },
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: "\u8349\u5148\u4ECE 100 \u957F\u5230 112\uFF0C\u518D\u88AB\u5403\u5230 92\uFF0Cday \u53D8\u6210 2\u3002\u4E09\u4E2A\u753B\u9762\u53D8\u5316\u5BF9\u5E94\u4E09\u6761\u5DF2\u6267\u884C\u8BED\u53E5\u3002"
+    },
+    {
+      title: "Debugger \u5206\u5F00\u770B\u4E09\u4E2A\u65F6\u523B",
+      concepts: ["debug", "value"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "debug"
+      },
+      do: [
+        {
+          action: "code.locate",
+          args: {
+            line: 7,
+            occurrence: 1
+          }
+        },
+        {
+          action: "annotation.show",
+          args: {
+            kind: "mark",
+            at: {
+              variable: "grass"
+            }
+          }
+        }
+      ],
+      say: "\u957F\u8349\u540E grass \u662F 112\uFF1B\u91C7\u98DF\u540E\u662F 92\uFF1Bday \u8D4B\u503C\u53EA\u6539\u65E5\u671F\u3002Debugger \u628A\u201C\u6BCF\u5929\u51C0\u5C11 8\u201D\u5C55\u5F00\u6210\u4E24\u4E2A\u65B9\u5411\u76F8\u53CD\u7684\u8FC7\u7A0B\u3002"
+    },
+    {
+      title: "\u7528\u5FAA\u73AF\u8868\u8FBE\u7A33\u5B9A\u89C4\u5219",
+      concepts: ["loop"],
+      say: [
+        {
+          say: "\u6BCF\u5929\u505A\u540C\u6837\u4E09\u4EF6\u4E8B\uFF0C\u8BA9 for \u4EA7\u751F\u56DB\u5929\u3002\u5FAA\u73AF\u4F53\u4EE3\u8868\u7A33\u5B9A\u7684\u6BCF\u65E5\u89C4\u5219\u3002",
+          write: "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\nfor _ in range(4):\n    grass = grass + growth\n    grass = grass - cows * eat\n    day = day + 1\n"
+        }
+      ]
+    },
+    {
+      title: "\u770B\u540C\u4E00\u884C\u53CD\u590D\u6267\u884C",
+      concepts: ["debug", "loop"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "debug"
+      },
+      do: [
+        {
+          action: "code.run"
+        },
+        {
+          action: "code.locate",
+          args: {
+            line: 8,
+            occurrence: 3
+          }
+        }
+      ],
+      say: "\u73B0\u5728\u505C\u5728\u957F\u8349\u8BED\u53E5\u7B2C 3 \u6B21\u6267\u884C\u3002\u540C\u4E00\u884C\u670D\u52A1\u4E0D\u540C\u65E5\u671F\uFF0Cgrass \u7684\u5F53\u524D\u503C\u8BA9\u6BCF\u6B21\u7ED3\u679C\u4E0D\u540C\uFF1B\u5FAA\u73AF\u628A\u91CD\u590D\u7ED3\u6784\u4E0E\u53D8\u5316\u6570\u636E\u5206\u5F00\u3002"
+    },
+    {
+      title: "\u63D0\u70BC\u6BCF\u65E5\u51C0\u53D8\u5316",
+      concepts: ["value", "loop"],
+      say: "\u6BCF\u5929\u51C0\u53D8\u5316\u662F growth - cows * eat\uFF0C\u5373 12 - 20 = -8\u3002\u56DB\u5929\u540E\u662F 68\u3002\u516C\u5F0F\u6982\u62EC\u8D8B\u52BF\uFF0C\u9010\u6B65\u7A0B\u5E8F\u4FDD\u7559\u5148\u957F\u540E\u5403\u7684\u8FC7\u7A0B\u3002"
+    },
+    {
+      title: "\u53C2\u6570\u51B3\u5B9A\u957F\u671F\u884C\u4E3A",
+      concepts: ["value", "loop"],
+      say: "growth \u5927\u4E8E\u603B\u98DF\u91CF\u65F6\u8349\u589E\u52A0\uFF0C\u76F8\u7B49\u65F6\u7A33\u5B9A\uFF0C\u66F4\u5C0F\u65F6\u4E0B\u964D\u3002\u7A0B\u5E8F\u9AA8\u67B6\u4E0D\u53D8\uFF0C\u53C2\u6570\u6539\u53D8\u8F68\u8FF9\uFF1B\u5EFA\u6A21\u5C31\u662F\u5206\u6E05\u72B6\u6001\u3001\u89C4\u5219\u3001\u65F6\u95F4\u548C\u53C2\u6570\u3002"
+    }
+  ]
+};
+
+// playgrounds/cow-grass/cow-grass.generated.tsx
+import { jsx, jsxs } from "../libs/react.js";
+var layoutOptions = { open: ["viz", "debug"], ratio: 0.4 };
 var INITIAL_SOURCE = `grass = 100        # \u5F53\u524D\u8349\u91CF
 growth = 12        # \u6BCF\u5929\u65B0\u957F\u51FA\u7684\u8349
 cows = 4           # \u725B\u7684\u6570\u91CF
@@ -162,7 +408,7 @@ grass = grass - cows * eat
 day = day + 1`;
 var HOLD = { grow: 1900, eat: 2400, rest: 800 };
 var HOLD_IDLE = 260;
-var cowGrass = stateful("cow-grass", (source) => ({ source }), [
+var cowGrass = stateful("cow-grass", (source2) => ({ source: source2 }), [
   on("editor.changed", edit, []),
   on("python.run", run, ["python.execute"])
 ]);
@@ -176,12 +422,12 @@ function run(state, _event, { emit }) {
 }
 function create(bus) {
   const course = cowGrass.create(INITIAL_SOURCE, bus);
-  const execution = python3.create({}, bus);
+  const execution2 = python3.create({}, bus);
   const player = playback2.create({}, bus);
   bus.emit({ type: "python.run" });
   return () => {
     player.dispose();
-    execution.dispose();
+    execution2.dispose();
     course.dispose();
   };
 }
@@ -962,29 +1208,33 @@ var mountOptions = {
   start: [{ type: "python.run" }]
 };
 var starter = INITIAL_SOURCE;
+var COW_GRASS_SCRIPT = cow_grass_script_default;
+var COW_GRASS_SESSION = pythonSession({
+  world: { title: "\u7267\u573A", render: (view) => {
+    const playing = view.get(playbackHost2);
+    return /* @__PURE__ */ jsx(CowPasture, { world: worldOf(playing?.trace ?? null, playing?.position ?? null) });
+  } },
+  ai: courseAi({
+    explain: "\u8FD9\u4E00\u53E5\u5728\u66F4\u65B0\u8349\u91CF\uFF1A\u6BCF\u5929\u5148\u957F\u51FA\u65B0\u8349\uFF0C\u518D\u88AB\u725B\u5403\u6389\uFF0C\u8349\u91CF\u7684\u53D8\u5316\u51B3\u5B9A\u80FD\u5403\u51E0\u5929\u3002",
+    question: "\u628A\u201C\u6BCF\u5929\u957F\u591A\u5C11\u201D\u548C\u201C\u6BCF\u5929\u5403\u591A\u5C11\u201D\u5206\u5F00\u770B\uFF0C\u8349\u91CF\u6BCF\u5929\u51C0\u53D8\u5316\u662F\u591A\u5C11\uFF1F\u8FD0\u884C\u540E\u5728\u7267\u573A\u91CC\u9010\u5929\u89C2\u5BDF\u3002"
+  }),
+  scripts: [COW_GRASS_SCRIPT]
+});
+var COW_GRASS_COURSE = {
+  name: "\u725B\u5403\u8349",
+  component: cowGrass,
+  starter: INITIAL_SOURCE,
+  playground: mountOptions,
+  session: COW_GRASS_SESSION
+};
 function Root(host = {}) {
-  const view = usePlayground(cowGrass, host.source ?? INITIAL_SOURCE, { ...mountOptions, ...host.options });
-  const world = worldOf(view?.parts.playback.trace ?? null, view?.parts.playback.position ?? null);
-  if (!view) return /* @__PURE__ */ jsx(Fragment, {});
-  return /* @__PURE__ */ jsx(
-    PlaygroundShell,
-    {
-      name: "\u725B\u5403\u8349 Playground",
-      layout: view.layout,
-      onEvent: view.send,
-      menu: view.menu,
-      toolbar: view.toolbar,
-      editor: view === null ? null : /* @__PURE__ */ jsx(Widget, { widget: view.editor }),
-      panels: [
-        { key: "pasture", icon: "viz", title: "\u7267\u573A", flush: true, content: /* @__PURE__ */ jsx(CowPasture, { world }) },
-        { key: "debug", icon: "debug", title: "\u8C03\u8BD5\u5668", content: view === null ? null : /* @__PURE__ */ jsx(Widget, { widget: view.parts.debugger }) },
-        { key: "output", icon: "output", title: "\u7EC8\u7AEF", content: view === null ? null : /* @__PURE__ */ jsx(Widget, { widget: view.parts.terminal }) }
-      ]
-    }
-  );
+  return /* @__PURE__ */ jsx(SessionPage, { course: COW_GRASS_COURSE, host });
 }
 export {
   CAPACITY,
+  COW_GRASS_COURSE,
+  COW_GRASS_SCRIPT,
+  COW_GRASS_SESSION,
   INITIAL_SOURCE,
   NOTICE_TEXT,
   Root,

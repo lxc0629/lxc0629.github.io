@@ -1,0 +1,60 @@
+{
+  "id": "turtle-geometry",
+  "title": "让循环长成一幅几何作品",
+  "mode": "instruction",
+  "steps": [
+    {
+      "title": "一次移动就是画板上的一笔",
+      "concepts": ["function", "loop"],
+      "stage": { "panels": ["viz", "debug"], "focus": "viz" },
+      "do": [
+        { "action": "code.run" },
+        { "action": "code.locate", "args": { "line": 12, "occurrence": 1 } }
+      ],
+      "say": "forward(length) 让海龟沿当前朝向前进，落笔时就在画板上留下线段。继续执行 left(angle)，位置不变但朝向改变；Debugger 里的两句动作会依次变成画板上的几何变化。"
+    },
+    {
+      "title": "正多边形为什么能够闭合",
+      "concepts": ["function", "loop"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 10, "occurrence": 1 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "angle" } } }
+      ],
+      "say": "polygon 用 360 / sides 计算每次转动的外角。循环 sides 次以后，总转角刚好是 360 度，海龟回到原方向；每条边长度相同，所以图形闭合。",
+      "predict": {
+        "question": "画一个正六边形，每条边之后应该转多少度？",
+        "choices": [
+          { "label": "60°", "correct": true, "reply": "正确。360 ÷ 6 = 60，这是海龟每次转动的外角。" },
+          { "label": "120°", "reply": "120° 是六边形的内角；海龟沿边前进后需要转的是外角。" },
+          { "label": "360°", "reply": "360° 是画完一圈累计的总转角，不是每次的转角。" }
+        ]
+      }
+    },
+    {
+      "title": "同一个循环产生三种变化",
+      "concepts": ["loop", "branch"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 20, "occurrence": 2 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "layer" } } }
+      ],
+      "say": "layer 同时驱动三件事：取模让颜色循环，奇偶判断让线宽交替，45 + layer × 2 让多边形逐层变大。最后每层再转 10 度，36 层累计转满一圈。复杂图案来自简单动作与参数变化的组合。"
+    },
+    {
+      "title": "条件只改变样式，不改变几何",
+      "concepts": ["branch", "loop"],
+      "stage": { "panels": ["viz", "debug"], "focus": "viz" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 22, "occurrence": 2 } }
+      ],
+      "say": "if 检查 layer 的奇偶，只在 1 和 3 之间切换线宽。多边形的位置、边长和转角仍由后面的 polygon 与 left 决定。把样式条件和几何计算分开，修改其中一项时更容易预测结果。"
+    },
+    {
+      "title": "从一个变量开始创作",
+      "concepts": ["loop", "branch", "function"],
+      "stage": { "panels": ["viz"] },
+      "say": "结束讲解后，一次只改一个变量再运行：边数改变闭合角度，循环次数改变重复数量，长度公式改变图案生长速度，if 条件改变样式分界。课程包还用 headless 示例验证了多边形实验室和星空生成器；当前 Session 不直接替换学生 Draft，避免覆盖你的代码。"
+    }
+  ]
+}

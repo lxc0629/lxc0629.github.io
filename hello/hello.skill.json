@@ -1,0 +1,25 @@
+{
+  "course": "hello",
+  "concepts": ["value"],
+  "teaches": "观察同一份信息怎样从大整数转换成字节再解码成字符串，并区分变量名与值的类型。",
+  "answerStyle": "沿 int、bytes、str 的转换链一次解释一步，优先让学生查看当前变量值与类型。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "variable-has-fixed-type",
+      "signs": ["类型", "hello ="],
+      "guide": "区分变量名与当前绑定的值，让学生单步观察 hello 先后绑定 int、bytes、str。"
+    },
+    {
+      "id": "byte-order-does-not-matter",
+      "signs": ["to_bytes", "big", "little"],
+      "guide": "用短整数演示同一数值按不同字节序还原出的字节排列不同。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么要先算 n？",
+      "reply": "to_bytes 需要知道要写出几个字节。先看 hello.bit_length()，再算向上取整后 n 是多少？"
+    }
+  ]
+}

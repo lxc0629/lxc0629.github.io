@@ -1,0 +1,25 @@
+{
+  "course": "cow-grass",
+  "concepts": ["value", "loop"],
+  "teaches": "用变量表示草量、增长、牛数和采食量，用循环重复每日更新并观察长期趋势。",
+  "answerStyle": "把一天拆成先增长、后采食、再推进日期，结合 Debugger 中的具体数值解释。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "assignment-is-equation",
+      "signs": ["grass = grass", "赋值"],
+      "guide": "说明右边读取旧值，计算完成后左边名字才绑定新值，并让学生比较相邻 Trace。"
+    },
+    {
+      "id": "one-cow-consumption",
+      "signs": ["cows * eat", "eat"],
+      "guide": "区分每头牛的食量 eat 与整群总食量 cows * eat。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么草每天少 8？",
+      "reply": "一天先增加 12，再由 4 头牛各吃 5。把这两个变化写成一个净变化算式是多少？"
+    }
+  ]
+}

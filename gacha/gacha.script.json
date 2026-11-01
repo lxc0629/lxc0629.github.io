@@ -1,0 +1,57 @@
+{
+  "id": "gacha-rules",
+  "title": "从概率表到一台可修改的盲盒机",
+  "mode": "instruction",
+  "steps": [
+    {
+      "title": "先认出规则数据",
+      "concepts": ["dict", "list", "value"],
+      "stage": { "panels": ["viz"], "focus": "viz" },
+      "say": "Editor 顶部不是流程，而是这台机器的规则。STARTING_MONEY 和 BOX_PRICE 决定能抽几次；STYLES 保存每个等级有哪些款式；两张 WEIGHTS 字典分别描述普通池和保底池。以后改变机器，应该先改这些数据。"
+    },
+    {
+      "title": "权重如何变成一次随机选择",
+      "concepts": ["function", "loop", "dict"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.run" },
+        { "action": "code.locate", "args": { "line": 21, "occurrence": 1 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "point" } } }
+      ],
+      "say": "weighted_pick 先在全部权重的总长度上随机取一个 point，再逐项减去每个区间的长度。point 第一次落到零以下时，对应等级就是本次结果。权重不必凑成 100，它们表达的是区间比例。"
+    },
+    {
+      "title": "保底只负责切换概率表",
+      "concepts": ["branch", "function"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 29, "occurrence": 1 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "is_pity" } } }
+      ],
+      "say": "tier_for_draw 没有复制随机算法。它只判断这一抽是否到达保底，然后把 NORMAL_WEIGHTS 或 PITY_WEIGHTS 交给同一个 weighted_pick。规则与机制因此可以分别修改。",
+      "predict": {
+        "question": "把 PITY_AFTER 从 10 改成 5，哪一抽第一次使用保底表？",
+        "choices": [
+          { "label": "第 4 抽", "reply": "draws_without_s 要等于 PITY_AFTER - 1，前四抽都没出 S 后，第五抽才满足。" },
+          { "label": "第 5 抽", "correct": true, "reply": "正确。进入第五抽前，连续未出 S 的计数是 4，刚好等于 5 - 1。" },
+          { "label": "第 6 抽", "reply": "保底判断发生在抽取之前；计数达到 4 时，第五抽已经切换概率表。" }
+        ]
+      }
+    },
+    {
+      "title": "循环同时更新钱和保底状态",
+      "concepts": ["loop", "branch", "value"],
+      "stage": { "panels": ["viz", "debug"], "focus": "viz" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 47, "occurrence": 1 } }
+      ],
+      "say": "每轮循环先付款，再决定等级和款式，最后更新连续未出 S 的次数。World 中的一张卡、一格保底和一条历史记录，都来自这次 open_box 已经记录的事实；拖动 Debugger 时只是回放，不会重新抽取。"
+    },
+    {
+      "title": "用修改参数做实验",
+      "concepts": ["dict", "value"],
+      "stage": { "panels": ["viz"] },
+      "say": "结束讲解后可以只改一个参数再运行：增加 STARTING_MONEY 会得到更多抽数；改变 NORMAL_WEIGHTS 会改变长期比例；改变 PITY_AFTER 会移动保底触发位置。一次结果可能偶然，连续运行才能逐渐看见概率规则。"
+    }
+  ]
+}

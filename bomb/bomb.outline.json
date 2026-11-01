@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "course": "bomb",
+  "title": "拆弹专家",
+  "concepts": [
+    {
+      "id": "branch",
+      "label": "条件",
+      "aliases": [
+        "if",
+        "else",
+        "elif",
+        "判断",
+        "分支",
+        "布尔",
+        "比较",
+        "and",
+        "or",
+        "not"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    },
+    {
+      "id": "debug",
+      "label": "调试",
+      "aliases": [
+        "报错",
+        "错误",
+        "bug",
+        "排错",
+        "调试器",
+        "单步",
+        "Traceback",
+        "异常"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "debug",
+    "branch"
+  ],
+  "lectures": [
+    {
+      "id": "bomb",
+      "title": "把拆弹手册翻译成程序",
+      "steps": [
+        {
+          "step": 0,
+          "title": "第一阶段先逐根搜索",
+          "say": "手册第一阶段要求黄色且带电。for 循环让 wire 依次取 1 到 8。先探测颜色，把观察结果保存在 color。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "用短路 and 安全测量",
+          "say": "先判断颜色，再把 get_voltage 放在 and 右边。颜色不匹配时 Python 会短路，不测电压。",
+          "concepts": [
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "剪线后马上退出搜索",
+          "say": "命中目标就剪线，并用 break 停止当前循环。否则下一轮还移动探针，会违反状态机。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "复位后写第二个阶段",
+          "say": "第一阶段完成后，reset_probe 让探针归仓并进入下一阶段。第二个循环复用同一算法骨架，只把规则换成红色带电引信。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "运行标准双保险",
+          "say": "运行后，World 按事件显示探针移动、颜色揭示、电压测量、剪线和阶段切换。亮起多少根线，就是程序实际检查了多少次。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "Debugger 看短路发生在哪里",
+          "say": "停在第一次 if。颜色不是 yellow 时，右侧 get_voltage 根本不执行；继续到黄色线，才会看到电压牌出现。短路既是布尔语义，也是减少危险动作的程序策略。",
+          "concepts": [
+            "debug",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "看 break 与阶段交接",
+          "say": "命中后执行 break，控制流跳到 reset_probe，而不是回到循环开头。Debugger 展示控制流跳转，World 展示状态从“已剪线、等待复位”变到下一阶段。",
+          "concepts": [
+            "debug",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "规则变化，骨架保持",
+          "say": "切换用例时，颜色、电压范围和阶段数量会变化；逐根搜索、短路判断、命中后 break、阶段间 reset 的结构保持稳定。程序设计就是识别哪些关系稳定、哪些参数来自需求。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "回顾状态机思维",
+          "say": "for 负责寻找目标，if 负责把手册变成条件，break 结束当前搜索，reset_probe 推进阶段。动作必须按状态顺序发生；Debugger 告诉你执行到了哪里，World 告诉你这个动作在规则系统里造成了什么。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

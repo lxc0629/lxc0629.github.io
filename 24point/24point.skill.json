@@ -1,0 +1,25 @@
+{
+  "course": "24point",
+  "concepts": ["enumerate", "recursion"],
+  "teaches": "把四张牌组织成表达式树，理解括号、运算优先级、局部结果与每张牌恰好使用一次的约束。",
+  "answerStyle": "先核对牌的使用，再沿表达式树解释一个局部运算，不直接给出整题答案。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "parentheses-are-cosmetic",
+      "signs": ["括号", "优先级", "*", "/"],
+      "guide": "对比有无括号时的表达式树，先让学生算两个最小子表达式。"
+    },
+    {
+      "id": "result-only-matters",
+      "signs": ["重复", "牌", "24"],
+      "guide": "分别核对结果是否为 24、四张牌是否各使用一次，这两条约束不能互相替代。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么结果对了还不通过？",
+      "reply": "结果只是一个条件。看右上角牌池：哪张牌被重复拿了，哪张还没有使用？"
+    }
+  ]
+}

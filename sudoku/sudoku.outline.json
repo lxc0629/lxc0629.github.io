@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "course": "sudoku",
+  "title": "迷你数独",
+  "concepts": [
+    {
+      "id": "list",
+      "label": "列表",
+      "aliases": [
+        "数组",
+        "append",
+        "下标",
+        "索引",
+        "切片",
+        "len"
+      ]
+    },
+    {
+      "id": "backtrack",
+      "label": "回溯",
+      "aliases": [
+        "回溯法",
+        "撤销",
+        "试错",
+        "剪枝"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "backtrack",
+    "list"
+  ],
+  "lectures": [
+    {
+      "id": "sudoku",
+      "title": "一步步写出双层枚举",
+      "steps": [
+        {
+          "step": 0,
+          "title": "先准备跨循环的成功标记",
+          "say": "我们要枚举两个空格。先用 solved 记录是否已经找到答案；它稍后会把内层循环的结果传给外层。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "外层选择第一个空格",
+          "say": "a 依次取 1、2、3、4。每换一个 a，就把第一空格更新一次。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "内层完整枚举第二个空格",
+          "say": "对当前 a，b 也从 1 到 4。这样形成最多 4×4 组候选。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "验证当前组合",
+          "say": "两个格子都有值后，is_valid 检查每行、每列和每个 2×2 宫。成功时设置标记并退出内层循环。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "让外层也知道已经成功",
+          "say": "内层 break 只退出 b 的循环。回到外层后检查 solved，再 break 一次，才不会覆盖刚找到的答案。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "运行并观察枚举顺序",
+          "say": "棋盘会按 (a,b) 的顺序尝试候选。冲突线来自当前棋盘事实，is_valid 则决定程序是否停止。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "Debugger 看内层循环重来",
+          "say": "第一次执行 place(2,b) 时查看 a、b。继续定位后续 occurrence，会看到 b 快速变化；b 跑完后 a 才增加，b 又从 1 开始。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "看找到答案的那个时刻",
+          "say": "停在第一次 is_valid 成立的位置。单步后 solved 从 False 变成 True，先退出内层，再由末尾的 if 退出外层。布尔变量在两个控制层之间传递了结果。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "回顾搜索程序",
+          "say": "嵌套循环系统地产生候选，验证函数筛掉不合法状态，标记和 break 提前终止搜索。World 说明“这个候选为什么冲突”，Debugger 说明“程序下一步为什么换候选或停止”。",
+          "concepts": [
+            "backtrack",
+            "list"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

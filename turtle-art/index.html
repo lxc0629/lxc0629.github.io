@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="../pico.svg" type="image/svg+xml">
+  <title>Turtle 几何画室</title>
+  <link rel="stylesheet" href="../pico.css">
+</head>
+<body class="pico-root">
+  <div id="root"></div>
+  <script>window.__PICO_PYODIDE_BASES__ = ["https://cdn.npmmirror.com/packages/pyodide/314.0.3/files/","https://cdn.jsdelivr.net/pyodide/v314.0.3/full/","https://unpkg.com/pyodide@314.0.3/","../pyodide/"].map((base) => new URL(base, location.href).href);</script>
+  <script type="module">
+import { createElement } from "../libs/react.js";
+import { createRoot } from "../libs/react.js";
+import { Root } from "./turtle-art.js";
+createRoot(document.getElementById("root")).render(createElement(Root));
+</script>
+  </body>
+</html>

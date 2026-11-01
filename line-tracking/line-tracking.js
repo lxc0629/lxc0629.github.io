@@ -6,8 +6,6 @@ import { on, stateful } from "../pico.js";
 import { Source } from "../pico.js";
 import { python as python3 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
-import { PlaygroundShell, Widget } from "../pico.js";
-import { usePlayground } from "../pico.js";
 
 // playgrounds/shared/python/index.ts
 import { python as python2, pythonPreload } from "../pico.js";
@@ -72,35 +70,189 @@ function pythonOptions(options = {}) {
       own({ dispose: bus.subscribe(["python.execute"], (event) => {
         checkedSource = event.source.code;
       }) });
-      const execution = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      const execution2 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
-        const result = execution.state.result;
+        const result = execution2.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
-      observe("python", () => ({ ...execution.state }), ["python.changed"]);
+      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
       observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
       observe("selection", () => focus.state, ["selection.changed"]);
-      return { python: execution.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
     }
   };
 }
 
 // playgrounds/line-tracking/line-tracking.generated.tsx
-import { Fragment, jsx, jsxs } from "../libs/react.js";
+import { playbackHost as playbackHost2, provided as provided2 } from "../session.js";
+import { SessionPage } from "../session.js";
+
+// playgrounds/shared/python/session.ts
+import { createElement } from "../libs/react.js";
+import { mockAiPort } from "../session.js";
+import { Widget } from "../pico.js";
+import { feature, playbackHost, provided, selectionHost } from "../session.js";
+import { stage } from "../session.js";
+import { source } from "../session.js";
+import { draftViews } from "../session.js";
+import { hintViews } from "../session.js";
+import { execution } from "../session.js";
+import { navigate } from "../session.js";
+import { liveVariables } from "../session.js";
+import { traceQueries } from "../session.js";
+import { annotations, registerAnchorResolver } from "../session.js";
+import { annotationViews, debuggerAnchors, terminalAnchors } from "../session.js";
+import { tour } from "../session.js";
+import { sessionContext } from "../session.js";
+import { playground } from "../session.js";
+import { playgroundSnapshot } from "../session.js";
+import { sessionEvidence } from "../session.js";
+import { ai } from "../session.js";
+import { aiViews } from "../session.js";
+import { script } from "../session.js";
+import { scriptRail } from "../session.js";
+import { aiScript } from "../session.js";
+import { worldPanel } from "../session.js";
+var pythonHost = provided("python.parts");
+var OUTPUT_PANEL = "output";
+var DEBUG_PANEL = "debug";
+var PYTHON_RAN = { on: "python.changed", until: (event) => event.result.status !== "pending" };
+var pythonViews = feature("python.views", {
+  requires: [pythonHost, playbackHost, annotations, playground],
+  create: ({ get, own }) => {
+    const parts = get(pythonHost);
+    const playing = get(playbackHost);
+    const run2 = () => playing.trace;
+    for (const resolver of [debuggerAnchors(parts.debugger, run2), terminalAnchors(parts.terminal, run2)]) {
+      own({ dispose: registerAnchorResolver(get(playground), resolver) });
+    }
+  },
+  queries: [{ id: "python.result", run: ({ get }) => resultOf(get(pythonHost)?.python ?? null) }],
+  views: [
+    { slot: "panel", key: OUTPUT_PANEL, icon: "output", title: "\u8F93\u51FA", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).terminal }) },
+    { slot: "panel", key: DEBUG_PANEL, icon: "debug", title: "\u8C03\u8BD5", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).debugger }) }
+  ]
+});
+function resultOf(python4) {
+  const result = python4?.result ?? null;
+  if (result === null || result.status === "pending") return { status: "pending" };
+  if (result.status === "failed") return { status: "failed", error: String(result.error) };
+  if (result.value === null) return { status: "none" };
+  const { trace, returncode, error, waiting } = result.value;
+  const end = trace.at(trace.steps.length + 1);
+  const tail = (text) => (text ?? "").slice(-2e3);
+  return {
+    status: "ready",
+    returncode,
+    steps: trace.steps.length,
+    error: error === null ? null : { message: error.message, line: error.line },
+    waiting: waiting?.prompt ?? null,
+    stdout: tail(end.stdout),
+    stderr: tail(end.stderr)
+  };
+}
+function pythonSession(options) {
+  const features = [
+    stage,
+    source,
+    draftViews,
+    hintViews,
+    execution.with({ run: { type: "python.run" }, settle: PYTHON_RAN }),
+    navigate.with({ debuggerPanel: DEBUG_PANEL }),
+    liveVariables,
+    traceQueries,
+    annotations,
+    annotationViews,
+    tour,
+    sessionContext,
+    sessionEvidence,
+    playground,
+    playgroundSnapshot,
+    ...options.ai === void 0 ? [] : [ai.with(options.ai), aiViews],
+    script.with(options.script ?? {}),
+    scriptRail.with({ library: options.scripts ?? [] }),
+    ...options.ai === void 0 ? [] : [aiScript.with({ narrate: false })],
+    worldPanel(options.world),
+    pythonViews,
+    ...options.domain ?? []
+  ];
+  return Object.freeze({
+    features: Object.freeze(features),
+    provide: (view) => [
+      playbackHost.with(view.parts.playback),
+      selectionHost.with(view.parts.selection),
+      pythonHost.with({ python: view.parts.python, terminal: view.parts.terminal, debugger: view.parts.debugger }),
+      ...options.provide?.(view) ?? []
+    ],
+    editorExtensions: pythonEditorOptions.extensions
+  });
+}
+function caseChoices(options) {
+  const values = options.choices.map((choice) => choice.value);
+  return feature(`${options.id}.choices`, {
+    requires: [options.state],
+    actions: [{
+      id: options.id,
+      label: options.label,
+      tags: ["run"],
+      args: { value: { type: "string", enum: values } },
+      when: ({ get }, { value }) => typeof value === "string" && values.includes(value) && get(options.state) !== null,
+      event: (_context, { value }) => options.event(value)
+    }],
+    views: [{ slot: "toolbar", label: options.label, controls: ({ get }) => {
+      const state = get(options.state);
+      return state === null ? [] : [{
+        kind: "choices",
+        label: options.label,
+        value: options.current(state),
+        choices: options.choices.map((choice) => ({ ...choice, event: { type: "session.invoke", action: options.id, args: { value: choice.value } } }))
+      }];
+    } }]
+  });
+}
+function courseAi(answers) {
+  return {
+    port: mockAiPort((request) => request.kind === "explain" ? { title: "\u8FD9\u4E00\u6B65\u5728\u505A\u4EC0\u4E48", text: answers.explain, primary: { action: "selection.locate", label: "\u5B9A\u4F4D\u5230\u6267\u884C" } } : { title: "\u53EF\u4EE5\u4ECE\u8FD9\u91CC\u60F3\u8D77", text: answers.question }, { delayMs: 300 })
+  };
+}
+
+// playgrounds/line-tracking/line-tracking.script.json
+var line_tracking_script_default = {
+  id: "line-tracking",
+  title: "\u4ECE\u4F20\u611F\u5668\u89C4\u5219\u5199\u51FA\u5DE1\u7EBF\u7A0B\u5E8F",
+  from: "",
+  mode: "instruction",
+  auto: true,
+  steps: [
+    { title: "\u5148\u5199\u6301\u7EED\u5DE5\u4F5C\u7684\u63A7\u5236\u5FAA\u73AF", concepts: ["loop", "motion"], stage: { panels: ["viz"] }, say: [{ say: "\u673A\u5668\u4EBA\u4E0D\u77E5\u9053\u6574\u5F20\u5730\u56FE\uFF0C\u53EA\u80FD\u53CD\u590D\u89C2\u5BDF\u5F53\u524D\u4F4D\u7F6E\u3002\u53EA\u8981\u8FD8\u6CA1\u5230\u7EC8\u70B9\uFF0C\u5C31\u7EE7\u7EED\u4E00\u8F6E\u201C\u8BFB\u53D6\u2014\u5224\u65AD\u2014\u884C\u52A8\u201D\u3002", write: "while not at_goal():\n" }, { say: "\u6BCF\u8F6E\u540C\u65F6\u8BFB\u53D6\u5DE6\u53F3\u63A2\u5934\uFF1B\u5143\u7EC4\u62C6\u5305\u8BA9\u4E24\u4E2A\u8BFB\u6570\u6709\u6E05\u695A\u7684\u540D\u5B57\u3002", write: "while not at_goal():\n    left, right = get_sensors()\n" }] },
+    { title: "\u53CC\u767D\u65F6\u4FDD\u6301\u76F4\u884C", concepts: ["branch", "motion"], say: [{ say: "\u4E24\u53EA\u63A2\u5934\u90FD\u662F\u767D\u8272\uFF0C\u8BF4\u660E\u9ED1\u7EBF\u5728\u8F66\u8EAB\u4E2D\u592E\u3002\u7528 and \u8868\u793A\u4E24\u4E2A\u6761\u4EF6\u5FC5\u987B\u540C\u65F6\u6210\u7ACB\u3002", write: 'while not at_goal():\n    left, right = get_sensors()\n\n    if left == "white" and right == "white":\n        forward()\n' }] },
+    { title: "\u5148\u5904\u7406\u53CC\u9ED1\u8DEF\u53E3", concepts: ["branch", "motion"], say: [{ say: "\u53CC\u9ED1\u662F\u5341\u5B57\u8DEF\u53E3\uFF0C\u672C\u8BFE\u89C4\u5B9A\u5DE6\u8F6C\u3002\u5148\u8F6C\u5411\uFF0C\u518D\u524D\u8FDB\u4E00\u6B65\u3002\u8FD9\u4E2A\u7279\u6B8A\u60C5\u51B5\u5FC5\u987B\u5199\u5728\u66F4\u5BBD\u6CDB\u7684 or \u5206\u652F\u524D\u9762\u3002", write: 'while not at_goal():\n    left, right = get_sensors()\n\n    if left == "white" and right == "white":\n        forward()\n    elif left == "black" and right == "black":\n        turn_left()\n        forward()\n' }] },
+    { title: "\u5355\u4FA7\u538B\u7EBF\u65F6\u4FEE\u6B63\u65B9\u5411", concepts: ["branch", "motion"], say: [{ say: "\u5269\u4E0B\u7684\u9ED1\u8272\u8BFB\u6570\u8868\u793A\u81F3\u5C11\u4E00\u4FA7\u538B\u7EBF\u3002\u5916\u5C42 or \u5224\u65AD\u9700\u8981\u4FEE\u6B63\uFF0C\u5185\u5C42 if \u51B3\u5B9A\u5411\u54EA\u8FB9\u8F6C\u3002", write: 'while not at_goal():\n    left, right = get_sensors()\n\n    if left == "white" and right == "white":\n        forward()\n    elif left == "black" and right == "black":\n        turn_left()\n        forward()\n    elif left == "black" or right == "black":\n        if left == "black":\n            turn_left()\n        else:\n            turn_right()\n        forward()\n' }] },
+    { title: "\u8FD0\u884C\u5B8C\u6574\u63A7\u5236\u5668", concepts: ["loop", "motion"], stage: { panels: ["viz", "debug"], focus: "viz" }, do: [{ action: "code.run" }], say: "\u8FD0\u884C\u65F6\uFF0C\u540C\u4E00\u4EFD\u7A0B\u5E8F\u4F1A\u5728\u8BB8\u591A\u8F6E\u5FAA\u73AF\u4E2D\u53CD\u590D\u4F7F\u7528\u3002\u5730\u56FE\u4E0D\u540C\uFF0C\u63A7\u5236\u89C4\u5219\u4E0D\u53D8\uFF1B\u8FD9\u5C31\u662F\u7528\u53CD\u9988\u800C\u4E0D\u662F\u8BB0\u8DEF\u7EBF\u63A7\u5236\u673A\u5668\u4EBA\u3002" },
+    { title: "Debugger \u770B\u7B2C\u4E00\u8F6E\u53CD\u9988", concepts: ["debug", "motion"], stage: { panels: ["viz", "debug"], focus: "debug" }, do: [{ action: "code.locate", args: { line: 2, occurrence: 1 } }, { action: "annotation.show", args: { kind: "mark", at: { variable: "left" } } }, { action: "annotation.show", args: { kind: "mark", at: { variable: "right" } } }], say: "\u505C\u5728\u7B2C\u4E00\u6B21\u8BFB\u53D6\u540E\uFF0C\u5BF9\u7167\u53D8\u91CF\u680F\u7684 left\u3001right \u4E0E\u8F66\u5934\u63A2\u5934\u3002\u7EE7\u7EED\u5355\u6B65\uFF0C\u770B\u7A0B\u5E8F\u53EA\u8FDB\u5165\u4E00\u4E2A\u5206\u652F\uFF0C\u518D\u6267\u884C forward\u3002" },
+    { title: "\u770B\u540C\u4E00\u53E5\u4EE3\u7801\u6267\u884C\u5F88\u591A\u6B21", concepts: ["debug", "loop", "motion"], do: [{ action: "code.locate", args: { line: 2, occurrence: 6 } }], say: "\u73B0\u5728\u5B9A\u4F4D\u5230\u540C\u4E00\u884C\u7684\u7B2C 6 \u6B21\u6267\u884C\u3002\u6E90\u7801\u6CA1\u6709\u590D\u5236\u516D\u4EFD\uFF0C\u662F while \u8BA9\u7A0B\u5E8F\u56DE\u5230\u8FD9\u91CC\uFF1B\u53D8\u91CF\u503C\u548C\u5C0F\u8F66\u4F4D\u7F6E\u5374\u5DF2\u7ECF\u53D8\u5316\u3002\u8FD9\u6B63\u662F\u5FAA\u73AF\u590D\u7528\u89C4\u5219\u7684\u610F\u4E49\u3002" },
+    { title: "\u6545\u610F\u7406\u89E3\u5206\u652F\u987A\u5E8F", concepts: ["branch", "motion"], stage: { panels: ["viz", "debug"], focus: "debug" }, say: "\u53CC\u9ED1\u540C\u65F6\u6EE1\u8DB3\u201C\u5DE6\u9ED1\u6216\u53F3\u9ED1\u201D\u3002\u5982\u679C\u628A or \u5206\u652F\u63D0\u524D\uFF0C\u5341\u5B57\u8DEF\u53E3\u4F1A\u88AB\u5F53\u6210\u666E\u901A\u5355\u4FA7\u4FEE\u6B63\u3002\u6761\u4EF6\u4ECE\u7279\u6B8A\u5230\u4E00\u822C\u6392\u5217\uFF0C\u662F\u63A7\u5236\u7A0B\u5E8F\u6B63\u786E\u6027\u7684\u7EC4\u6210\u90E8\u5206\u3002" },
+    { title: "\u56DE\u987E\u63A7\u5236\u601D\u60F3", concepts: ["loop", "branch", "motion"], say: "\u6BCF\u4E00\u8F6E\u90FD\u662F\uFF1A\u8BFB\u53D6\u4E8B\u5B9E \u2192 \u6309\u4F18\u5148\u7EA7\u5206\u7C7B \u2192 \u9009\u62E9\u52A8\u4F5C \u2192 \u524D\u8FDB\u4E00\u6B65\u3002Debugger \u5C55\u793A\u63A7\u5236\u6D41\uFF0CWorld \u5C55\u793A\u52A8\u4F5C\u540E\u679C\uFF1B\u628A\u4E24\u8005\u5BF9\u7167\uFF0C\u624D\u80FD\u770B\u89C1\u4EE3\u7801\u600E\u6837\u6210\u4E3A\u771F\u5B9E\u63A7\u5236\u7B56\u7565\u3002" }
+  ]
+};
+
+// playgrounds/line-tracking/line-tracking.generated.tsx
+import { jsx, jsxs } from "../libs/react.js";
 var RESOURCE = "robot";
-var layoutOptions = { open: ["world", "debug"], ratio: 0.4 };
+var layoutOptions = { open: ["viz", "debug"], ratio: 0.4 };
 var STARTER = `while not at_goal():
     left, right = get_sensors()
 
@@ -280,7 +432,7 @@ function preludeFor(route) {
 
 get_sensors, forward, turn_left, turn_right, at_goal = __make_robot()`;
 }
-var lineTracking = stateful("line-tracking", (source) => ({ source, routeIndex: 0 }), [
+var lineTracking = stateful("line-tracking", (source2) => ({ source: source2, routeIndex: 0 }), [
   on("editor.changed", edit, []),
   on("python.run", run, ["python.execute"]),
   on("line-tracking.route.changed", selectRoute, ["python.clear", "python.run"])
@@ -304,10 +456,10 @@ function selectRoute(state, event, { emit }) {
 function create(bus) {
   const course = lineTracking.create(STARTER, bus);
   const player = playback2.create({}, bus);
-  const execution = python3.create({}, bus);
+  const execution2 = python3.create({}, bus);
   bus.emit({ type: "python.run" });
   return () => {
-    execution.dispose();
+    execution2.dispose();
     player.dispose();
     course.dispose();
   };
@@ -559,37 +711,46 @@ var STYLE = `
 `;
 var mountOptions = { ...pythonOptions({ playback: { stepMs: 130, stepMsFor: paceOf } }), filename: "line-tracking.py", layout: layoutOptions, automatic: 500, start: [{ type: "python.run" }] };
 var starter = STARTER;
+var LINE_TRACKING_SCRIPT = line_tracking_script_default;
+var courseState = provided2("line-tracking.state");
+var LINE_TRACKING_SESSION = pythonSession({
+  world: { title: "\u8DEF\u7EBF", render: (view) => {
+    const state = view.get(courseState);
+    const playing = view.get(playbackHost2);
+    return /* @__PURE__ */ jsxs("div", { className: "line-world-root", style: { width: "100%", height: "100%", position: "relative" }, children: [
+      /* @__PURE__ */ jsx("style", { children: STYLE }),
+      /* @__PURE__ */ jsx(RouteWorld, { route: ROUTES[state.routeIndex], world: readRobotWorld(playing?.position ?? null, playing?.trace ?? null, state.routeIndex) }, state.routeIndex)
+    ] });
+  } },
+  domain: [caseChoices({
+    id: "line-tracking.route",
+    label: "\u8DEF\u7EBF",
+    state: courseState,
+    current: (state) => String(state.routeIndex),
+    choices: ROUTES.map((item, index) => ({ value: String(index), label: String(index + 1), title: item.name })),
+    event: (value) => ({ type: "line-tracking.route.changed", routeIndex: Number(value) })
+  })],
+  provide: (view) => [courseState.with(view.state)],
+  ai: courseAi({
+    explain: "\u8FD9\u4E00\u53E5\u662F\u5DE1\u7EBF\u5FAA\u73AF\u91CC\u7684\u4E00\u6B65\uFF1A\u5148\u8BFB\u5DE6\u53F3\u4E24\u4E2A\u4F20\u611F\u5668\uFF0C\u518D\u51B3\u5B9A\u5F80\u54EA\u8FB9\u4FEE\u6B63\uFF0C\u5FAA\u73AF\u76F4\u5230 at_goal()\u3002",
+    question: "\u60F3\u4E00\u60F3\u5DE6\u3001\u53F3\u4F20\u611F\u5668\u5404\u538B\u5728\u7EBF\u4E0A\u65F6\u673A\u5668\u4EBA\u5E94\u8BE5\u600E\u4E48\u8F6C\u3002\u8FD0\u884C\u540E\u5728\u8DEF\u7EBF\u4E0A\u9010\u6B65\u770B\u4F20\u611F\u5668\u8BFB\u6570\u548C\u6BCF\u4E00\u6B65\u7684\u52A8\u4F5C\u3002"
+  }),
+  scripts: [LINE_TRACKING_SCRIPT]
+});
+var LINE_TRACKING_COURSE = {
+  name: "\u673A\u5668\u4EBA\u5DE1\u7EBF",
+  component: lineTracking,
+  starter: STARTER,
+  playground: mountOptions,
+  session: LINE_TRACKING_SESSION
+};
 function Root(host = {}) {
-  const view = usePlayground(lineTracking, host.source ?? STARTER, { ...mountOptions, ...host.options });
-  if (!view) return null;
-  const route = ROUTES[view.state.routeIndex];
-  const world = readRobotWorld(view.parts.playback.position, view.parts.playback.trace, view.state.routeIndex);
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx("style", { children: STYLE }),
-    /* @__PURE__ */ jsx(
-      PlaygroundShell,
-      {
-        name: "\u673A\u5668\u4EBA\u5DE1\u7EBF",
-        layout: view.layout,
-        onEvent: view.send,
-        menu: view.menu,
-        toolbar: [...view.toolbar, { label: "\u8DEF\u7EBF", controls: [{ kind: "choices", label: "\u8DEF\u7EBF", value: String(view.state.routeIndex), choices: ROUTES.map((item, routeIndex) => ({
-          value: String(routeIndex),
-          title: item.name,
-          label: String(routeIndex + 1),
-          event: { type: "line-tracking.route.changed", routeIndex }
-        })) }] }],
-        editor: /* @__PURE__ */ jsx(Widget, { widget: view.editor }),
-        panels: [
-          { key: "world", icon: "viz", title: route.setting, flush: true, content: /* @__PURE__ */ jsx(RouteWorld, { route, world }, view.state.routeIndex) },
-          { key: "debug", icon: "debug", title: "\u8C03\u8BD5", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.debugger }) },
-          { key: "output", icon: "output", title: "\u7EC8\u7AEF", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.terminal }) }
-        ]
-      }
-    )
-  ] });
+  return /* @__PURE__ */ jsx(SessionPage, { course: LINE_TRACKING_COURSE, host });
 }
 export {
+  LINE_TRACKING_COURSE,
+  LINE_TRACKING_SCRIPT,
+  LINE_TRACKING_SESSION,
   ROUTES,
   Root,
   STARTER,

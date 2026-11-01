@@ -1,0 +1,14 @@
+{
+  "course": "music",
+  "concepts": ["value", "loop", "function", "list", "dict", "debug"],
+  "teaches": "用音名与拍数列表表示乐谱，通过函数计算 MIDI 音高，再用循环、多声部和休止构成旋律与卡农。",
+  "answerStyle": "沿一个具体音符解释音名、MIDI、卷帘位置和声音的对应，再讨论循环或声部结构。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "music.work", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    { "id": "midi-is-arbitrary", "signs": ["MIDI", "midi", "60", "67"], "guide": "用 12 × (octave + 1) + semitone 现场计算一个音名，说明数字与音高是固定对应。" },
+    { "id": "canon-is-two-melodies", "signs": ["canon", "voice", "rest"], "guide": "让学生比较两声部的音符序列；内容相同，只是第二声部先休止后进入。" }
+  ],
+  "examples": [
+    { "ask": "为什么 G4 是 67？", "reply": "G 在一个八度内距离 C 有 7 个半音；C4 是 60，所以 G4 是 60 + 7。可以在 SEMITONES 和 midi 函数中逐步算出来。" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "course": "gacha",
+  "concepts": ["value", "branch", "loop", "function", "list", "dict", "debug"],
+  "teaches": "把盲盒的价格、概率、款式和保底写成可修改数据，并用加权随机、函数和状态循环实现抽取。",
+  "answerStyle": "先区分规则数据、抽取机制和运行状态，再让学生只改一个参数并观察 Trace 中的真实结果。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    { "id": "weights-must-sum-100", "signs": ["NORMAL_WEIGHTS", "sum", "100"], "guide": "说明权重表示相对区间，算法会先求总和，所以不要求固定为 100。" },
+    { "id": "world-randomizes", "signs": ["random", "open_box"], "guide": "指出随机发生在学生代码里，open_box 只把已经得到的等级、款式和状态写入 Trace。" }
+  ],
+  "examples": [
+    { "ask": "为什么保底不用再写一套随机函数？", "reply": "保底改变的是哪张权重表，而不是加权随机的算法。观察 tier_for_draw 最后是否仍调用同一个 weighted_pick。" }
+  ]
+}

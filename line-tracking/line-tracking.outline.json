@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "course": "line-tracking",
+  "title": "机器人巡线",
+  "concepts": [
+    {
+      "id": "branch",
+      "label": "条件",
+      "aliases": [
+        "if",
+        "else",
+        "elif",
+        "判断",
+        "分支",
+        "布尔",
+        "比较",
+        "and",
+        "or",
+        "not"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    },
+    {
+      "id": "debug",
+      "label": "调试",
+      "aliases": [
+        "报错",
+        "错误",
+        "bug",
+        "排错",
+        "调试器",
+        "单步",
+        "Traceback",
+        "异常"
+      ]
+    },
+    {
+      "id": "motion",
+      "label": "坐标与运动",
+      "aliases": [
+        "坐标",
+        "移动",
+        "方向",
+        "转弯",
+        "机器人",
+        "位置"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "motion",
+    "loop"
+  ],
+  "lectures": [
+    {
+      "id": "line-tracking",
+      "title": "从传感器规则写出巡线程序",
+      "steps": [
+        {
+          "step": 0,
+          "title": "先写持续工作的控制循环",
+          "say": "机器人不知道整张地图，只能反复观察当前位置。只要还没到终点，就继续一轮“读取—判断—行动”。每轮同时读取左右探头；元组拆包让两个读数有清楚的名字。",
+          "concepts": [
+            "loop",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "双白时保持直行",
+          "say": "两只探头都是白色，说明黑线在车身中央。用 and 表示两个条件必须同时成立。",
+          "concepts": [
+            "branch",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "先处理双黑路口",
+          "say": "双黑是十字路口，本课规定左转。先转向，再前进一步。这个特殊情况必须写在更宽泛的 or 分支前面。",
+          "concepts": [
+            "branch",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "单侧压线时修正方向",
+          "say": "剩下的黑色读数表示至少一侧压线。外层 or 判断需要修正，内层 if 决定向哪边转。",
+          "concepts": [
+            "branch",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "运行完整控制器",
+          "say": "运行时，同一份程序会在许多轮循环中反复使用。地图不同，控制规则不变；这就是用反馈而不是记路线控制机器人。",
+          "concepts": [
+            "loop",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "Debugger 看第一轮反馈",
+          "say": "停在第一次读取后，对照变量栏的 left、right 与车头探头。继续单步，看程序只进入一个分支，再执行 forward。",
+          "concepts": [
+            "debug",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "看同一句代码执行很多次",
+          "say": "现在定位到同一行的第 6 次执行。源码没有复制六份，是 while 让程序回到这里；变量值和小车位置却已经变化。这正是循环复用规则的意义。",
+          "concepts": [
+            "debug",
+            "loop",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "故意理解分支顺序",
+          "say": "双黑同时满足“左黑或右黑”。如果把 or 分支提前，十字路口会被当成普通单侧修正。条件从特殊到一般排列，是控制程序正确性的组成部分。",
+          "concepts": [
+            "branch",
+            "motion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "回顾控制思想",
+          "say": "每一轮都是：读取事实 → 按优先级分类 → 选择动作 → 前进一步。Debugger 展示控制流，World 展示动作后果；把两者对照，才能看见代码怎样成为真实控制策略。",
+          "concepts": [
+            "loop",
+            "branch",
+            "motion"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

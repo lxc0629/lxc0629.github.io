@@ -1,0 +1,59 @@
+{
+  "id": "music-pitch",
+  "title": "沿着一个音符走过代码、音高与声音",
+  "mode": "instruction",
+  "steps": [
+    {
+      "title": "乐谱先成为数据",
+      "concepts": ["list", "value"],
+      "stage": { "panels": ["viz"], "focus": "viz" },
+      "say": "TWINKLE 列表就是乐谱。每个元组的第一个值是音名，第二个值是拍数。音名决定纵向音高，拍数决定横向长度；所以谱面、卷帘和代码使用的是同一份音乐数据。"
+    },
+    {
+      "title": "音名怎样算成 MIDI",
+      "concepts": ["function", "dict", "value"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.run" },
+        { "action": "code.locate", "args": { "line": 10, "occurrence": 1 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "octave" } } }
+      ],
+      "say": "midi 把音名拆成字母部分与八度。SEMITONES 给出音在一个八度内的半音偏移，再用 12 × (octave + 1) 加上偏移。C4 得到 60，G4 得到 67，C5 得到 72。",
+      "predict": {
+        "question": "如果 C4 是 60，那么高一个八度的 C5 是多少？",
+        "choices": [
+          { "label": "61", "reply": "相邻 MIDI 数字只高一个半音；一个完整八度包含 12 个半音。" },
+          { "label": "67", "reply": "67 是 G4；从 C 到下一个 C 要跨过 12 个半音。" },
+          { "label": "72", "correct": true, "reply": "正确。音名相同、八度增加 1，MIDI 就增加 12。" }
+        ]
+      }
+    },
+    {
+      "title": "循环把整张谱送去演奏",
+      "concepts": ["loop", "function", "list"],
+      "stage": { "panels": ["viz", "debug"], "focus": "debug" },
+      "do": [
+        { "action": "code.locate", "args": { "line": 16, "occurrence": 1 } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "note_name" } } },
+        { "action": "annotation.show", "args": { "kind": "mark", "at": { "variable": "beats" } } }
+      ],
+      "say": "play 不知道《小星星》的内容，它只遍历任何 melody。每一轮把 note_name 交给 midi，把算出的音高与 beats 一起传给 note。函数负责翻译，循环负责按顺序处理整张谱。"
+    },
+    {
+      "title": "同一事件生成三种呈现",
+      "concepts": ["debug", "value"],
+      "stage": { "panels": ["viz", "debug"], "focus": "viz" },
+      "say": "World 上方显示简谱、音名和 MIDI；下方卷帘用纵向位置表示 MIDI，用宽度表示拍数；运行代码后，声音频率也从 MIDI 推导。它们不是三份乐谱，而是同一组 note 事件的三种呈现。"
+    },
+    {
+      "title": "卡农是同一旋律延后进入",
+      "concepts": ["function", "list"],
+      "stage": { "panels": ["viz", "debug"], "focus": "viz" },
+      "do": [
+        { "action": "music.work", "args": { "value": "2" } },
+        { "action": "code.run" }
+      ],
+      "say": "现在第二声部先 rest(4)，再调用同一个 play(CANON_THEME)。卷帘中两条形状相同的旋律相差四拍，这就是卡农最直接的程序模型：复用同一数据，改变开始时间。"
+    }
+  ]
+}

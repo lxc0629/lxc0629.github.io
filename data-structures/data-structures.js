@@ -3,8 +3,6 @@ import { useId, useLayoutEffect, useRef, useState } from "../libs/react.js";
 import { on, stateful } from "../pico.js";
 import { python as python3 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
-import { PlaygroundShell, Widget } from "../pico.js";
-import { usePlayground } from "../pico.js";
 import { Source } from "../pico.js";
 
 // playgrounds/shared/python/index.ts
@@ -70,30 +68,245 @@ function pythonOptions(options = {}) {
       own({ dispose: bus.subscribe(["python.execute"], (event) => {
         checkedSource = event.source.code;
       }) });
-      const execution = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      const execution2 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
-        const result = execution.state.result;
+        const result = execution2.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
-      observe("python", () => ({ ...execution.state }), ["python.changed"]);
+      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
       observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
       observe("selection", () => focus.state, ["selection.changed"]);
-      return { python: execution.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
     }
   };
 }
+
+// playgrounds/data-structures/data-structures.generated.tsx
+import { playbackHost as playbackHost2, provided as provided2, selectionHost as selectionHost2 } from "../session.js";
+import { SessionPage } from "../session.js";
+
+// playgrounds/shared/python/session.ts
+import { createElement } from "../libs/react.js";
+import { mockAiPort } from "../session.js";
+import { Widget } from "../pico.js";
+import { feature, playbackHost, provided, selectionHost } from "../session.js";
+import { stage } from "../session.js";
+import { source } from "../session.js";
+import { draftViews } from "../session.js";
+import { hintViews } from "../session.js";
+import { execution } from "../session.js";
+import { navigate } from "../session.js";
+import { liveVariables } from "../session.js";
+import { traceQueries } from "../session.js";
+import { annotations, registerAnchorResolver } from "../session.js";
+import { annotationViews, debuggerAnchors, terminalAnchors } from "../session.js";
+import { tour } from "../session.js";
+import { sessionContext } from "../session.js";
+import { playground } from "../session.js";
+import { playgroundSnapshot } from "../session.js";
+import { sessionEvidence } from "../session.js";
+import { ai } from "../session.js";
+import { aiViews } from "../session.js";
+import { script } from "../session.js";
+import { scriptRail } from "../session.js";
+import { aiScript } from "../session.js";
+import { worldPanel } from "../session.js";
+var pythonHost = provided("python.parts");
+var OUTPUT_PANEL = "output";
+var DEBUG_PANEL = "debug";
+var PYTHON_RAN = { on: "python.changed", until: (event) => event.result.status !== "pending" };
+var pythonViews = feature("python.views", {
+  requires: [pythonHost, playbackHost, annotations, playground],
+  create: ({ get, own }) => {
+    const parts = get(pythonHost);
+    const playing = get(playbackHost);
+    const run = () => playing.trace;
+    for (const resolver of [debuggerAnchors(parts.debugger, run), terminalAnchors(parts.terminal, run)]) {
+      own({ dispose: registerAnchorResolver(get(playground), resolver) });
+    }
+  },
+  queries: [{ id: "python.result", run: ({ get }) => resultOf(get(pythonHost)?.python ?? null) }],
+  views: [
+    { slot: "panel", key: OUTPUT_PANEL, icon: "output", title: "\u8F93\u51FA", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).terminal }) },
+    { slot: "panel", key: DEBUG_PANEL, icon: "debug", title: "\u8C03\u8BD5", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).debugger }) }
+  ]
+});
+function resultOf(python4) {
+  const result = python4?.result ?? null;
+  if (result === null || result.status === "pending") return { status: "pending" };
+  if (result.status === "failed") return { status: "failed", error: String(result.error) };
+  if (result.value === null) return { status: "none" };
+  const { trace, returncode, error, waiting } = result.value;
+  const end = trace.at(trace.steps.length + 1);
+  const tail = (text) => (text ?? "").slice(-2e3);
+  return {
+    status: "ready",
+    returncode,
+    steps: trace.steps.length,
+    error: error === null ? null : { message: error.message, line: error.line },
+    waiting: waiting?.prompt ?? null,
+    stdout: tail(end.stdout),
+    stderr: tail(end.stderr)
+  };
+}
+function pythonSession(options) {
+  const features = [
+    stage,
+    source,
+    draftViews,
+    hintViews,
+    execution.with({ run: { type: "python.run" }, settle: PYTHON_RAN }),
+    navigate.with({ debuggerPanel: DEBUG_PANEL }),
+    liveVariables,
+    traceQueries,
+    annotations,
+    annotationViews,
+    tour,
+    sessionContext,
+    sessionEvidence,
+    playground,
+    playgroundSnapshot,
+    ...options.ai === void 0 ? [] : [ai.with(options.ai), aiViews],
+    script.with(options.script ?? {}),
+    scriptRail.with({ library: options.scripts ?? [] }),
+    ...options.ai === void 0 ? [] : [aiScript.with({ narrate: false })],
+    worldPanel(options.world),
+    pythonViews,
+    ...options.domain ?? []
+  ];
+  return Object.freeze({
+    features: Object.freeze(features),
+    provide: (view) => [
+      playbackHost.with(view.parts.playback),
+      selectionHost.with(view.parts.selection),
+      pythonHost.with({ python: view.parts.python, terminal: view.parts.terminal, debugger: view.parts.debugger }),
+      ...options.provide?.(view) ?? []
+    ],
+    editorExtensions: pythonEditorOptions.extensions
+  });
+}
+function caseChoices(options) {
+  const values = options.choices.map((choice) => choice.value);
+  return feature(`${options.id}.choices`, {
+    requires: [options.state],
+    actions: [{
+      id: options.id,
+      label: options.label,
+      tags: ["run"],
+      args: { value: { type: "string", enum: values } },
+      when: ({ get }, { value }) => typeof value === "string" && values.includes(value) && get(options.state) !== null,
+      event: (_context, { value }) => options.event(value)
+    }],
+    views: [{ slot: "toolbar", label: options.label, controls: ({ get }) => {
+      const state = get(options.state);
+      return state === null ? [] : [{
+        kind: "choices",
+        label: options.label,
+        value: options.current(state),
+        choices: options.choices.map((choice) => ({ ...choice, event: { type: "session.invoke", action: options.id, args: { value: choice.value } } }))
+      }];
+    } }]
+  });
+}
+function courseAi(answers) {
+  return {
+    port: mockAiPort((request) => request.kind === "explain" ? { title: "\u8FD9\u4E00\u6B65\u5728\u505A\u4EC0\u4E48", text: answers.explain, primary: { action: "selection.locate", label: "\u5B9A\u4F4D\u5230\u6267\u884C" } } : { title: "\u53EF\u4EE5\u4ECE\u8FD9\u91CC\u60F3\u8D77", text: answers.question }, { delayMs: 300 })
+  };
+}
+
+// playgrounds/data-structures/data-structures.script.json
+var data_structures_script_default = {
+  id: "data-structures",
+  title: "\u4E00\u4E2A\u5217\u8868\uFF0C\u51E0\u4E2A\u540D\u5B57",
+  from: "",
+  mode: "instruction",
+  auto: true,
+  steps: [
+    {
+      title: "\u540D\u5B57\u6307\u5411\u5BF9\u8C61",
+      concepts: ["list"],
+      say: [
+        {
+          say: "`numbers = [2, 4]` \u5148\u9020\u51FA\u4E00\u4E2A\u5217\u8868\u5BF9\u8C61\uFF0C\u518D\u8BA9\u540D\u5B57 numbers \u6307\u5411\u5B83\u3002",
+          write: "numbers = [2, 4]\n"
+        },
+        {
+          say: "`alias = numbers` \u6CA1\u6709\u590D\u5236\u5217\u8868\uFF0C\u53EA\u662F\u7ED9\u540C\u4E00\u4E2A\u5217\u8868\u518D\u8D77\u4E00\u4E2A\u540D\u5B57\u3002",
+          write: "numbers = [2, 4]\nalias = numbers\n"
+        }
+      ]
+    },
+    {
+      title: "\u5B57\u5178\u91CC\u5B58\u7684\u662F\u5F15\u7528",
+      concepts: ["dict", "list"],
+      say: [
+        {
+          say: '\u5B57\u5178\u6309\u952E\u627E\u503C\u3002`"scores"` \u5BF9\u5E94\u7684\u503C\u4E0D\u662F\u4E00\u4EFD\u62F7\u8D1D\uFF0C\u8FD8\u662F\u521A\u624D\u90A3\u4E2A\u5217\u8868\u3002',
+          write: 'numbers = [2, 4]\nalias = numbers\nprofile = {"name": "Ada", "scores": numbers}\n'
+        }
+      ]
+    },
+    {
+      title: "\u96C6\u5408\uFF1A\u6CA1\u6709\u987A\u5E8F\uFF0C\u4E0D\u4F1A\u91CD\u590D",
+      concepts: [],
+      say: [
+        {
+          say: "\u96C6\u5408\u53EA\u5173\u5FC3\u201C\u6709\u6CA1\u6709\u201D\uFF1A\u6CA1\u6709\u4E0B\u6807\uFF0C\u540C\u4E00\u4E2A\u5143\u7D20\u653E\u4E24\u6B21\u4E5F\u53EA\u7B97\u4E00\u4E2A\u3002",
+          write: 'numbers = [2, 4]\nalias = numbers\nprofile = {"name": "Ada", "scores": numbers}\ntags = {"python", "trace"}\n'
+        }
+      ]
+    },
+    {
+      title: "\u6539\u4E00\u5904\uFF0C\u4E09\u5904\u90FD\u770B\u89C1",
+      concepts: ["dict", "list"],
+      say: [
+        {
+          say: "`numbers.append(8)` \u5728\u539F\u6765\u7684\u5217\u8868\u4E0A\u52A0\u4E00\u4E2A\u5143\u7D20\uFF0C\u6CA1\u6709\u9020\u65B0\u5217\u8868\u3002",
+          write: 'numbers = [2, 4]\nalias = numbers\nprofile = {"name": "Ada", "scores": numbers}\ntags = {"python", "trace"}\n\nnumbers.append(8)\n'
+        },
+        {
+          say: "\u5B57\u5178\u52A0\u4E00\u4E2A\u952E\uFF0C\u96C6\u5408\u52A0\u4E00\u4E2A\u5143\u7D20\uFF0C\u90FD\u662F\u5C31\u5730\u4FEE\u6539\u3002",
+          write: 'numbers = [2, 4]\nalias = numbers\nprofile = {"name": "Ada", "scores": numbers}\ntags = {"python", "trace"}\n\nnumbers.append(8)\nprofile["active"] = True\ntags.add("debugger")\n'
+        }
+      ]
+    },
+    {
+      title: "\u8FD0\u884C\u770B\u770B",
+      concepts: ["dict", "list"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "viz"
+      },
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: '\u8FD0\u884C\u540E\u770B\u7ED3\u6784\u56FE\uFF1Anumbers\u3001alias \u548C profile["scores"] \u4E09\u6761\u5F15\u7EBF\u6307\u5411\u540C\u4E00\u4E2A\u5217\u8868\uFF0C\u6240\u4EE5 append \u4E4B\u540E\u4E09\u5904\u90FD\u662F [2, 4, 8]\u3002'
+    },
+    {
+      title: "\u60F3\u4E00\u60F3",
+      concepts: ["list"],
+      say: "\u5982\u679C\u60F3\u8BA9 alias \u6210\u4E3A\u72EC\u7ACB\u7684\u4E00\u4EFD\uFF0C\u8981\u5199 `alias = numbers.copy()`\u3002\u6539\u6210\u8FD9\u6837\u518D\u8FD0\u884C\uFF0C\u7ED3\u6784\u56FE\u91CC\u4F1A\u51FA\u73B0\u4E24\u4E2A\u5217\u8868\u3002"
+    }
+  ]
+};
 
 // playgrounds/data-structures/data-structures.generated.tsx
 import { Fragment, jsx, jsxs } from "../libs/react.js";
@@ -271,9 +484,9 @@ del __make_object_graph_snapshot
 `;
 var BLOCK_HEADER = /^(def |class |@|if |elif |else\s*:|while |for |with |try\s*:|except|finally\s*:)/;
 var SKIP_STATEMENT = /^(return|break|continue|pass)\b/;
-function instrumentSource(source) {
+function instrumentSource(source2) {
   let insideDefinition = false;
-  return source.split("\n").map((line) => {
+  return source2.split("\n").map((line) => {
     const trimmed = line.trim();
     const indent = line.length - line.trimStart().length;
     if (trimmed === "" || trimmed.startsWith("#")) return line;
@@ -284,7 +497,7 @@ function instrumentSource(source) {
     return `${line}; __pico_snapshot()`;
   }).join("\n");
 }
-var dataStructures = stateful("data-structures", (source) => ({ source, caseId: "collections" }), [
+var dataStructures = stateful("data-structures", (source2) => ({ source: source2, caseId: "collections" }), [
   on("editor.changed", (state, event, { emit }) => {
     if (state.source === event.source) return;
     state.source = event.source;
@@ -318,9 +531,9 @@ function createCase(caseId) {
     const course = dataStructures.create(selected.source, bus);
     if (caseId !== "collections") course.receive({ type: "data-structures.case.changed", caseId });
     const player = playback2.create({}, bus);
-    const execution = python3.create({}, bus);
+    const execution2 = python3.create({}, bus);
     return () => {
-      execution.dispose();
+      execution2.dispose();
       player.dispose();
       course.dispose();
     };
@@ -1061,54 +1274,56 @@ function semanticStepDelay(position) {
   const previousOrdinal = position.previous.resources?.[RESOURCE] ?? 0;
   return log !== previousOrdinal ? 1200 : 160;
 }
-var PANELS = ["structure", "debug"];
+var PANELS = ["viz", "debug"];
 var mountOptions = {
   ...pythonOptions({ debugger: { variablesExpandable: true }, playback: { stepMsFor: semanticStepDelay } }),
   filename: "data-structures.py",
-  layout: { open: [...PANELS], ratio: 0.38, sizes: { structure: 1.15, debug: 1 } },
-  session: null
+  layout: { open: [...PANELS], ratio: 0.38, sizes: { viz: 1.15, debug: 1 } },
+  session: null,
+  automatic: 500,
+  start: [{ type: "python.run" }]
 };
 var starter = STARTER;
+var courseState = provided2("data-structures.state");
+var DATA_STRUCTURES_SCRIPT = data_structures_script_default;
+var DATA_STRUCTURES_SESSION = pythonSession({
+  world: { title: "\u6570\u636E\u7ED3\u6784", render: (view) => {
+    const state = view.get(courseState);
+    const result = view.get(pythonHost).python.result;
+    const trace = result.status === "ready" && result.value !== null ? result.value.trace : null;
+    const selected = view.get(selectionHost2)?.current ?? null;
+    const focus = selected?.kind === "runtime-variable" && typeof selected.path[1] === "string" ? selected.path[1] : null;
+    return /* @__PURE__ */ jsxs(Fragment, { children: [
+      /* @__PURE__ */ jsx("style", { children: DATA_STRUCTURES_STYLE }),
+      /* @__PURE__ */ jsx(StructureView, { caseId: state.caseId, trace, position: view.get(playbackHost2)?.position ?? null, focus })
+    ] });
+  } },
+  domain: [caseChoices({
+    id: "data-structures.case",
+    label: "\u6570\u636E\u7ED3\u6784",
+    state: courseState,
+    current: (state) => state.caseId,
+    choices: CASES.map((item) => ({ value: item.id, label: item.label })),
+    event: (value) => ({ type: "data-structures.case.changed", caseId: value })
+  })],
+  provide: (view) => [courseState.with(view.state)],
+  ai: courseAi({
+    explain: "\u8FD9\u4E00\u53E5\u5728\u6539\u52A8\u4E00\u4E2A\u5BB9\u5668\uFF1A\u770B\u5B83\u5F80\u5217\u8868\u3001\u5B57\u5178\u6216\u96C6\u5408\u91CC\u653E\u4E86\u4EC0\u4E48\u3001\u53D6\u8D70\u4E86\u4EC0\u4E48\uFF0C\u5DE6\u8FB9\u7684\u7ED3\u6784\u56FE\u4F1A\u8DDF\u7740\u8FD9\u4E00\u6B65\u53D8\u5316\u3002",
+    question: "\u5148\u5206\u6E05\u5217\u8868\u3001\u5B57\u5178\u3001\u96C6\u5408\u5404\u81EA\u600E\u4E48\u5B58\u4E1C\u897F\uFF1A\u6709\u6CA1\u6709\u987A\u5E8F\u3001\u80FD\u4E0D\u80FD\u91CD\u590D\u3001\u6309\u4EC0\u4E48\u627E\u3002\u8FD0\u884C\u540E\u70B9\u8C03\u8BD5\u91CC\u7684\u53D8\u91CF\uFF0C\u7ED3\u6784\u56FE\u4F1A\u628A\u5B83\u6807\u51FA\u6765\u3002"
+  }),
+  scripts: [DATA_STRUCTURES_SCRIPT]
+});
+var DATA_STRUCTURES_COURSE = {
+  name: "Python \u6570\u636E\u7ED3\u6784",
+  component: dataStructures,
+  starter: STARTER,
+  playground: mountOptions,
+  session: DATA_STRUCTURES_SESSION
+};
 function Root(host = {}) {
-  const view = usePlayground(dataStructures, host.source ?? STARTER, { ...mountOptions, ...host.options });
-  if (view === null) return null;
-  const result = view.parts.python.result;
-  const trace = result.status === "ready" && result.value !== null ? result.value.trace : null;
-  const running = result.status === "pending";
-  const selected = view.parts.selection.current;
-  const focus = selected?.kind === "runtime-variable" && typeof selected.path[1] === "string" ? selected.path[1] : null;
-  return /* @__PURE__ */ jsxs("div", { className: "pico-ds-app", children: [
-    /* @__PURE__ */ jsx("style", { children: DATA_STRUCTURES_STYLE }),
-    /* @__PURE__ */ jsx(
-      PlaygroundShell,
-      {
-        name: "Python Data Structures",
-        layout: view.layout,
-        onEvent: view.send,
-        menu: view.menu,
-        toolbar: [
-          ...view.toolbar,
-          { label: "\u793A\u4F8B", controls: [{
-            kind: "choices",
-            label: "\u6570\u636E\u7ED3\u6784",
-            value: view.state.caseId,
-            choices: CASES.map((item) => ({ value: item.id, label: item.label, event: { type: "data-structures.case.changed", caseId: item.id } }))
-          }] },
-          { controls: [{ kind: "button", icon: "play", label: running ? "\u6B63\u5728\u8FD0\u884C" : "\u8FD0\u884C", disabled: running, event: { type: "python.run" } }] }
-        ],
-        editor: /* @__PURE__ */ jsx(Widget, { widget: view.editor }),
-        panels: [
-          { key: "structure", icon: "viz", title: "\u6570\u636E\u7ED3\u6784", flush: true, content: /* @__PURE__ */ jsx(StructureView, { caseId: view.state.caseId, trace, position: view.parts.playback.position, focus }) },
-          { key: "debug", icon: "debug", title: "\u8C03\u8BD5", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.debugger }) },
-          { key: "output", icon: "output", title: "\u8F93\u51FA", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.terminal }) }
-        ]
-      }
-    )
-  ] });
+  return /* @__PURE__ */ jsx(SessionPage, { course: DATA_STRUCTURES_COURSE, host });
 }
 var DATA_STRUCTURES_STYLE = `
-  .pico-ds-app { width: 100%; height: 100%; min-width: 0; min-height: 0; }
-  .pico-ds-app > .pico-page { height: 100%; }
   .pico-ds-canvas, .pico-ds-empty { display: grid; width: 100%; height: 100%; min-width: 0; min-height: 0; place-items: center; padding: var(--pico-space-3); background: var(--pico-code-bg); overflow: hidden; }
   .pico-ds-svg { display: block; max-width: 100%; max-height: 100%; overflow: visible; }
 
@@ -1148,6 +1363,9 @@ var DATA_STRUCTURES_STYLE = `
 `;
 export {
   CASES,
+  DATA_STRUCTURES_COURSE,
+  DATA_STRUCTURES_SCRIPT,
+  DATA_STRUCTURES_SESSION,
   Root,
   SNAPSHOT_PRELUDE,
   STARTER,

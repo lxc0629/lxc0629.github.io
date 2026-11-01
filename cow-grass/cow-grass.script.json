@@ -1,0 +1,126 @@
+{
+  "id": "cow-grass",
+  "title": "从每日变化写出牧场模拟",
+  "from": "",
+  "mode": "instruction",
+  "auto": true,
+  "steps": [
+    {
+      "title": "定义状态和参数","concepts":["value"],
+      "stage": {
+        "panels": [
+          "viz"
+        ]
+      },
+      "say": [
+        {
+          "say": "grass 是变化的状态；growth、cows、eat 决定变化速度；day 记录时间。",
+          "write": "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n"
+        }
+      ]
+    },
+    {
+      "title": "写出一天的生长","concepts":["value"],
+      "say": [
+        {
+          "say": "一天先长草。赋值读取旧 grass，加上 growth，再写回新值。",
+          "write": "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\ngrass = grass + growth\n"
+        }
+      ]
+    },
+    {
+      "title": "扣除整群牛的采食","concepts":["value"],
+      "say": [
+        {
+          "say": "整群总食量是 cows * eat。乘法先算，再从当前草量扣除，最后日期前进。",
+          "write": "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\ngrass = grass + growth\ngrass = grass - cows * eat\nday = day + 1\n"
+        }
+      ]
+    },
+    {
+      "title": "运行一天","concepts":["value"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "viz"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "草先从 100 长到 112，再被吃到 92，day 变成 2。三个画面变化对应三条已执行语句。"
+    },
+    {
+      "title": "Debugger 分开看三个时刻","concepts":["debug","value"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "debug"
+      },
+      "do": [
+        {
+          "action": "code.locate",
+          "args": {
+            "line": 7,
+            "occurrence": 1
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "mark",
+            "at": {
+              "variable": "grass"
+            }
+          }
+        }
+      ],
+      "say": "长草后 grass 是 112；采食后是 92；day 赋值只改日期。Debugger 把“每天净少 8”展开成两个方向相反的过程。"
+    },
+    {
+      "title": "用循环表达稳定规则","concepts":["loop"],
+      "say": [
+        {
+          "say": "每天做同样三件事，让 for 产生四天。循环体代表稳定的每日规则。",
+          "write": "grass = 100\ngrowth = 12\ncows = 4\neat = 5\nday = 1\n\nfor _ in range(4):\n    grass = grass + growth\n    grass = grass - cows * eat\n    day = day + 1\n"
+        }
+      ]
+    },
+    {
+      "title": "看同一行反复执行","concepts":["debug","loop"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "debug"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        },
+        {
+          "action": "code.locate",
+          "args": {
+            "line": 8,
+            "occurrence": 3
+          }
+        }
+      ],
+      "say": "现在停在长草语句第 3 次执行。同一行服务不同日期，grass 的当前值让每次结果不同；循环把重复结构与变化数据分开。"
+    },
+    {
+      "title": "提炼每日净变化","concepts":["value","loop"],
+      "say": "每天净变化是 growth - cows * eat，即 12 - 20 = -8。四天后是 68。公式概括趋势，逐步程序保留先长后吃的过程。"
+    },
+    {
+      "title": "参数决定长期行为","concepts":["value","loop"],
+      "say": "growth 大于总食量时草增加，相等时稳定，更小时下降。程序骨架不变，参数改变轨迹；建模就是分清状态、规则、时间和参数。"
+    }
+  ]
+}

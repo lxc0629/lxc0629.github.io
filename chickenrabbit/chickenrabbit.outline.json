@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "course": "chickenrabbit",
+  "title": "鸡兔同笼",
+  "concepts": [
+    {
+      "id": "value",
+      "label": "变量",
+      "aliases": [
+        "赋值",
+        "变量名",
+        "数据类型",
+        "int",
+        "str",
+        "字符串",
+        "整数",
+        "print",
+        "input",
+        "输出",
+        "输入"
+      ]
+    },
+    {
+      "id": "branch",
+      "label": "条件",
+      "aliases": [
+        "if",
+        "else",
+        "elif",
+        "判断",
+        "分支",
+        "布尔",
+        "比较",
+        "and",
+        "or",
+        "not"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "loop",
+    "branch"
+  ],
+  "lectures": [
+    {
+      "id": "chickenrabbit",
+      "title": "从抬腿实验写出鸡兔同笼",
+      "steps": [
+        {
+          "step": 0,
+          "title": "先把问题写成两个观测",
+          "say": "笼子里只有鸡和兔。我们暂时看不到各有几只，只知道一共有 10 个头、28 条腿。先把这两个事实放进一个二元组。下标 0 取第一个值，也就是头数。下标 1 取腿数。到这里，代码只是在忠实记录题目，没有开始猜答案。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "策略一：每只动物都抬两条腿",
+          "say": "鸡只有两条腿，兔有四条。让每只动物都抬起两条腿，鸡就没有腿着地，兔还剩两条。我们把这个思想直接写成一次世界动作。动作发生后，再读取此刻着地的腿数。注意顺序：先改变世界，再观察结果。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "着地腿只来自兔子",
+          "say": "现在每只兔贡献两条着地腿，每只鸡贡献零条，所以 `grounded // 2` 就是兔子数量。整除表达了结果必须是完整的只数。总头数减去兔子数，就是鸡的数量。每个变量保存推理中的一个事实，每个表达式对应一步等量关系。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "运行第一种策略",
+          "say": "运行后，所有动物抬起两条腿；`grounded` 是 8，`rabbits` 是 4，`chickens` 是 6。答案正确后，笼子才揭示真实数量。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "用 Debugger 看数据怎样出现",
+          "say": "现在停在抬腿语句。继续单步时先看到 World 姿态变化；执行下一行，`grounded` 才获得读数。Debugger 让我们区分“发出动作”和“读取结果”两个时刻。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "沿着变量继续到答案",
+          "say": "执行第 7 行后，变量栏出现 `grounded = 8`。后两行不再操作世界，只把实验事实转换成兔子数和鸡数。程序控制流与数学推理在这里一一对应。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "策略二：只抬一条腿",
+          "say": "现在换一个实验：每只动物只抬一条腿。动作参数先从 2 改成 1。公式也要跟着改变。每只动物先共有 1 条着地腿；减去 heads 后，剩下的是每只兔额外的 2 条。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "运行第二种策略并比较",
+          "say": "这次 `grounded` 是 18。表达式先算 `18 - 10 = 8`，再除以 2，仍得到 4 只兔。两种程序答案相同，中间变量不同，因为实验策略不同。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "编程思想来自对问题的建模",
+          "say": "两种写法都经历：记录观测 → 设计动作 → 读取新事实 → 用公式消去一种动物 → 算出另一种动物。函数调用表达实验，变量保存观察，算术表达推理；改变实验时，依赖它的公式必须一起改变。",
+          "concepts": [
+            "value"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

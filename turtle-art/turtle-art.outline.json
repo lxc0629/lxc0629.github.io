@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "course": "turtle-art",
+  "title": "Turtle 几何画室",
+  "concepts": [
+    {
+      "id": "branch",
+      "label": "条件",
+      "aliases": [
+        "if",
+        "else",
+        "elif",
+        "判断",
+        "分支",
+        "布尔",
+        "比较",
+        "and",
+        "or",
+        "not"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    },
+    {
+      "id": "function",
+      "label": "函数",
+      "aliases": [
+        "def",
+        "return",
+        "参数",
+        "返回值",
+        "调用",
+        "封装"
+      ]
+    },
+    {
+      "id": "motion",
+      "label": "坐标与运动",
+      "aliases": [
+        "坐标",
+        "移动",
+        "方向",
+        "转弯",
+        "机器人",
+        "位置"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "motion",
+    "loop",
+    "branch",
+    "function"
+  ],
+  "lectures": [
+    {
+      "id": "turtle-geometry",
+      "title": "让循环长成一幅几何作品",
+      "steps": [
+        {
+          "step": 0,
+          "title": "一次移动就是画板上的一笔",
+          "say": "forward(length) 让海龟沿当前朝向前进，落笔时就在画板上留下线段。继续执行 left(angle)，位置不变但朝向改变；Debugger 里的两句动作会依次变成画板上的几何变化。",
+          "concepts": [
+            "function",
+            "loop"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "正多边形为什么能够闭合",
+          "say": "polygon 用 360 / sides 计算每次转动的外角。循环 sides 次以后，总转角刚好是 360 度，海龟回到原方向；每条边长度相同，所以图形闭合。",
+          "concepts": [
+            "function",
+            "loop"
+          ],
+          "prediction": "画一个正六边形，每条边之后应该转多少度？"
+        },
+        {
+          "step": 2,
+          "title": "同一个循环产生三种变化",
+          "say": "layer 同时驱动三件事：取模让颜色循环，奇偶判断让线宽交替，45 + layer × 2 让多边形逐层变大。最后每层再转 10 度，36 层累计转满一圈。复杂图案来自简单动作与参数变化的组合。",
+          "concepts": [
+            "loop",
+            "branch"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "条件只改变样式，不改变几何",
+          "say": "if 检查 layer 的奇偶，只在 1 和 3 之间切换线宽。多边形的位置、边长和转角仍由后面的 polygon 与 left 决定。把样式条件和几何计算分开，修改其中一项时更容易预测结果。",
+          "concepts": [
+            "branch",
+            "loop"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "从一个变量开始创作",
+          "say": "结束讲解后，一次只改一个变量再运行：边数改变闭合角度，循环次数改变重复数量，长度公式改变图案生长速度，if 条件改变样式分界。课程包还用 headless 示例验证了多边形实验室和星空生成器；当前 Session 不直接替换学生 Draft，避免覆盖你的代码。",
+          "concepts": [
+            "loop",
+            "branch",
+            "function"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

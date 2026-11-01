@@ -68,19 +68,20 @@ function pythonOptions(options = {}) {
         checkedSource = event.source.code;
       }) });
       const execution = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
         const result = execution.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
@@ -95,6 +96,10 @@ function pythonOptions(options = {}) {
 // playgrounds/picoworld/picoworld.tsx
 import { python as python3 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
+import { playbackHost } from "../session.js";
+import { useSession } from "../session.js";
+import { playground } from "../session.js";
+import { source } from "../session.js";
 import { picoWorld, picoWorldProgram } from "../world.js";
 import { jsx } from "../libs/react.js";
 var layoutOptions = { open: ["viz"] };
@@ -108,7 +113,7 @@ for layer in range(5):
 # \u7ED9\u5854\u5C16\u52A0\u4E0A\u4E00\u5757\u91D1\u8272\u7684\u9876\u77F3\u3002
 drop(0, 0, "gold_block")
 `;
-var picoWorldCourse = stateful("picoworld-course", (source) => ({ source }), [
+var picoWorldCourse = stateful("picoworld-course", (source2) => ({ source: source2 }), [
   on("editor.changed", edit, ["python.clear"]),
   on("python.run", run, ["python.execute"])
 ]);
@@ -141,8 +146,13 @@ var mountOptions = {
   start: [{ type: "python.run" }]
 };
 var starter = STARTER;
+var PICOWORLD_SESSION = Object.freeze({
+  features: Object.freeze([playground, source]),
+  provide: (view) => [playbackHost.with(view.parts.playback)]
+});
 function Root(host = {}) {
   const view = usePlayground(picoWorldCourse, host.source ?? STARTER, { ...mountOptions, ...host.options });
+  useSession(view, PICOWORLD_SESSION);
   const [world, setWorld] = useState(null);
   const trace = view?.parts.playback.trace ?? null;
   const position = view?.parts.playback.position ?? null;

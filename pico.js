@@ -1205,15 +1205,21 @@ function subject(value) {
 }
 function decodeLearningEvidenceData(value) {
   const input = object(value, "Evidence");
-  exact(input, ["version", "type", "source", "subject", "payload"], "Evidence");
+  const { recordedAt: _recordedAt, ...required } = input;
+  exact(required, ["version", "type", "source", "subject", "payload"], "Evidence");
   if (input["version"] !== 1 || input["type"] !== "learning.evidence.recorded") {
     throw new TypeError("Evidence version or type is invalid");
   }
   const source = object(input["source"], "Evidence.source");
   exact(source, ["session", "sequence"], "Evidence.source");
+  const recordedAt = input["recordedAt"];
+  if (recordedAt !== void 0 && (typeof recordedAt !== "string" || Number.isNaN(Date.parse(recordedAt)))) {
+    throw new TypeError("Evidence.recordedAt must be an ISO time");
+  }
   return Object.freeze({
     version: 1,
     type: "learning.evidence.recorded",
+    ...recordedAt === void 0 ? {} : { recordedAt },
     source: Object.freeze({
       session: string(source["session"], "Evidence.source.session"),
       sequence: integer(source["sequence"], "Evidence.source.sequence")
@@ -2547,11 +2553,21 @@ function normalize(value) {
   return Object.freeze({
     open: value.open === null ? null : Object.freeze([...new Set(value.open)]),
     ratio: Math.max(0.34, Math.min(0.6, value.ratio)),
-    sizes: Object.freeze({ ...value.sizes })
+    sizes: Object.freeze({ ...value.sizes }),
+    tree: value.tree === null ? null : checkTree(value.tree, /* @__PURE__ */ new Set())
   });
 }
+function checkTree(node2, slots) {
+  if ("slot" in node2) {
+    if (typeof node2.slot !== "string" || node2.slot === "" || slots.has(node2.slot)) throw new RangeError("Invalid layout slot");
+    slots.add(node2.slot);
+    return Object.freeze({ slot: node2.slot });
+  }
+  if (node2.split !== "row" && node2.split !== "column" || !Array.isArray(node2.children) || node2.children.length === 0 || node2.key !== void 0 && typeof node2.key !== "string") throw new RangeError("Invalid layout split");
+  return Object.freeze({ split: node2.split, children: Object.freeze(node2.children.map((child2) => checkTree(child2, slots))), ...node2.key === void 0 ? {} : { key: node2.key } });
+}
 function createLayout(initial = {}) {
-  const state2 = createState(normalize({ open: null, ratio: 0.43, sizes: {}, ...initial }));
+  const state2 = createState(normalize({ open: null, ratio: 0.43, sizes: {}, tree: null, ...initial }));
   const readable = Object.freeze({ getSnapshot: state2.getSnapshot, subscribe: state2.subscribe });
   layouts.set(readable, state2);
   return readable;
@@ -2560,7 +2576,7 @@ function changeLayout(readable, event2, { emit }) {
   const state2 = layouts.get(readable);
   const next = normalize({ ...state2.getSnapshot(), ...event2.value });
   const previous = state2.getSnapshot();
-  if (previous.ratio === next.ratio && JSON.stringify(previous.open) === JSON.stringify(next.open) && Object.keys(previous.sizes).length === Object.keys(next.sizes).length && Object.keys(next.sizes).every((key) => previous.sizes[key] === next.sizes[key])) return;
+  if (previous.ratio === next.ratio && JSON.stringify(previous.open) === JSON.stringify(next.open) && JSON.stringify(previous.tree) === JSON.stringify(next.tree) && Object.keys(previous.sizes).length === Object.keys(next.sizes).length && Object.keys(next.sizes).every((key) => previous.sizes[key] === next.sizes[key])) return;
   state2.set(next);
   emit({ type: "layout.changed", value: next });
 }
@@ -2951,6 +2967,37 @@ function Split({ direction, minPane = MIN_PANE, className, panes, sizes, onResiz
   }) });
 }
 
+// src/impl/components/tree.ts
+function arrangeLayout(tree, visible) {
+  const shown = new Set(visible);
+  const placed = new Set(slotsOf(tree));
+  const rest = visible.filter((key) => key !== "editor" && !placed.has(key));
+  let root = prune(tree, shown);
+  if (rest.length > 0) root = join(root, rest.length === 1 ? { slot: rest[0] } : { split: "column", key: "layout:rest", children: rest.map((slot) => ({ slot })) });
+  if (shown.has("editor") && !placed.has("editor")) root = join({ slot: "editor" }, root);
+  return root;
+}
+function layoutKey(node2) {
+  return "slot" in node2 ? node2.slot : node2.key ?? `${node2.split}:${slotsOf(node2).join("+")}`;
+}
+function slotsOf(node2) {
+  return "slot" in node2 ? [node2.slot] : node2.children.flatMap(slotsOf);
+}
+function prune(node2, shown) {
+  if ("slot" in node2) return shown.has(node2.slot) ? node2 : null;
+  const children2 = node2.children.flatMap((child2) => {
+    const kept = prune(child2, shown);
+    return kept === null ? [] : [kept];
+  });
+  if (children2.length === 0) return null;
+  return children2.length === 1 ? children2[0] : { ...node2, children: children2 };
+}
+function join(left, right) {
+  if (left === null) return right;
+  if (right === null) return left;
+  return { split: "row", key: "layout:join", children: [left, right] };
+}
+
 // src/impl/components/shell.tsx
 import { Fragment as Fragment3, jsx as jsx4, jsxs as jsxs2 } from "./libs/react.js";
 var MIN_RATIO = 0.34;
@@ -3004,18 +3051,39 @@ function PlaygroundShell({
     },
     panel.key
   );
+  const topBar = /* @__PURE__ */ jsx4(
+    TopBar,
+    {
+      name,
+      menu,
+      groups: toolbar,
+      onEvent,
+      views: viewControls.map(({ panel, pressed }) => ({ key: panel.key, icon: panel.icon, label: `${panel.title}\u89C6\u56FE`, pressed, onClick: () => toggle(panel.key) }))
+    }
+  );
+  if (state2.tree !== null) {
+    const resize = (sizes) => onEvent({ type: "layout.change", value: { sizes: { ...state2.sizes, ...sizes } } });
+    const content = (slot) => slot === "editor" ? editor2 : renderPanel(visible.find((panel) => panel.key === slot));
+    const render = (node2, className) => "slot" in node2 ? /* @__PURE__ */ jsx4("div", { className: `pico-split pico-split--row${className === void 0 ? "" : ` ${className}`}`, children: /* @__PURE__ */ jsx4("div", { className: "pico-pane", style: { flex: "1 1 0" }, children: content(node2.slot) }) }) : /* @__PURE__ */ jsx4(
+      Split,
+      {
+        direction: node2.split,
+        className,
+        sizes: state2.sizes,
+        onResize: resize,
+        panes: node2.children.map((child2) => ({ key: layoutKey(child2), content: "slot" in child2 ? content(child2.slot) : render(child2) }))
+      }
+    );
+    const root = arrangeLayout(state2.tree, ["editor", ...visible.map((panel) => panel.key)]);
+    return /* @__PURE__ */ jsxs2("div", { className: "pico-page", children: [
+      /* @__PURE__ */ jsx4("style", { children: CARD_MOTION_STYLE }),
+      topBar,
+      root === null ? null : render(root, "pico-pg-main")
+    ] });
+  }
   return /* @__PURE__ */ jsxs2("div", { className: "pico-page", children: [
     /* @__PURE__ */ jsx4("style", { children: CARD_MOTION_STYLE }),
-    /* @__PURE__ */ jsx4(
-      TopBar,
-      {
-        name,
-        menu,
-        groups: toolbar,
-        onEvent,
-        views: viewControls.map(({ panel, pressed }) => ({ key: panel.key, icon: panel.icon, label: `${panel.title}\u89C6\u56FE`, pressed, onClick: () => toggle(panel.key) }))
-      }
-    ),
+    topBar,
     /* @__PURE__ */ jsxs2("div", { className: "pico-split pico-split--row pico-pg-main", ref: main, children: [
       /* @__PURE__ */ jsx4("div", { className: "pico-pane", style: { flex: `0 0 ${visible.length === 0 ? 100 : ratio * 100}%`, viewTransitionName: `pico-${transitionId}-editor` }, children: editor2 }),
       visible.length > 0 && /* @__PURE__ */ jsxs2(Fragment3, { children: [
@@ -3235,19 +3303,20 @@ function typeTag(value) {
   return Array.isArray(value) ? "list" : "dict";
 }
 function expanded(value) {
-  return format(value).length > 48;
+  return format(value).length > 48 || value !== null && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 1;
 }
-function valueElement(value, isExpanded) {
-  if (value === void 0) {
-    return node("span", "pico-debugger-value-text", "\u2014");
+function valueElement(variable, isExpanded) {
+  if (variable.value === void 0) {
+    return node("span", "pico-debugger-value-text", variable.text);
   }
+  const value = variable.value;
   if (isExpanded && value !== null && typeof value === "object") {
     const pre = node("pre", `pico-debugger-value-text pico-val-expanded pico-val--${typeTag(value)}`);
     pre.textContent = formatExpanded(value);
     return pre;
   }
   const span = node("span", `pico-debugger-value-text pico-val--${typeTag(value)}`);
-  span.textContent = formatInline(value);
+  span.textContent = variable.text;
   return span;
 }
 function topFrame(state2) {
@@ -3256,17 +3325,24 @@ function topFrame(state2) {
 function scopedVariables(state2) {
   return { ...state2.globals ?? {}, ...topFrame(state2)?.locals ?? {} };
 }
-function variableRows(current, previous, selected, onSelect) {
+function findRow(root, name) {
+  for (const child2 of root.children) {
+    const element = child2;
+    if (element.className === "pico-debugger-variable" && element.dataset.name === name) return element;
+    const found = findRow(element, name);
+    if (found !== null) return found;
+  }
+  return null;
+}
+function variableRows(variables2, selected, onSelect) {
   const list = node("dl", "pico-debugger-variables");
-  for (const name of /* @__PURE__ */ new Set([...Object.keys(current), ...Object.keys(previous)])) {
-    const before = previous[name];
-    const after = current[name];
+  for (const variable of variables2) {
+    const { name, value } = variable;
     const row = node("div", "pico-debugger-variable");
-    if (!Object.hasOwn(previous, name)) row.dataset.change = "added";
-    else if (!Object.hasOwn(current, name)) row.dataset.change = "removed";
-    else if (JSON.stringify(before) !== JSON.stringify(after)) row.dataset.change = "changed";
+    row.dataset.name = name;
+    if (variable.change !== null) row.dataset.change = variable.change;
     if (name === selected) row.dataset.selected = "true";
-    if (after !== void 0) {
+    if (value !== void 0) {
       row.tabIndex = 0;
       row.setAttribute("role", "button");
       row.setAttribute("aria-pressed", String(name === selected));
@@ -3279,10 +3355,10 @@ function variableRows(current, previous, selected, onSelect) {
         }
       });
     }
-    const isExpanded = after !== void 0 && expanded(after);
+    const isExpanded = value !== void 0 && expanded(value);
     if (isExpanded) row.dataset.expanded = "true";
     const valueNode = node("dd", "pico-debugger-value");
-    valueNode.append(valueElement(after, isExpanded));
+    valueNode.append(valueElement(variable, isExpanded));
     const nameNode = node("dt", "pico-debugger-name");
     nameNode.append(nameLabel(name));
     row.append(nameNode, valueNode);
@@ -3322,7 +3398,8 @@ function debuggerVariableTimeline(selection2) {
   const name = variableName(selection2.path);
   if (name === null) return [];
   const points = [];
-  let previous = scopedVariables(selection2.run.initialState);
+  let previousState = selection2.run.initialState;
+  let previous = scopedVariables(previousState);
   for (let traceIndex = 1; traceIndex <= selection2.run.steps.length + 1; traceIndex += 1) {
     const state2 = selection2.run.at(traceIndex);
     const current = scopedVariables(state2);
@@ -3333,15 +3410,26 @@ function debuggerVariableTimeline(selection2) {
     if (had !== has || had && JSON.stringify(before) !== JSON.stringify(value)) {
       points.push({
         traceIndex,
-        line: state2.line,
+        line: previousState.line,
         change: !had && has ? "created" : had && !has ? "removed" : "changed",
         before,
         value
       });
     }
+    previousState = state2;
     previous = current;
   }
   return points;
+}
+function debuggerVariablesAt(position2) {
+  const current = scopedVariables(position2.state);
+  const previous = scopedVariables(position2.previous);
+  return Object.freeze([.../* @__PURE__ */ new Set([...Object.keys(current), ...Object.keys(previous)])].map((name) => {
+    const before = previous[name];
+    const value = current[name];
+    const change2 = !Object.hasOwn(previous, name) ? "added" : !Object.hasOwn(current, name) ? "removed" : JSON.stringify(before) !== JSON.stringify(value) ? "changed" : null;
+    return Object.freeze({ name, value, change: change2, text: value === void 0 ? "\u2014" : formatInline(value) });
+  }));
 }
 function sourceLineAt(source, offset) {
   return source.slice(0, offset).split("\n").length;
@@ -3505,11 +3593,16 @@ var debuggers = /* @__PURE__ */ new WeakMap();
 function createDebugger(options, lifecycle) {
   const core = new DebuggerCore(options?.variablesExpandable === true);
   debuggers.set(core.state, core);
+  elements.set(core.element, core);
   lifecycle.onDispose(() => core.dispose());
   return core.state;
 }
 function debuggerElement(state2) {
   return debuggers.get(state2).element;
+}
+var elements = /* @__PURE__ */ new WeakMap();
+function debuggerAnchorRectImpl(element, anchor) {
+  return elements.get(element)?.anchorRect(anchor) ?? null;
 }
 function renderDebugger(state2, event2) {
   debuggers.get(state2).receive(event2);
@@ -3721,19 +3814,14 @@ var DebuggerCore = class {
       this.diff.replaceChildren();
       return;
     }
-    const current = this.projection.position?.state;
-    const previous = this.projection.position?.previous;
-    if (!current || !previous) {
+    const position2 = this.projection.position;
+    if (position2 === null) {
       this.diff.replaceChildren();
       return;
     }
-    const currentVariables = scopedVariables(current);
-    const previousVariables = scopedVariables(previous);
-    const filter = (variables2) => {
-      if (this.selected === null || this.showAllVariables) return variables2;
-      return Object.hasOwn(variables2, this.selected) ? { [this.selected]: variables2[this.selected] } : {};
-    };
-    const rows = variableRows(filter(currentVariables), filter(previousVariables), this.selected, (name) => this.selectVariable(name));
+    const variables2 = debuggerVariablesAt(position2);
+    const visible = this.selected === null || this.showAllVariables ? variables2 : variables2.filter((item) => item.name === this.selected);
+    const rows = variableRows(visible, this.selected, (name) => this.selectVariable(name));
     const children2 = [];
     if (this.selected !== null) {
       const tools = node("div", "pico-debugger-variable-tools");
@@ -3770,6 +3858,19 @@ var DebuggerCore = class {
     if (trace2 === null || position2 === null) return null;
     return { kind: "runtime-variable", run: trace2, path: variablePath(name) };
   }
+  /** 只读：时间轴窗口中某一步的槽位（纵向为时间轴可视区域），或变量栏中某个变量的行。 */
+  anchorRect(anchor) {
+    if (anchor.kind === "variable") {
+      const row = findRow(this.diff, anchor.name);
+      return row === null ? null : row.getBoundingClientRect();
+    }
+    const { first, count } = this.viewport;
+    if (this.trace === null || count === 0 || anchor.traceIndex < first || anchor.traceIndex >= first + count) return null;
+    const area = this.canvas.getBoundingClientRect();
+    const visible = this.flame.getBoundingClientRect();
+    const width = area.width / count;
+    return new DOMRect(area.left + width * (anchor.traceIndex - first), visible.top, width, visible.height);
+  }
   receiveSelection(event2, emit) {
     if (this.disposed) return;
     this.selection = event2.current;
@@ -3780,7 +3881,7 @@ var DebuggerCore = class {
     this.refreshSelection();
     this.updateControls();
     this.paint();
-    if (event2.current !== null && this.hasFocusedSelection && this.selectedSteps.length > 0) {
+    if (event2.current !== null && this.hasFocusedSelection && this.selectedSteps.length > 0 && this.projection.position?.atEnd === true) {
       this.move(this.selectedSteps[0], emit);
     }
     if (unchanged) return;
@@ -3946,6 +4047,12 @@ function sourceOccurrences(trace2, selection2) {
 function variableTimeline(selection2) {
   return debuggerVariableTimeline(selection2);
 }
+function debuggerAnchorRect(element, anchor) {
+  return debuggerAnchorRectImpl(element, anchor);
+}
+function variablesAt(position2) {
+  return debuggerVariablesAt(position2);
+}
 
 // src/impl/editor/index.ts
 import { Compartment, StateEffect, StateField, EditorState as CMEditorState } from "./libs/codemirror.js";
@@ -4041,8 +4148,7 @@ var editorTheme = EditorView.theme({
   },
   ".pico-line-change": {
     backgroundColor: "color-mix(in srgb, var(--pico-accent) 28%, transparent)",
-    boxShadow: "inset 4px 0 0 var(--pico-accent)",
-    fontWeight: "650"
+    boxShadow: "inset 4px 0 0 var(--pico-accent)"
   },
   ".pico-line-error": {
     backgroundColor: "var(--pico-hue-error-bg)",
@@ -4578,7 +4684,7 @@ function usePlaygroundAssembly(component, initialOptions, options) {
           clearTimeout(automatic);
         })
       ];
-      own(stateful("playground", () => void 0, handlers).create(bus));
+      own(stateful("playground-runtime", () => void 0, handlers).create(bus));
       cleanups.push(bus.subscribeAll((event2, origin) => {
         if (event2.type.startsWith("log.")) return;
         if (source !== course.state.source) {
@@ -4769,6 +4875,7 @@ async function createSurface(host) {
     });
     resizeObserver.observe(host);
   }
+  let origin = 0;
   return {
     write(text, options) {
       let out = "";
@@ -4793,10 +4900,30 @@ async function createSurface(host) {
       term.blur();
     },
     clear() {
-      term.write("\x1B[2J\x1B[H");
+      term.write("\x1B[2J\x1B[H", () => {
+        origin = term.buffer.active.baseY;
+      });
     },
     reset() {
       term.reset();
+      origin = 0;
+    },
+    lineRect(line) {
+      const buffer = term.buffer.active;
+      let logical = 0;
+      let row = -1;
+      for (let y = origin; y < buffer.length && row < 0; y += 1) {
+        if (buffer.getLine(y)?.isWrapped === true) continue;
+        logical += 1;
+        if (logical === line) row = y;
+      }
+      const screen = term.element?.querySelector(".xterm-screen");
+      if (row < 0 || !screen) return null;
+      const box = screen.getBoundingClientRect();
+      const height = box.height / term.rows;
+      const width = box.width / term.cols;
+      const text = buffer.getLine(row)?.translateToString(true) ?? "";
+      return new DOMRect(box.left, box.top + (row - buffer.viewportY) * height, Math.max(1, Math.min(term.cols, text.length)) * width, height);
     },
     dispose() {
       themeObserver?.disconnect();
@@ -4841,6 +4968,10 @@ function createTerminal(_options, lifecycle) {
 function terminalElement(state2) {
   return terminals.get(state2).element;
 }
+var elements2 = /* @__PURE__ */ new WeakMap();
+function terminalLineRectImpl(element, line) {
+  return elements2.get(element)?.lineRect(line) ?? null;
+}
 function renderTerminal(state2, event2) {
   terminals.get(state2).render(event2.view);
 }
@@ -4874,6 +5005,7 @@ var TerminalCore = class {
     if (this.#root === null) {
       ensureStyle(TERMINAL_CSS);
       this.#root = node("div", "pico-widget pico-term");
+      elements2.set(this.#root, this);
       this.#host = node("div", "pico-term-body");
       this.#empty = emptySurface();
       const watermark = panelWatermark(ICONS.output);
@@ -4882,6 +5014,10 @@ var TerminalCore = class {
     }
     this.#ensure();
     return this.#root;
+  }
+  /** 只读：当前输出第 line 行的矩形；终端表面尚未装载时为 null。 */
+  lineRect(line) {
+    return this.#surface?.lineRect(line) ?? null;
   }
   #reset() {
     if (this.#disposed) return;
@@ -5046,6 +5182,9 @@ var terminal = stateful("terminal", createTerminal, [
   event("terminal.render", {}),
   event("terminal.submitted", {})
 ], terminalElement);
+function terminalLineRect(element, line) {
+  return terminalLineRectImpl(element, line);
+}
 export {
   EventBus,
   PlaygroundShell2 as PlaygroundShell,
@@ -5058,6 +5197,7 @@ export {
   createReplicatedRecord2 as createReplicatedRecord,
   createState,
   debuggerComponent as debugger,
+  debuggerAnchorRect,
   decodeLearningAssessment2 as decodeLearningAssessment,
   decodeLearningEvidenceData2 as decodeLearningEvidenceData,
   decodeLearningResultData2 as decodeLearningResultData,
@@ -5083,8 +5223,10 @@ export {
   stateful,
   store,
   terminal,
+  terminalLineRect,
   theme,
   usePlayground,
   variableTimeline,
+  variablesAt,
   verifyReplicatedRecord2 as verifyReplicatedRecord
 };

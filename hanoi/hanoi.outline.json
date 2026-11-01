@@ -1,0 +1,223 @@
+{
+  "version": 1,
+  "course": "hanoi",
+  "title": "Tower of Hanoi",
+  "concepts": [
+    {
+      "id": "recursion",
+      "label": "递归",
+      "aliases": [
+        "递归出口",
+        "基本情况",
+        "自己调用自己",
+        "调用栈"
+      ]
+    },
+    {
+      "id": "debug",
+      "label": "调试",
+      "aliases": [
+        "报错",
+        "错误",
+        "bug",
+        "排错",
+        "调试器",
+        "单步",
+        "Traceback",
+        "异常"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "recursion"
+  ],
+  "lectures": [
+    {
+      "id": "hanoi",
+      "title": "讲解该算法代码",
+      "steps": [
+        {
+          "step": 0,
+          "title": "这座塔只能顺时针走",
+          "say": "三根柱子 A、B、C 围成一圈，盘子只能顺时针走一格：A→B、B→C、C→A。大盘不能压在小盘上。\n\n任务是把 3 个盘子从 A 搬到 C。注意：A 到 C 不是一步，要走 A→B→C 两格。\n\n程序每打印一行 `A -> B` 就是走一步，右边的可视化照着输出搬盘子。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "先把“走一格”写成一张表",
+          "say": "字典把每根柱子映射到它顺时针的下一根。整个程序里“怎么走”只在这一处定义。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "hanoi 是一个承诺",
+          "say": "`hanoi(n, src, dst)` 只承诺一件事：把 src 最上面 n 个盘子搬到 dst，下面更大的盘子不动。`aux` 是剩下的第三根柱子：三根里去掉 src 和 dst，只剩一个。留意 `aux,` 的逗号：集合相减得到的是 `{\"B\"}` 这样一个集合，逗号把它唯一的元素拆出来，`aux` 才是字符串 `\"B\"`。少了逗号，后面拿 aux 当柱子名就会出错。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "最简单的承诺：只剩一个盘子",
+          "say": "一个盘子离终点可能是一格（A→B），也可能是两格（A→C）。所以写 `while`：还没到，就再走一格。每走一格打印一行，再把 `src` 前移到下一根柱子。到了就 `return`，这一层的承诺兑现了。为什么一定是 while？讲完整个程序后我们改一下亲眼看看。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "让路原则",
+          "say": "写递归之前，先想清楚一件事：最大的盘子要从 X 走到 Y，比它小的 n-1 个必须都在第三根柱子上。\n\n它们在 X 上，大盘拿不出来；在 Y 上，大盘放不上去。只剩第三根。\n\n整个算法就是这条原则，下面两段代码都是它推出来的。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "终点就在下一格",
+          "say": "终点在下一格时，大盘只走一步。按让路原则：先把 n-1 个搬到 aux，大盘走一格，再把 n-1 个搬到 dst 上面。三行都是同一个承诺，只是 n 少了一个，或只搬 1 个。不用追进 `hanoi(n - 1, …)` 去看它怎么搬：n == 1 已经兑现，所以 n == 2 成立，n == 3 也成立。这就是递归的“信任”。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 6,
+          "title": "终点在两格外",
+          "say": "终点在两格外（比如 A→C）时，aux 恰好在中间，大盘要走两步：src→aux，再 aux→dst。每一步前都用一次让路原则：· 大盘走 src→aux 前，小盘要在 dst；· 大盘走 aux→dst 前，小盘要在 src。于是是五行：小盘去 dst，大盘到 aux，小盘回 src，大盘到 dst，小盘再到 dst。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 7,
+          "title": "运行",
+          "say": "3 个盘子一共走了 21 步。看最大的盘子：它只走了两次，A→B 和 B→C。每次走之前，小盘都恰好让开了——跟着它走一遍。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 8,
+          "title": "第一步是谁走的",
+          "say": "我停在第 9 行第一次执行，也就是打印第一行 `A -> B` 之前。看 Debugger 的调用栈：`hanoi(3, A, C)` → `hanoi(2, A, C)` → `hanoi(1, A, C)`。\n\n最外面两层一句 print 都没执行，它们只是把任务分下去；真正走棋的永远是 `n == 1` 那一层。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 9,
+          "title": "while 走了两轮",
+          "say": "现在停在第 10 行，行尾显示这一刻的变量。\n\n第一次停在这里，`src` 是 A，执行完变成 B，还没到 C，于是再走一轮；第二次停在这里，`src` 是 B，执行完就是 C，循环结束。\n\n这个盘子一口气走了两格——它是最小的盘子，路上没人挡。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 10,
+          "title": "易错点：把 while 改成 if",
+          "say": "很多人觉得“一个盘子走一格就行”，把 while 写成 if。我只改第 8 行这一处。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 11,
+          "title": "第二步就错了",
+          "say": "改完了，运行看看。可视化在第 2 步画了红叉：盘子 2 压在了盘子 1 上。可错真的在第 2 步吗？继续往下看。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 12,
+          "title": "红叉不一定是犯错的地方",
+          "say": "回到第 1 步：这一层是 `hanoi(1, A, C)`，要走两格。`if` 只走了一格就结束，盘子 1 停在了 B。\n\n接着 `hanoi(1, A, B)` 让盘子 2 走 A→B，正好压上去——红叉是在这时才出现的。\n\n`while` 是“走到为止”，`if` 只是“走一次”。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 13,
+          "title": "改回 while",
+          "say": "把第 8 行改回来。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 14,
+          "title": "易错点：直接套经典三步",
+          "say": "学过经典汉诺塔的同学会问：分两种情况太麻烦，直接写经典的三步行不行？反正 n == 1 的 while 能走两格。\n\n我把两个分支换成经典的三步。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 15,
+          "title": "第六步撞上了",
+          "say": "改完了，运行看看。第 6 步画了红叉：盘子 3 压在了盘子 1 上。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 16,
+          "title": "大盘路过时，那里有人",
+          "say": "停在第 6 次打印：调用栈是 `hanoi(3, A, C)` → `hanoi(1, A, C)`，在搬最大的盘子，要走 A→B→C 两格。可是前面刚把两个小盘搬到了 aux，也就是 B——大盘走第一格就撞上了。\n\n让路原则说的是大盘的每一步。经典三步只让了一次路，所以终点在两格外时必须拆成五步。\n\n这也说明了 while 的边界：一口气走两格，只对路上没人的盘子才合法。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 17,
+          "title": "改回来",
+          "say": "把两个分支恢复。",
+          "concepts": [
+            "recursion",
+            "debug"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 18,
+          "title": "回顾",
+          "say": "三件事：\n1. 承诺：`hanoi(n, src, dst)` 只管把 n 个盘子从 src 搬到 dst。\n2. 让路原则：大盘每走一步，小盘都必须在第三根柱子上。\n3. 信任：n == 1 兑现了，更大的 n 就靠同一个承诺兑现。\n\n有任何地方想再看一遍，直接在下面问我。",
+          "concepts": [
+            "recursion"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

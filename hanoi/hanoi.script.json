@@ -1,0 +1,649 @@
+{
+  "id": "hanoi",
+  "title": "讲解该算法代码",
+  "from": "",
+  "mode": "instruction",
+  "auto": true,
+  "steps": [
+    {
+      "title": "这座塔只能顺时针走","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz"
+        ],
+        "focus": "viz"
+      },
+      "say": "三根柱子 A、B、C 围成一圈，盘子只能顺时针走一格：A→B、B→C、C→A。大盘不能压在小盘上。\n\n任务是把 3 个盘子从 A 搬到 C。注意：A 到 C 不是一步，要走 A→B→C 两格。\n\n程序每打印一行 `A -> B` 就是走一步，右边的可视化照着输出搬盘子。"
+    },
+    {
+      "title": "先把“走一格”写成一张表","concepts":["recursion"],
+      "stage": {
+        "panels": []
+      },
+      "say": [
+        {
+          "say": "字典把每根柱子映射到它顺时针的下一根。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n"
+        },
+        {
+          "say": "整个程序里“怎么走”只在这一处定义。"
+        }
+      ]
+    },
+    {
+      "title": "hanoi 是一个承诺","concepts":["recursion"],
+      "say": [
+        {
+          "say": "`hanoi(n, src, dst)` 只承诺一件事：把 src 最上面 n 个盘子搬到 dst，下面更大的盘子不动。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n"
+        },
+        {
+          "say": "`aux` 是剩下的第三根柱子：三根里去掉 src 和 dst，只剩一个。",
+          "paragraph": true,
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n"
+        },
+        {
+          "say": "留意 `aux,` 的逗号：集合相减得到的是 `{\"B\"}` 这样一个集合，逗号把它唯一的元素拆出来，`aux` 才是字符串 `\"B\"`。",
+          "paragraph": true
+        },
+        {
+          "say": "少了逗号，后面拿 aux 当柱子名就会出错。"
+        }
+      ]
+    },
+    {
+      "title": "最简单的承诺：只剩一个盘子","concepts":["recursion"],
+      "say": [
+        {
+          "say": "一个盘子离终点可能是一格（A→B），也可能是两格（A→C）。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n"
+        },
+        {
+          "say": "所以写 `while`：还没到，就再走一格。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n"
+        },
+        {
+          "say": "每走一格打印一行，",
+          "paragraph": true,
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n"
+        },
+        {
+          "say": "再把 `src` 前移到下一根柱子。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n"
+        },
+        {
+          "say": "到了就 `return`，这一层的承诺兑现了。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n"
+        },
+        {
+          "say": "为什么一定是 while？讲完整个程序后我们改一下亲眼看看。",
+          "paragraph": true
+        }
+      ]
+    },
+    {
+      "title": "让路原则","concepts":["recursion"],
+      "say": "写递归之前，先想清楚一件事：最大的盘子要从 X 走到 Y，比它小的 n-1 个必须都在第三根柱子上。\n\n它们在 X 上，大盘拿不出来；在 Y 上，大盘放不上去。只剩第三根。\n\n整个算法就是这条原则，下面两段代码都是它推出来的。"
+    },
+    {
+      "title": "终点就在下一格","concepts":["recursion"],
+      "say": [
+        {
+          "say": "终点在下一格时，大盘只走一步。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n"
+        },
+        {
+          "say": "按让路原则：先把 n-1 个搬到 aux，",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n"
+        },
+        {
+          "say": "大盘走一格，",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n"
+        },
+        {
+          "say": "再把 n-1 个搬到 dst 上面。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n"
+        },
+        {
+          "say": "三行都是同一个承诺，只是 n 少了一个，或只搬 1 个。",
+          "paragraph": true
+        },
+        {
+          "say": "不用追进 `hanoi(n - 1, …)` 去看它怎么搬：n == 1 已经兑现，所以 n == 2 成立，n == 3 也成立。",
+          "paragraph": true
+        },
+        {
+          "say": "这就是递归的“信任”。"
+        }
+      ]
+    },
+    {
+      "title": "终点在两格外","concepts":["recursion"],
+      "say": [
+        {
+          "say": "终点在两格外（比如 A→C）时，aux 恰好在中间，大盘要走两步：src→aux，再 aux→dst。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n"
+        },
+        {
+          "say": "每一步前都用一次让路原则："
+        },
+        {
+          "say": "· 大盘走 src→aux 前，小盘要在 dst；",
+          "paragraph": true
+        },
+        {
+          "say": "· 大盘走 aux→dst 前，小盘要在 src。",
+          "paragraph": true
+        },
+        {
+          "say": "于是是五行：小盘去 dst，",
+          "paragraph": true,
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n"
+        },
+        {
+          "say": "大盘到 aux，",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n"
+        },
+        {
+          "say": "小盘回 src，",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n"
+        },
+        {
+          "say": "大盘到 dst，",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n        hanoi(1, aux, dst)\n"
+        },
+        {
+          "say": "小盘再到 dst。",
+          "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n        hanoi(1, aux, dst)\n        hanoi(n - 1, src, dst)\n"
+        }
+      ]
+    },
+    {
+      "title": "运行","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz",
+          "output"
+        ],
+        "focus": "viz",
+        "arrange": {
+          "split": "row",
+          "children": [
+            {
+              "slot": "viz"
+            },
+            {
+              "split": "column",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "output"
+                }
+              ]
+            }
+          ]
+        },
+        "sizes": {
+          "viz": 1.65,
+          "column:editor+output": 1.15,
+          "editor": 1.35
+        }
+      },
+      "say": [
+        {
+          "say": "3 个盘子一共走了 21 步。"
+        },
+        {
+          "say": "看最大的盘子：它只走了两次，A→B 和 B→C。"
+        },
+        {
+          "say": "每次走之前，小盘都恰好让开了——跟着它走一遍。",
+          "do": [
+            {
+              "action": "hanoi.followDisk",
+              "args": {
+                "disk": 3
+              }
+            }
+          ]
+        }
+      ],
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ]
+    },
+    {
+      "title": "第一步是谁走的","concepts":["recursion","debug"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "debug",
+        "arrange": {
+          "split": "column",
+          "children": [
+            {
+              "split": "row",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "viz"
+                }
+              ]
+            },
+            {
+              "slot": "debug"
+            }
+          ]
+        },
+        "sizes": {
+          "row:editor+viz": 1.35,
+          "editor": 1.35,
+          "debug": 1.05
+        }
+      },
+      "say": "我停在第 9 行第一次执行，也就是打印第一行 `A -> B` 之前。看 Debugger 的调用栈：`hanoi(3, A, C)` → `hanoi(2, A, C)` → `hanoi(1, A, C)`。\n\n最外面两层一句 print 都没执行，它们只是把任务分下去；真正走棋的永远是 `n == 1` 那一层。",
+      "do": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 1,
+            "phase": "print"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "note",
+            "at": {
+              "line": 9,
+              "text": "print"
+            },
+            "text": "真正走棋的是 n == 1 这一层"
+          }
+        }
+      ]
+    },
+    {
+      "title": "while 走了两轮","concepts":["recursion","debug"],
+      "say": "现在停在第 10 行，行尾显示这一刻的变量。\n\n第一次停在这里，`src` 是 A，执行完变成 B，还没到 C，于是再走一轮；第二次停在这里，`src` 是 B，执行完就是 C，循环结束。\n\n这个盘子一口气走了两格——它是最小的盘子，路上没人挡。",
+      "do": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 1,
+            "phase": "advance"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "note",
+            "at": {
+              "line": 8,
+              "text": "while"
+            },
+            "text": "没到 dst，就再走一格"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "mark",
+            "at": {
+              "line": 10
+            }
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "mark",
+            "at": {
+              "variable": "src"
+            }
+          }
+        }
+      ],
+      "offer": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 1,
+            "phase": "advance"
+          },
+          "label": "第一轮"
+        },
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 2,
+            "phase": "advance"
+          },
+          "label": "第二轮"
+        }
+      ]
+    },
+    {
+      "title": "易错点：把 while 改成 if","concepts":["recursion","debug"],
+      "stage": {
+        "panels": []
+      },
+      "say": "很多人觉得“一个盘子走一格就行”，把 while 写成 if。我只改第 8 行这一处。",
+      "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        if src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n        hanoi(1, aux, dst)\n        hanoi(n - 1, src, dst)\n"
+    },
+    {
+      "title": "第二步就错了","concepts":["recursion","debug"],
+      "stage": {
+        "panels": [
+          "viz",
+          "output"
+        ],
+        "focus": "viz",
+        "arrange": {
+          "split": "row",
+          "children": [
+            {
+              "slot": "viz"
+            },
+            {
+              "split": "column",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "output"
+                }
+              ]
+            }
+          ]
+        },
+        "sizes": {
+          "viz": 1.65,
+          "column:editor+output": 1.15,
+          "editor": 1.35
+        }
+      },
+      "say": [
+        {
+          "say": "改完了，运行看看。",
+          "do": [
+            {
+              "action": "code.run"
+            }
+          ]
+        },
+        {
+          "say": "可视化在第 2 步画了红叉：盘子 2 压在了盘子 1 上。",
+          "do": [
+            {
+              "action": "annotation.show",
+              "args": {
+                "kind": "note",
+                "at": {
+                  "object": "disk:1"
+                },
+                "text": "盘子 1 停在了 B"
+              }
+            },
+            {
+              "action": "annotation.show",
+              "args": {
+                "kind": "note",
+                "at": {
+                  "output": 2
+                },
+                "text": "第 2 步：盘子 2 压上盘子 1"
+              }
+            }
+          ]
+        },
+        {
+          "say": "可错真的在第 2 步吗？继续往下看。",
+          "paragraph": true
+        }
+      ]
+    },
+    {
+      "title": "红叉不一定是犯错的地方","concepts":["recursion","debug"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "debug",
+        "arrange": {
+          "split": "column",
+          "children": [
+            {
+              "split": "row",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "viz"
+                }
+              ]
+            },
+            {
+              "slot": "debug"
+            }
+          ]
+        },
+        "sizes": {
+          "row:editor+viz": 1.35,
+          "editor": 1.35,
+          "debug": 1.05
+        }
+      },
+      "say": "回到第 1 步：这一层是 `hanoi(1, A, C)`，要走两格。`if` 只走了一格就结束，盘子 1 停在了 B。\n\n接着 `hanoi(1, A, B)` 让盘子 2 走 A→B，正好压上去——红叉是在这时才出现的。\n\n`while` 是“走到为止”，`if` 只是“走一次”。",
+      "do": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 1,
+            "phase": "print"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "note",
+            "at": {
+              "line": 8,
+              "text": "if"
+            },
+            "text": "只判断一次：走一格就结束"
+          }
+        }
+      ],
+      "offer": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 1,
+            "phase": "print"
+          },
+          "label": "犯错的第 1 步"
+        },
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 2,
+            "phase": "print"
+          },
+          "label": "出红叉的第 2 步"
+        }
+      ]
+    },
+    {
+      "title": "改回 while","concepts":["recursion","debug"],
+      "stage": {
+        "panels": []
+      },
+      "say": "把第 8 行改回来。",
+      "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n        hanoi(1, aux, dst)\n        hanoi(n - 1, src, dst)\n"
+    },
+    {
+      "title": "易错点：直接套经典三步","concepts":["recursion","debug"],
+      "say": "学过经典汉诺塔的同学会问：分两种情况太麻烦，直接写经典的三步行不行？反正 n == 1 的 while 能走两格。\n\n我把两个分支换成经典的三步。",
+      "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    hanoi(n - 1, src, aux)\n    hanoi(1, src, dst)\n    hanoi(n - 1, aux, dst)\n"
+    },
+    {
+      "title": "第六步撞上了","concepts":["recursion","debug"],
+      "stage": {
+        "panels": [
+          "viz",
+          "output"
+        ],
+        "focus": "viz",
+        "arrange": {
+          "split": "row",
+          "children": [
+            {
+              "slot": "viz"
+            },
+            {
+              "split": "column",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "output"
+                }
+              ]
+            }
+          ]
+        },
+        "sizes": {
+          "viz": 1.65,
+          "column:editor+output": 1.15,
+          "editor": 1.35
+        }
+      },
+      "say": [
+        {
+          "say": "改完了，运行看看。",
+          "do": [
+            {
+              "action": "code.run"
+            }
+          ]
+        },
+        {
+          "say": "第 6 步画了红叉：盘子 3 压在了盘子 1 上。"
+        }
+      ]
+    },
+    {
+      "title": "大盘路过时，那里有人","concepts":["recursion","debug"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "viz",
+        "arrange": {
+          "split": "column",
+          "children": [
+            {
+              "split": "row",
+              "children": [
+                {
+                  "slot": "editor"
+                },
+                {
+                  "slot": "viz"
+                }
+              ]
+            },
+            {
+              "slot": "debug"
+            }
+          ]
+        },
+        "sizes": {
+          "row:editor+viz": 1.35,
+          "editor": 1.35,
+          "viz": 1.05
+        }
+      },
+      "say": "停在第 6 次打印：调用栈是 `hanoi(3, A, C)` → `hanoi(1, A, C)`，在搬最大的盘子，要走 A→B→C 两格。可是前面刚把两个小盘搬到了 aux，也就是 B——大盘走第一格就撞上了。\n\n让路原则说的是大盘的每一步。经典三步只让了一次路，所以终点在两格外时必须拆成五步。\n\n这也说明了 while 的边界：一口气走两格，只对路上没人的盘子才合法。",
+      "do": [
+        {
+          "action": "hanoi.locateMove",
+          "args": {
+            "move": 6,
+            "phase": "print"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "link",
+            "at": {
+              "line": 14,
+              "text": "hanoi(1, src, dst)"
+            },
+            "to": {
+              "object": "disk:3"
+            },
+            "text": "一口气走两格"
+          }
+        },
+        {
+          "action": "annotation.show",
+          "args": {
+            "kind": "note",
+            "at": {
+              "object": "disk:1"
+            },
+            "text": "B 上还有小盘"
+          }
+        }
+      ]
+    },
+    {
+      "title": "改回来","concepts":["recursion","debug"],
+      "stage": {
+        "panels": []
+      },
+      "say": "把两个分支恢复。",
+      "write": "def next_of(peg):\n    return {\"A\": \"B\", \"B\": \"C\", \"C\": \"A\"}[peg]\n\ndef hanoi(n, src, dst):\n    aux, = set(\"ABC\") - {src, dst}\n\n    if n == 1:\n        while src != dst:\n            print(f\"{src} -> {next_of(src)}\")\n            src = next_of(src)\n        return\n\n    if next_of(src) == dst:\n        hanoi(n - 1, src, aux)\n        hanoi(1, src, dst)\n        hanoi(n - 1, aux, dst)\n    else:\n        hanoi(n - 1, src, dst)\n        hanoi(1, src, aux)\n        hanoi(n - 1, dst, src)\n        hanoi(1, aux, dst)\n        hanoi(n - 1, src, dst)\n"
+    },
+    {
+      "title": "回顾","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz"
+        ],
+        "focus": "viz"
+      },
+      "say": "三件事：\n1. 承诺：`hanoi(n, src, dst)` 只管把 n 个盘子从 src 搬到 dst。\n2. 让路原则：大盘每走一步，小盘都必须在第三根柱子上。\n3. 信任：n == 1 兑现了，更大的 n 就靠同一个承诺兑现。\n\n有任何地方想再看一遍，直接在下面问我。",
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "offer": [
+        {
+          "action": "hanoi.disks",
+          "args": {
+            "disks": 4
+          },
+          "label": "换 4 个盘子运行"
+        }
+      ]
+    }
+  ]
+}

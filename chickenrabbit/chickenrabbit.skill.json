@@ -1,0 +1,25 @@
+{
+  "course": "chickenrabbit",
+  "concepts": ["loop", "branch"],
+  "teaches": "把头数和腿数记录为变量，通过抬腿实验得到新事实，再用等量关系算出鸡兔数量。",
+  "answerStyle": "把世界动作、观察结果和算术公式分开解释，每次只追一条等量关系。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "read-before-action",
+      "signs": ["grounded", "count_grounded_legs", "raise_legs"],
+      "guide": "强调先抬腿再读取着地腿数，让学生在 Trace 中比较两个调用发生的顺序。"
+    },
+    {
+      "id": "formula-independent-of-experiment",
+      "signs": ["// 2", "抬一条", "抬两条"],
+      "guide": "先列出每种动物还剩几条腿，再据此重建公式；实验改变时公式必须一起改变。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么 grounded 除以 2 是兔子数？",
+      "reply": "抬两条腿后，鸡贡献 0 条着地腿，兔贡献 2 条。现在 grounded 里的每一组 2 来自谁？"
+    }
+  ]
+}

@@ -2,10 +2,8 @@
 import { useEffect, useState } from "../libs/react.js";
 import { on, stateful } from "../pico.js";
 import { Source } from "../pico.js";
-import { python as execution } from "../pico.js";
+import { python as execution2 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
-import { PlaygroundShell, Widget } from "../pico.js";
-import { usePlayground } from "../pico.js";
 
 // playgrounds/shared/python/index.ts
 import { python as python2, pythonPreload } from "../pico.js";
@@ -70,39 +68,294 @@ function pythonOptions(options = {}) {
       own({ dispose: bus.subscribe(["python.execute"], (event) => {
         checkedSource = event.source.code;
       }) });
-      const execution2 = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      const execution3 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
-        const result = execution2.state.result;
+        const result = execution3.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
-      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
+      observe("python", () => ({ ...execution3.state }), ["python.changed"]);
       observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
       observe("selection", () => focus.state, ["selection.changed"]);
-      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+      return { python: execution3.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
     }
   };
 }
 
 // playgrounds/24point/24point.generated.tsx
-import { Fragment, jsx, jsxs } from "../libs/react.js";
+import { feature as feature2, playbackHost as playbackHost2, provided as provided2 } from "../session.js";
+import { SessionPage } from "../session.js";
+
+// playgrounds/shared/python/session.ts
+import { createElement } from "../libs/react.js";
+import { mockAiPort } from "../session.js";
+import { Widget } from "../pico.js";
+import { feature, playbackHost, provided, selectionHost } from "../session.js";
+import { stage } from "../session.js";
+import { source } from "../session.js";
+import { draftViews } from "../session.js";
+import { hintViews } from "../session.js";
+import { execution } from "../session.js";
+import { navigate } from "../session.js";
+import { liveVariables } from "../session.js";
+import { traceQueries } from "../session.js";
+import { annotations, registerAnchorResolver } from "../session.js";
+import { annotationViews, debuggerAnchors, terminalAnchors } from "../session.js";
+import { tour } from "../session.js";
+import { sessionContext } from "../session.js";
+import { playground } from "../session.js";
+import { playgroundSnapshot } from "../session.js";
+import { sessionEvidence } from "../session.js";
+import { ai } from "../session.js";
+import { aiViews } from "../session.js";
+import { script } from "../session.js";
+import { scriptRail } from "../session.js";
+import { aiScript } from "../session.js";
+import { worldPanel } from "../session.js";
+var pythonHost = provided("python.parts");
+var OUTPUT_PANEL = "output";
+var DEBUG_PANEL = "debug";
+var PYTHON_RAN = { on: "python.changed", until: (event) => event.result.status !== "pending" };
+var pythonViews = feature("python.views", {
+  requires: [pythonHost, playbackHost, annotations, playground],
+  create: ({ get, own }) => {
+    const parts = get(pythonHost);
+    const playing = get(playbackHost);
+    const run = () => playing.trace;
+    for (const resolver of [debuggerAnchors(parts.debugger, run), terminalAnchors(parts.terminal, run)]) {
+      own({ dispose: registerAnchorResolver(get(playground), resolver) });
+    }
+  },
+  queries: [{ id: "python.result", run: ({ get }) => resultOf(get(pythonHost)?.python ?? null) }],
+  views: [
+    { slot: "panel", key: OUTPUT_PANEL, icon: "output", title: "\u8F93\u51FA", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).terminal }) },
+    { slot: "panel", key: DEBUG_PANEL, icon: "debug", title: "\u8C03\u8BD5", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).debugger }) }
+  ]
+});
+function resultOf(python3) {
+  const result = python3?.result ?? null;
+  if (result === null || result.status === "pending") return { status: "pending" };
+  if (result.status === "failed") return { status: "failed", error: String(result.error) };
+  if (result.value === null) return { status: "none" };
+  const { trace, returncode, error, waiting } = result.value;
+  const end = trace.at(trace.steps.length + 1);
+  const tail = (text) => (text ?? "").slice(-2e3);
+  return {
+    status: "ready",
+    returncode,
+    steps: trace.steps.length,
+    error: error === null ? null : { message: error.message, line: error.line },
+    waiting: waiting?.prompt ?? null,
+    stdout: tail(end.stdout),
+    stderr: tail(end.stderr)
+  };
+}
+function pythonSession(options) {
+  const features = [
+    stage,
+    source,
+    draftViews,
+    hintViews,
+    execution.with({ run: { type: "python.run" }, settle: PYTHON_RAN }),
+    navigate.with({ debuggerPanel: DEBUG_PANEL }),
+    liveVariables,
+    traceQueries,
+    annotations,
+    annotationViews,
+    tour,
+    sessionContext,
+    sessionEvidence,
+    playground,
+    playgroundSnapshot,
+    ...options.ai === void 0 ? [] : [ai.with(options.ai), aiViews],
+    script.with(options.script ?? {}),
+    scriptRail.with({ library: options.scripts ?? [] }),
+    ...options.ai === void 0 ? [] : [aiScript.with({ narrate: false })],
+    worldPanel(options.world),
+    pythonViews,
+    ...options.domain ?? []
+  ];
+  return Object.freeze({
+    features: Object.freeze(features),
+    provide: (view) => [
+      playbackHost.with(view.parts.playback),
+      selectionHost.with(view.parts.selection),
+      pythonHost.with({ python: view.parts.python, terminal: view.parts.terminal, debugger: view.parts.debugger }),
+      ...options.provide?.(view) ?? []
+    ],
+    editorExtensions: pythonEditorOptions.extensions
+  });
+}
+
+// playgrounds/24point/24point.script.json
+var point_script_default = {
+  id: "24point",
+  title: "\u4ECE\u56DB\u5F20\u724C\u5199\u51FA\u4E00\u68F5\u8FD0\u7B97\u6811",
+  from: "",
+  mode: "instruction",
+  auto: true,
+  steps: [
+    {
+      title: "\u5148\u5199\u6700\u5C0F\u7684\u5B50\u95EE\u9898",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz"
+        ]
+      },
+      say: [
+        {
+          say: "\u7B2C\u4E00\u9898\u662F 3\u30018\u30016\u30015\u3002\u5148\u8BA9 3 \u548C 8 \u76F8\u4E58\uFF0C\u5F97\u5230\u4E2D\u95F4\u7ED3\u679C 24\u3002",
+          write: "3 * 8\n"
+        }
+      ]
+    },
+    {
+      title: "\u6784\u9020\u53E6\u4E00\u652F\u5E76\u7EC4\u5408",
+      concepts: ["recursion"],
+      say: [
+        {
+          say: "6 \u51CF 5 \u5F97\u5230 1\uFF1B\u62EC\u53F7\u628A\u5B83\u58F0\u660E\u4E3A\u72EC\u7ACB\u5B50\u8868\u8FBE\u5F0F\u3002\u6700\u540E\u628A\u4E24\u4E2A\u5B50\u7ED3\u679C\u76F8\u4E58\u3002",
+          write: "(3 * 8) * (6 - 5)\n"
+        }
+      ]
+    },
+    {
+      title: "\u8FD0\u884C\u6B63\u786E\u8868\u8FBE\u5F0F",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "viz"
+      },
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: "\u52A8\u753B\u5148\u6D88\u8D39 3\u30018\uFF0C\u518D\u6D88\u8D39 6\u30015\uFF0C\u6700\u540E\u6839\u8282\u70B9\u7B97\u51FA 24\u3002\u56DB\u5F20\u724C\u6070\u597D\u4ECE\u724C\u6C60\u6D88\u5931\u3002"
+    },
+    {
+      title: "\u6E90\u7801\u600E\u6837\u53D8\u6210\u6811",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "debug"
+      },
+      do: [
+        {
+          action: "code.locate",
+          args: {
+            line: 1,
+            occurrence: 1
+          }
+        }
+      ],
+      say: "\u53EA\u6709\u4E00\u884C\u6E90\u7801\uFF0C\u4F46\u89E3\u6790\u5668\u5148\u5EFA\u7ACB\u6811\uFF0C\u518D\u6309\u53F6\u5B50\u548C\u5185\u90E8\u8282\u70B9\u6C42\u503C\u3002Debugger \u6307\u5411\u6574\u6761\u8868\u8FBE\u5F0F\uFF0CWorld \u5C55\u5F00\u8FD9\u4E00\u884C\u5185\u90E8\u7684\u8BA1\u7B97\u7ED3\u6784\u3002"
+    },
+    {
+      title: "\u62EC\u53F7\u4E0D\u662F\u88C5\u9970",
+      concepts: ["recursion"],
+      say: [
+        {
+          say: "\u53BB\u6389\u5173\u952E\u62EC\u53F7\uFF0C\u5199\u6210\u8FDE\u7EED\u4E58\u6CD5\u518D\u51CF 5\u3002\u4F18\u5148\u7EA7\u548C\u7ED3\u5408\u65B9\u5411\u8BA9\u8FD0\u7B97\u6811\u53D1\u751F\u53D8\u5316\u3002",
+          write: "3 * 8 * 6 - 5\n"
+        }
+      ]
+    },
+    {
+      title: "\u8FD0\u884C\u9519\u8BEF\u7ED3\u6784",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ],
+        focus: "viz"
+      },
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: "\u56DB\u5F20\u724C\u4ECD\u5404\u7528\u4E00\u6B21\uFF0C\u4F46\u6839\u8282\u70B9\u4E0D\u662F 24\u3002\u201C\u8F93\u5165\u5408\u6CD5\u201D\u548C\u201C\u8FD0\u7B97\u7ED3\u6784\u6B63\u786E\u201D\u662F\u4E24\u6761\u72EC\u7ACB\u7EA6\u675F\u3002"
+    },
+    {
+      title: "\u5236\u9020\u91CD\u590D\u7528\u724C",
+      concepts: ["recursion"],
+      say: [
+        {
+          say: "\u628A\u6700\u540E\u7684 5 \u6362\u6210 3\uFF0C\u4F1A\u91CD\u590D\u4F7F\u7528 3\uFF0C\u540C\u65F6\u9057\u6F0F 5\u3002",
+          write: "(3 * 8) * (6 - 3)\n"
+        }
+      ]
+    },
+    {
+      title: "\u724C\u6C60\u8BB0\u5F55\u8F93\u5165\u7EA6\u675F",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz"
+        ]
+      },
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: "\u7B2C\u4E8C\u4E2A 3 \u65E0\u724C\u53EF\u53D6\uFF0C5 \u4ECD\u7559\u5728\u724C\u6C60\u3002World \u7528\u724C\u7684\u8EAB\u4EFD\u8865\u8DB3\u4E86\u666E\u901A\u7B97\u672F\u7ED3\u679C\u770B\u4E0D\u5230\u7684\u4FE1\u606F\u3002"
+    },
+    {
+      title: "\u6062\u590D\u5E76\u56DE\u987E",
+      concepts: ["recursion"],
+      stage: {
+        panels: [
+          "viz",
+          "debug"
+        ]
+      },
+      say: [
+        {
+          say: "\u6062\u590D\u6B63\u786E\u8FD0\u7B97\u6811\u5E76\u518D\u6B21\u8FD0\u884C\u3002",
+          write: "(3 * 8) * (6 - 5)\n"
+        }
+      ]
+    },
+    {
+      title: "\u8868\u8FBE\u5F0F\u5C31\u662F\u7A0B\u5E8F\u7ED3\u6784",
+      concepts: ["recursion"],
+      do: [
+        {
+          action: "code.run"
+        }
+      ],
+      say: "\u53F6\u5B50\u9009\u62E9\u8F93\u5165\uFF0C\u62EC\u53F7\u51B3\u5B9A\u7EC4\u5408\uFF0C\u5185\u90E8\u8282\u70B9\u4FDD\u5B58\u5C40\u90E8\u7ED3\u679C\uFF0C\u6839\u8282\u70B9\u7ED9\u51FA\u7B54\u6848\u3002\u8FD0\u884C\u628A\u9690\u542B\u7684\u8BED\u6CD5\u6811\u53D8\u6210\u53EF\u89C2\u5BDF\u4E8B\u5B9E\u3002"
+    }
+  ]
+};
+
+// playgrounds/24point/24point.generated.tsx
+import { mockAiPort as mockAiPort2 } from "../session.js";
+import { jsx, jsxs } from "../libs/react.js";
 var persistent = /* @__PURE__ */ new WeakSet();
-var point24gpt = stateful("point24gpt", (options) => {
-  const state = { source: options.source ?? initialSource, choice: "0", completed: [...options.completed ?? (options.persist ? readCompleted() : [])] };
-  if (options.persist) persistent.add(state);
-  return state;
-}, [
+var POINT24_DECLARATIONS = [
   on("editor.changed", (state, event, { emit }) => {
     state.source = event.source;
     emit({ type: "python.clear" });
@@ -129,11 +382,21 @@ var point24gpt = stateful("point24gpt", (options) => {
       emit({ type: "point24gpt.completed", choice: state.choice });
     }
   })
-]);
+];
+var point24gpt = stateful("point24gpt", (options) => {
+  const state = { source: options.source ?? initialSource, choice: "0", completed: [...options.completed ?? (options.persist ? readCompleted() : [])] };
+  if (options.persist) persistent.add(state);
+  return state;
+}, POINT24_DECLARATIONS);
+var point24Course = stateful("point24gpt", (source2) => {
+  const state = { source: source2, choice: "0", completed: [...readCompleted()] };
+  persistent.add(state);
+  return state;
+}, POINT24_DECLARATIONS);
 function createExample(bus) {
   const course = point24gpt.create({}, bus);
   const player = playback2.create({}, bus);
-  const runner = execution.create({}, bus);
+  const runner = execution2.create({}, bus);
   return () => {
     runner.dispose();
     player.dispose();
@@ -154,7 +417,7 @@ var examples = {
 };
 var cardPath = (card) => {
   const rank = { 1: "ace", 11: "jack", 12: "queen", 13: "king" }[card.value] ?? card.value;
-  return `assets/playing-cards/${rank}_of_${card.suit}.svg`;
+  return new URL(`assets/playing-cards/${rank}_of_${card.suit}.svg`, import.meta.url).href;
 };
 var ink = "var(--pico-ink)";
 var accent = "var(--pico-accent-deep)";
@@ -414,12 +677,12 @@ def _calculate24(source, cards):
         frame("end")
         return dict(nodes=[], frames=frames, message=message)
 `;
-var layoutOptions = { open: ["world"], ratio: 0.4 };
-function makeRequest(source, cards) {
+var layoutOptions = { open: ["viz"], ratio: 0.4 };
+function makeRequest(source2, cards) {
   return {
-    source,
+    source: source2,
     prelude: `${evaluator}
-_p24 = _calculate24(${JSON.stringify(source)}, ${JSON.stringify(cards.map((card) => card.value))})
+_p24 = _calculate24(${JSON.stringify(source2)}, ${JSON.stringify(cards.map((card) => card.value))})
 _runtime.register_trace_resource("point24", [_p24])
 J, Q, K = 11, 12, 13`,
     options: { trace: { events: [], observe: null }, timeoutMs: 1500, maxTraceSteps: 100 }
@@ -464,57 +727,94 @@ function readCompleted() {
     return /* @__PURE__ */ new Set();
   }
 }
-var savedOptions = { persist: true };
-var mountOptions = { ...pythonOptions(), filename: "24point-gpt.py", layout: layoutOptions };
+var mountOptions = { ...pythonOptions(), filename: "24point-gpt.py", layout: layoutOptions, automatic: 500 };
 var starter = initialSource;
+var POINT24_SCRIPT = point_script_default;
+var point24State = provided2("point24.state");
+var point24Cases = feature2("point24.cases", {
+  requires: [point24State],
+  actions: [{
+    id: "point24.select",
+    label: "\u9009\u62E9\u9898\u76EE",
+    tags: ["run"],
+    settle: () => PYTHON_RAN,
+    args: { choice: { type: "string", enum: cases.map((_, index) => String(index)) } },
+    when: (context, { choice }) => typeof choice === "string" && cases.some((_, index) => String(index) === choice) && choice !== context.get(point24State)?.choice,
+    event: (_context, { choice }) => ({ type: "point24gpt.select", choice })
+  }],
+  views: [{ slot: "toolbar", label: "\u9898\u76EE", controls: ({ get }) => {
+    const state = get(point24State);
+    return [{ kind: "choices", label: "\u9898\u76EE", value: state.choice, choices: cases.map((_, index) => ({
+      value: String(index),
+      label: String(index + 1),
+      title: `\u7B2C ${index + 1} \u9898`,
+      event: { type: "session.invoke", action: "point24.select", args: { choice: String(index) } }
+    })) }];
+  } }]
+});
+function point24Answer(request) {
+  if (request.kind === "explain") return {
+    title: "\u6CBF\u8868\u8FBE\u5F0F\u6811\u68C0\u67E5\u8FD9\u4E00\u6B65",
+    text: "\u53F6\u5B50\u5BF9\u5E94\u8F93\u5165\u724C\uFF0C\u5185\u90E8\u8282\u70B9\u5BF9\u5E94\u8FD0\u7B97\uFF0C\u6839\u8282\u70B9\u662F\u6700\u7EC8\u7ED3\u679C\u300224 \u70B9\u8FD8\u8981\u540C\u65F6\u68C0\u67E5\u724C\u6C60\uFF1A\u56DB\u5F20\u724C\u5FC5\u987B\u5404\u4F7F\u7528\u4E00\u6B21\u3002",
+    primary: { action: "selection.locate", label: "\u5B9A\u4F4D\u5230\u6267\u884C" }
+  };
+  return {
+    title: "\u5148\u4ECE\u724C\u6C60\u548C\u62EC\u53F7\u770B\u8D77",
+    text: "\u6BCF\u5F20\u724C\u8981\u6070\u597D\u4F7F\u7528\u4E00\u6B21\uFF0C\u6700\u540E\u7684\u6839\u8282\u70B9\u5FC5\u987B\u7B49\u4E8E 24\u3002\u62EC\u53F7\u51B3\u5B9A\u8FD0\u7B97\u6811\u7684\u5F62\u72B6\uFF1B\u8FD0\u884C\u540E\u53EF\u4EE5\u6CBF\u6811\u89C2\u5BDF\u6BCF\u6B21\u53D6\u724C\u548C\u4E2D\u95F4\u7ED3\u679C\u3002",
+    primary: { action: "script.play", label: "\u5F00\u59CB\u8BB2\u89E3", args: { script: POINT24_SCRIPT } }
+  };
+}
+var POINT24_STYLE = `
+.point24-world {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--pico-surface);
+  box-sizing: border-box;
+  padding: var(--pico-space-3);
+}
+.point24-world svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+`;
+var POINT24_SESSION = pythonSession({
+  world: { title: "\u5361\u724C", render: (view) => {
+    const state = view.get(point24State);
+    const result = view.get(pythonHost).python.result;
+    const trace = view.get(playbackHost2)?.trace ?? null;
+    const calculation = trace ? calculationFromTrace(trace) : null;
+    const completed = result.status === "ready" && result.value !== null;
+    return /* @__PURE__ */ jsxs("div", { className: "point24-world", children: [
+      /* @__PURE__ */ jsx("style", { children: POINT24_STYLE }),
+      result.status === "failed" ? /* @__PURE__ */ jsx("div", { role: "alert", style: { color: errorInk }, children: "\u2717 \u8FD0\u884C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5" }) : /* @__PURE__ */ jsx(Replay, { cards: cases[Number(state.choice)], calculation, hand: !completed })
+    ] });
+  } },
+  domain: [point24Cases],
+  provide: (view) => [point24State.with(view.state)],
+  ai: { port: mockAiPort2(point24Answer, { delayMs: 300 }) },
+  scripts: [POINT24_SCRIPT]
+});
+var POINT24_COURSE = {
+  name: "24 \u70B9",
+  component: point24Course,
+  starter: initialSource,
+  playground: { ...mountOptions, start: [{ type: "python.run" }] },
+  session: POINT24_SESSION
+};
 function Root(host = {}) {
-  const view = usePlayground(point24gpt, { ...savedOptions, source: host.source ?? initialSource }, { ...mountOptions, ...host.options });
-  const selected = view?.state.choice ?? "0";
-  const hasRun = view?.parts.python.result.status === "pending" || view?.parts.python.result.status === "ready" && view.parts.python.result.value !== null;
-  const execution2 = view?.parts.python.result;
-  const calculation = view?.parts.playback.trace ? calculationFromTrace(view.parts.playback.trace) : null;
-  const isCompleted = (choice) => view?.state.completed.includes(choice) === true;
-  if (!view) return /* @__PURE__ */ jsx(Fragment, {});
-  const cards = cases[Number(selected)];
-  return /* @__PURE__ */ jsx(
-    PlaygroundShell,
-    {
-      name: "24 \u70B9",
-      layout: view.layout,
-      onEvent: view.send,
-      menu: view.menu,
-      editor: view ? /* @__PURE__ */ jsx(Widget, { widget: view.editor }) : null,
-      toolbar: [...view.toolbar, { controls: [{
-        kind: "choices",
-        label: "\u9898\u76EE",
-        value: selected,
-        choices: cases.map((_, index) => ({
-          value: String(index),
-          event: { type: "point24gpt.select", choice: String(index) },
-          title: `\u7B2C ${index + 1} \u9898${isCompleted(String(index)) ? "\uFF0C\u5DF2\u5B8C\u6210" : ""}`,
-          label: /* @__PURE__ */ jsxs("span", { style: { color: isCompleted(String(index)) ? "var(--pico-hue-branch-strong)" : void 0 }, children: [
-            index + 1,
-            isCompleted(String(index)) && /* @__PURE__ */ jsx("span", { "aria-label": "\u6B63\u786E", children: " \u2713" })
-          ] })
-        }))
-      }, {
-        kind: "button",
-        icon: "play",
-        label: "\u8FD0\u884C",
-        disabled: !view || execution2?.status === "pending",
-        event: { type: "python.run" }
-      }] }],
-      panels: [{
-        key: "world",
-        title: "\u5361\u724C",
-        icon: "viz",
-        flush: true,
-        content: /* @__PURE__ */ jsx("div", { className: "pico-scene", children: execution2?.status === "failed" ? /* @__PURE__ */ jsx("div", { role: "alert", style: { color: errorInk }, children: "\u2717 \u8FD0\u884C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5" }) : /* @__PURE__ */ jsx(Replay, { cards, calculation, hand: !hasRun }) })
-      }]
-    }
-  );
+  return /* @__PURE__ */ jsx(SessionPage, { course: POINT24_COURSE, host });
 }
 export {
+  POINT24_COURSE,
+  POINT24_SCRIPT,
   Root,
   WorldSvg,
   calculationFromTrace,

@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "course": "gacha",
+  "title": "设计一台盲盒机",
+  "concepts": [
+    {
+      "id": "value",
+      "label": "变量",
+      "aliases": [
+        "赋值",
+        "变量名",
+        "数据类型",
+        "int",
+        "str",
+        "字符串",
+        "整数",
+        "print",
+        "input",
+        "输出",
+        "输入"
+      ]
+    },
+    {
+      "id": "branch",
+      "label": "条件",
+      "aliases": [
+        "if",
+        "else",
+        "elif",
+        "判断",
+        "分支",
+        "布尔",
+        "比较",
+        "and",
+        "or",
+        "not"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    },
+    {
+      "id": "function",
+      "label": "函数",
+      "aliases": [
+        "def",
+        "return",
+        "参数",
+        "返回值",
+        "调用",
+        "封装"
+      ]
+    },
+    {
+      "id": "list",
+      "label": "列表",
+      "aliases": [
+        "数组",
+        "append",
+        "下标",
+        "索引",
+        "切片",
+        "len"
+      ]
+    },
+    {
+      "id": "dict",
+      "label": "字典",
+      "aliases": [
+        "键值",
+        "key",
+        "value",
+        "映射",
+        "哈希"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "dict",
+    "loop",
+    "branch"
+  ],
+  "lectures": [
+    {
+      "id": "gacha-rules",
+      "title": "从概率表到一台可修改的盲盒机",
+      "steps": [
+        {
+          "step": 0,
+          "title": "先认出规则数据",
+          "say": "Editor 顶部不是流程，而是这台机器的规则。STARTING_MONEY 和 BOX_PRICE 决定能抽几次；STYLES 保存每个等级有哪些款式；两张 WEIGHTS 字典分别描述普通池和保底池。以后改变机器，应该先改这些数据。",
+          "concepts": [
+            "dict",
+            "list",
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "权重如何变成一次随机选择",
+          "say": "weighted_pick 先在全部权重的总长度上随机取一个 point，再逐项减去每个区间的长度。point 第一次落到零以下时，对应等级就是本次结果。权重不必凑成 100，它们表达的是区间比例。",
+          "concepts": [
+            "function",
+            "loop",
+            "dict"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "保底只负责切换概率表",
+          "say": "tier_for_draw 没有复制随机算法。它只判断这一抽是否到达保底，然后把 NORMAL_WEIGHTS 或 PITY_WEIGHTS 交给同一个 weighted_pick。规则与机制因此可以分别修改。",
+          "concepts": [
+            "branch",
+            "function"
+          ],
+          "prediction": "把 PITY_AFTER 从 10 改成 5，哪一抽第一次使用保底表？"
+        },
+        {
+          "step": 3,
+          "title": "循环同时更新钱和保底状态",
+          "say": "每轮循环先付款，再决定等级和款式，最后更新连续未出 S 的次数。World 中的一张卡、一格保底和一条历史记录，都来自这次 open_box 已经记录的事实；拖动 Debugger 时只是回放，不会重新抽取。",
+          "concepts": [
+            "loop",
+            "branch",
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "用修改参数做实验",
+          "say": "结束讲解后可以只改一个参数再运行：增加 STARTING_MONEY 会得到更多抽数；改变 NORMAL_WEIGHTS 会改变长期比例；改变 PITY_AFTER 会移动保底触发位置。一次结果可能偶然，连续运行才能逐渐看见概率规则。",
+          "concepts": [
+            "dict",
+            "value"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

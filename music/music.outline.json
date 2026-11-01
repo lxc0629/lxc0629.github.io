@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "course": "music",
+  "title": "用 Python 写一首歌",
+  "concepts": [
+    {
+      "id": "value",
+      "label": "变量",
+      "aliases": [
+        "赋值",
+        "变量名",
+        "数据类型",
+        "int",
+        "str",
+        "字符串",
+        "整数",
+        "print",
+        "input",
+        "输出",
+        "输入"
+      ]
+    },
+    {
+      "id": "loop",
+      "label": "循环",
+      "aliases": [
+        "for",
+        "while",
+        "range",
+        "遍历",
+        "重复",
+        "break",
+        "continue",
+        "迭代"
+      ]
+    },
+    {
+      "id": "function",
+      "label": "函数",
+      "aliases": [
+        "def",
+        "return",
+        "参数",
+        "返回值",
+        "调用",
+        "封装"
+      ]
+    },
+    {
+      "id": "list",
+      "label": "列表",
+      "aliases": [
+        "数组",
+        "append",
+        "下标",
+        "索引",
+        "切片",
+        "len"
+      ]
+    },
+    {
+      "id": "dict",
+      "label": "字典",
+      "aliases": [
+        "键值",
+        "key",
+        "value",
+        "映射",
+        "哈希"
+      ]
+    },
+    {
+      "id": "debug",
+      "label": "调试",
+      "aliases": [
+        "报错",
+        "错误",
+        "bug",
+        "排错",
+        "调试器",
+        "单步",
+        "Traceback",
+        "异常"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "list",
+    "function",
+    "loop"
+  ],
+  "lectures": [
+    {
+      "id": "music-pitch",
+      "title": "沿着一个音符走过代码、音高与声音",
+      "steps": [
+        {
+          "step": 0,
+          "title": "乐谱先成为数据",
+          "say": "TWINKLE 列表就是乐谱。每个元组的第一个值是音名，第二个值是拍数。音名决定纵向音高，拍数决定横向长度；所以谱面、卷帘和代码使用的是同一份音乐数据。",
+          "concepts": [
+            "list",
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "音名怎样算成 MIDI",
+          "say": "midi 把音名拆成字母部分与八度。SEMITONES 给出音在一个八度内的半音偏移，再用 12 × (octave + 1) 加上偏移。C4 得到 60，G4 得到 67，C5 得到 72。",
+          "concepts": [
+            "function",
+            "dict",
+            "value"
+          ],
+          "prediction": "如果 C4 是 60，那么高一个八度的 C5 是多少？"
+        },
+        {
+          "step": 2,
+          "title": "循环把整张谱送去演奏",
+          "say": "play 不知道《小星星》的内容，它只遍历任何 melody。每一轮把 note_name 交给 midi，把算出的音高与 beats 一起传给 note。函数负责翻译，循环负责按顺序处理整张谱。",
+          "concepts": [
+            "loop",
+            "function",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "同一事件生成三种呈现",
+          "say": "World 上方显示简谱、音名和 MIDI；下方卷帘用纵向位置表示 MIDI，用宽度表示拍数；运行代码后，声音频率也从 MIDI 推导。它们不是三份乐谱，而是同一组 note 事件的三种呈现。",
+          "concepts": [
+            "debug",
+            "value"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "卡农是同一旋律延后进入",
+          "say": "现在第二声部先 rest(4)，再调用同一个 play(CANON_THEME)。卷帘中两条形状相同的旋律相差四拍，这就是卡农最直接的程序模型：复用同一数据，改变开始时间。",
+          "concepts": [
+            "function",
+            "list"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

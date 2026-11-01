@@ -1,0 +1,25 @@
+{
+  "course": "data-structures",
+  "concepts": ["list", "dict"],
+  "teaches": "用对象图观察列表、字典、集合、别名和引用修改，理解多个名字可以指向同一个对象。",
+  "answerStyle": "先指出名字和对象，再沿一条引用解释变化；不要把对象图误说成值的拷贝。",
+  "actions": ["selection.locate", "code.locate", "trace.seek", "code.run", "annotation.show", "source.explain", "source.restore"],
+  "misconceptions": [
+    {
+      "id": "assignment-copies-list",
+      "signs": ["alias", "copy", "numbers"],
+      "guide": "让学生看 numbers 与 alias 两条引线是否指向同一个对象，再比较 numbers.copy()。"
+    },
+    {
+      "id": "nested-value-is-copied",
+      "signs": ["profile", "scores", "append"],
+      "guide": "沿 profile[\"scores\"] 的引用找到列表，说明 append 修改的是同一对象。"
+    }
+  ],
+  "examples": [
+    {
+      "ask": "为什么改 numbers，alias 也变了？",
+      "reply": "先看对象图：numbers 和 alias 的箭头终点相同吗？append 改的是名字，还是箭头指向的列表对象？"
+    }
+  ]
+}

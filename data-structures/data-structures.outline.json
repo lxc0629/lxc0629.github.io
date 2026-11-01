@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "course": "data-structures",
+  "title": "Python 数据结构",
+  "concepts": [
+    {
+      "id": "list",
+      "label": "列表",
+      "aliases": [
+        "数组",
+        "append",
+        "下标",
+        "索引",
+        "切片",
+        "len"
+      ]
+    },
+    {
+      "id": "dict",
+      "label": "字典",
+      "aliases": [
+        "键值",
+        "key",
+        "value",
+        "映射",
+        "哈希"
+      ]
+    }
+  ],
+  "courseConcepts": [
+    "list",
+    "dict"
+  ],
+  "lectures": [
+    {
+      "id": "data-structures",
+      "title": "一个列表，几个名字",
+      "steps": [
+        {
+          "step": 0,
+          "title": "名字指向对象",
+          "say": "`numbers = [2, 4]` 先造出一个列表对象，再让名字 numbers 指向它。`alias = numbers` 没有复制列表，只是给同一个列表再起一个名字。",
+          "concepts": [
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 1,
+          "title": "字典里存的是引用",
+          "say": "字典按键找值。`\"scores\"` 对应的值不是一份拷贝，还是刚才那个列表。",
+          "concepts": [
+            "dict",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 2,
+          "title": "集合：没有顺序，不会重复",
+          "say": "集合只关心“有没有”：没有下标，同一个元素放两次也只算一个。",
+          "concepts": [],
+          "prediction": null
+        },
+        {
+          "step": 3,
+          "title": "改一处，三处都看见",
+          "say": "`numbers.append(8)` 在原来的列表上加一个元素，没有造新列表。字典加一个键，集合加一个元素，都是就地修改。",
+          "concepts": [
+            "dict",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 4,
+          "title": "运行看看",
+          "say": "运行后看结构图：numbers、alias 和 profile[\"scores\"] 三条引线指向同一个列表，所以 append 之后三处都是 [2, 4, 8]。",
+          "concepts": [
+            "dict",
+            "list"
+          ],
+          "prediction": null
+        },
+        {
+          "step": 5,
+          "title": "想一想",
+          "say": "如果想让 alias 成为独立的一份，要写 `alias = numbers.copy()`。改成这样再运行，结构图里会出现两个列表。",
+          "concepts": [
+            "list"
+          ],
+          "prediction": null
+        }
+      ]
+    }
+  ]
+}

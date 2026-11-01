@@ -3,8 +3,6 @@ import { on, stateful } from "../pico.js";
 import { Source } from "../pico.js";
 import { python as python3 } from "../pico.js";
 import { playback as playback2 } from "../pico.js";
-import { PlaygroundShell, Widget } from "../pico.js";
-import { usePlayground } from "../pico.js";
 
 // playgrounds/shared/python/index.ts
 import { python as python2, pythonPreload } from "../pico.js";
@@ -69,35 +67,189 @@ function pythonOptions(options = {}) {
       own({ dispose: bus.subscribe(["python.execute"], (event) => {
         checkedSource = event.source.code;
       }) });
-      const execution = own(python2.create(options.python ?? {}, bus));
-      own({ dispose: bus.subscribe(["playback.changed"], () => {
+      const execution2 = own(python2.create(options.python ?? {}, bus));
+      own({ dispose: bus.subscribe(["playback.changed", "selection.changed"], () => {
         const { position } = playing.state;
-        const result = execution.state.result;
+        const result = execution2.state.result;
         const error = position?.atEnd && result.status === "ready" ? result.value?.error : null;
         const diagnostics = [];
         const lines = checkedSource.split("\n");
         if (error?.line != null && Number.isInteger(error.line) && error.line >= 1 && error.line <= lines.length) {
-          const from = lines.slice(0, error.line - 1).reduce((offset, line) => offset + line.length + 1, 0);
+          const from = lines.slice(0, error.line - 1).reduce((offset, line2) => offset + line2.length + 1, 0);
           diagnostics.push({ from, to: from + lines[error.line - 1].length, severity: "error", message: error.message });
         }
         const selected = focus.state.current;
-        const changesSelectedVariable = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null && variableTimeline(selected).some((point) => point.traceIndex === position.traceIndex);
-        const highlight = !diagnostics.length && position?.state.line != null ? { line: position.state.line, kind: changesSelectedVariable ? "change" : "execution" } : null;
+        const variablePoint = selected?.kind === "runtime-variable" && selected.run === playing.state.trace && position !== null ? variableTimeline(selected).find((point) => point.traceIndex === position.traceIndex) : void 0;
+        const line = variablePoint?.line ?? position?.state.line ?? null;
+        const highlight = !diagnostics.length && line !== null ? { line, kind: variablePoint?.line != null ? "change" : "execution" } : null;
         bus.emit({ type: "editor.render", source: editor.state.source, highlight }, "playground");
         bus.emit({ type: "editor.diagnostics", source: checkedSource, diagnostics }, "playground");
       }) });
-      observe("python", () => ({ ...execution.state }), ["python.changed"]);
+      observe("python", () => ({ ...execution2.state }), ["python.changed"]);
       observe("playback", () => ({ ...playing.state }), ["playback.changed"]);
       observe("selection", () => focus.state, ["selection.changed"]);
-      return { python: execution.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
+      return { python: execution2.state, playback: playing.state, terminal: output, debugger: debugging, selection: focus.state };
     }
   };
 }
 
 // playgrounds/bomb/bomb.generated.tsx
-import { Fragment, jsx, jsxs } from "../libs/react.js";
+import { playbackHost as playbackHost2, provided as provided2 } from "../session.js";
+import { SessionPage } from "../session.js";
+
+// playgrounds/shared/python/session.ts
+import { createElement } from "../libs/react.js";
+import { mockAiPort } from "../session.js";
+import { Widget } from "../pico.js";
+import { feature, playbackHost, provided, selectionHost } from "../session.js";
+import { stage } from "../session.js";
+import { source } from "../session.js";
+import { draftViews } from "../session.js";
+import { hintViews } from "../session.js";
+import { execution } from "../session.js";
+import { navigate } from "../session.js";
+import { liveVariables } from "../session.js";
+import { traceQueries } from "../session.js";
+import { annotations, registerAnchorResolver } from "../session.js";
+import { annotationViews, debuggerAnchors, terminalAnchors } from "../session.js";
+import { tour } from "../session.js";
+import { sessionContext } from "../session.js";
+import { playground } from "../session.js";
+import { playgroundSnapshot } from "../session.js";
+import { sessionEvidence } from "../session.js";
+import { ai } from "../session.js";
+import { aiViews } from "../session.js";
+import { script } from "../session.js";
+import { scriptRail } from "../session.js";
+import { aiScript } from "../session.js";
+import { worldPanel } from "../session.js";
+var pythonHost = provided("python.parts");
+var OUTPUT_PANEL = "output";
+var DEBUG_PANEL = "debug";
+var PYTHON_RAN = { on: "python.changed", until: (event) => event.result.status !== "pending" };
+var pythonViews = feature("python.views", {
+  requires: [pythonHost, playbackHost, annotations, playground],
+  create: ({ get, own }) => {
+    const parts = get(pythonHost);
+    const playing = get(playbackHost);
+    const run2 = () => playing.trace;
+    for (const resolver of [debuggerAnchors(parts.debugger, run2), terminalAnchors(parts.terminal, run2)]) {
+      own({ dispose: registerAnchorResolver(get(playground), resolver) });
+    }
+  },
+  queries: [{ id: "python.result", run: ({ get }) => resultOf(get(pythonHost)?.python ?? null) }],
+  views: [
+    { slot: "panel", key: OUTPUT_PANEL, icon: "output", title: "\u8F93\u51FA", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).terminal }) },
+    { slot: "panel", key: DEBUG_PANEL, icon: "debug", title: "\u8C03\u8BD5", render: ({ get }) => createElement(Widget, { widget: get(pythonHost).debugger }) }
+  ]
+});
+function resultOf(python4) {
+  const result = python4?.result ?? null;
+  if (result === null || result.status === "pending") return { status: "pending" };
+  if (result.status === "failed") return { status: "failed", error: String(result.error) };
+  if (result.value === null) return { status: "none" };
+  const { trace, returncode, error, waiting } = result.value;
+  const end = trace.at(trace.steps.length + 1);
+  const tail = (text) => (text ?? "").slice(-2e3);
+  return {
+    status: "ready",
+    returncode,
+    steps: trace.steps.length,
+    error: error === null ? null : { message: error.message, line: error.line },
+    waiting: waiting?.prompt ?? null,
+    stdout: tail(end.stdout),
+    stderr: tail(end.stderr)
+  };
+}
+function pythonSession(options) {
+  const features = [
+    stage,
+    source,
+    draftViews,
+    hintViews,
+    execution.with({ run: { type: "python.run" }, settle: PYTHON_RAN }),
+    navigate.with({ debuggerPanel: DEBUG_PANEL }),
+    liveVariables,
+    traceQueries,
+    annotations,
+    annotationViews,
+    tour,
+    sessionContext,
+    sessionEvidence,
+    playground,
+    playgroundSnapshot,
+    ...options.ai === void 0 ? [] : [ai.with(options.ai), aiViews],
+    script.with(options.script ?? {}),
+    scriptRail.with({ library: options.scripts ?? [] }),
+    ...options.ai === void 0 ? [] : [aiScript.with({ narrate: false })],
+    worldPanel(options.world),
+    pythonViews,
+    ...options.domain ?? []
+  ];
+  return Object.freeze({
+    features: Object.freeze(features),
+    provide: (view) => [
+      playbackHost.with(view.parts.playback),
+      selectionHost.with(view.parts.selection),
+      pythonHost.with({ python: view.parts.python, terminal: view.parts.terminal, debugger: view.parts.debugger }),
+      ...options.provide?.(view) ?? []
+    ],
+    editorExtensions: pythonEditorOptions.extensions
+  });
+}
+function caseChoices(options) {
+  const values = options.choices.map((choice) => choice.value);
+  return feature(`${options.id}.choices`, {
+    requires: [options.state],
+    actions: [{
+      id: options.id,
+      label: options.label,
+      tags: ["run"],
+      args: { value: { type: "string", enum: values } },
+      when: ({ get }, { value }) => typeof value === "string" && values.includes(value) && get(options.state) !== null,
+      event: (_context, { value }) => options.event(value)
+    }],
+    views: [{ slot: "toolbar", label: options.label, controls: ({ get }) => {
+      const state = get(options.state);
+      return state === null ? [] : [{
+        kind: "choices",
+        label: options.label,
+        value: options.current(state),
+        choices: options.choices.map((choice) => ({ ...choice, event: { type: "session.invoke", action: options.id, args: { value: choice.value } } }))
+      }];
+    } }]
+  });
+}
+function courseAi(answers) {
+  return {
+    port: mockAiPort((request) => request.kind === "explain" ? { title: "\u8FD9\u4E00\u6B65\u5728\u505A\u4EC0\u4E48", text: answers.explain, primary: { action: "selection.locate", label: "\u5B9A\u4F4D\u5230\u6267\u884C" } } : { title: "\u53EF\u4EE5\u4ECE\u8FD9\u91CC\u60F3\u8D77", text: answers.question }, { delayMs: 300 })
+  };
+}
+
+// playgrounds/bomb/bomb.script.json
+var bomb_script_default = {
+  id: "bomb",
+  title: "\u628A\u62C6\u5F39\u624B\u518C\u7FFB\u8BD1\u6210\u7A0B\u5E8F",
+  from: "",
+  mode: "instruction",
+  auto: true,
+  steps: [
+    { title: "\u7B2C\u4E00\u9636\u6BB5\u5148\u9010\u6839\u641C\u7D22", concepts: ["loop", "branch"], stage: { panels: ["viz"] }, say: [{ say: "\u624B\u518C\u7B2C\u4E00\u9636\u6BB5\u8981\u6C42\u9EC4\u8272\u4E14\u5E26\u7535\u3002for \u5FAA\u73AF\u8BA9 wire \u4F9D\u6B21\u53D6 1 \u5230 8\u3002", write: "for wire in range(1, 9):\n" }, { say: "\u5148\u63A2\u6D4B\u989C\u8272\uFF0C\u628A\u89C2\u5BDF\u7ED3\u679C\u4FDD\u5B58\u5728 color\u3002", write: "for wire in range(1, 9):\n    color = get_color(wire)\n" }] },
+    { title: "\u7528\u77ED\u8DEF and \u5B89\u5168\u6D4B\u91CF", concepts: ["branch"], say: [{ say: "\u5148\u5224\u65AD\u989C\u8272\uFF0C\u518D\u628A get_voltage \u653E\u5728 and \u53F3\u8FB9\u3002\u989C\u8272\u4E0D\u5339\u914D\u65F6 Python \u4F1A\u77ED\u8DEF\uFF0C\u4E0D\u6D4B\u7535\u538B\u3002", write: 'for wire in range(1, 9):\n    color = get_color(wire)\n    if color == "yellow" and get_voltage(wire) > 0:\n' }] },
+    { title: "\u526A\u7EBF\u540E\u9A6C\u4E0A\u9000\u51FA\u641C\u7D22", concepts: ["loop", "branch"], say: [{ say: "\u547D\u4E2D\u76EE\u6807\u5C31\u526A\u7EBF\uFF0C\u5E76\u7528 break \u505C\u6B62\u5F53\u524D\u5FAA\u73AF\u3002\u5426\u5219\u4E0B\u4E00\u8F6E\u8FD8\u79FB\u52A8\u63A2\u9488\uFF0C\u4F1A\u8FDD\u53CD\u72B6\u6001\u673A\u3002", write: 'for wire in range(1, 9):\n    color = get_color(wire)\n    if color == "yellow" and get_voltage(wire) > 0:\n        cut(wire)\n        break\n' }] },
+    { title: "\u590D\u4F4D\u540E\u5199\u7B2C\u4E8C\u4E2A\u9636\u6BB5", concepts: ["loop", "branch"], say: [{ say: "\u7B2C\u4E00\u9636\u6BB5\u5B8C\u6210\u540E\uFF0Creset_probe \u8BA9\u63A2\u9488\u5F52\u4ED3\u5E76\u8FDB\u5165\u4E0B\u4E00\u9636\u6BB5\u3002\u7B2C\u4E8C\u4E2A\u5FAA\u73AF\u590D\u7528\u540C\u4E00\u7B97\u6CD5\u9AA8\u67B6\uFF0C\u53EA\u628A\u89C4\u5219\u6362\u6210\u7EA2\u8272\u5E26\u7535\u5F15\u4FE1\u3002", write: 'for wire in range(1, 9):\n    color = get_color(wire)\n    if color == "yellow" and get_voltage(wire) > 0:\n        cut(wire)\n        break\n\nreset_probe()\n\nfor wire in range(1, 9):\n    color = get_color(wire)\n    if color == "red" and get_voltage(wire) > 0:\n        cut(wire)\n        break\n' }] },
+    { title: "\u8FD0\u884C\u6807\u51C6\u53CC\u4FDD\u9669", concepts: ["loop", "branch"], stage: { panels: ["viz", "debug"], focus: "viz" }, do: [{ action: "code.run" }], say: "\u8FD0\u884C\u540E\uFF0CWorld \u6309\u4E8B\u4EF6\u663E\u793A\u63A2\u9488\u79FB\u52A8\u3001\u989C\u8272\u63ED\u793A\u3001\u7535\u538B\u6D4B\u91CF\u3001\u526A\u7EBF\u548C\u9636\u6BB5\u5207\u6362\u3002\u4EAE\u8D77\u591A\u5C11\u6839\u7EBF\uFF0C\u5C31\u662F\u7A0B\u5E8F\u5B9E\u9645\u68C0\u67E5\u4E86\u591A\u5C11\u6B21\u3002" },
+    { title: "Debugger \u770B\u77ED\u8DEF\u53D1\u751F\u5728\u54EA\u91CC", concepts: ["debug", "branch"], stage: { panels: ["viz", "debug"], focus: "debug" }, do: [{ action: "code.locate", args: { line: 3, occurrence: 1 } }, { action: "annotation.show", args: { kind: "mark", at: { variable: "color" } } }], say: "\u505C\u5728\u7B2C\u4E00\u6B21 if\u3002\u989C\u8272\u4E0D\u662F yellow \u65F6\uFF0C\u53F3\u4FA7 get_voltage \u6839\u672C\u4E0D\u6267\u884C\uFF1B\u7EE7\u7EED\u5230\u9EC4\u8272\u7EBF\uFF0C\u624D\u4F1A\u770B\u5230\u7535\u538B\u724C\u51FA\u73B0\u3002\u77ED\u8DEF\u65E2\u662F\u5E03\u5C14\u8BED\u4E49\uFF0C\u4E5F\u662F\u51CF\u5C11\u5371\u9669\u52A8\u4F5C\u7684\u7A0B\u5E8F\u7B56\u7565\u3002" },
+    { title: "\u770B break \u4E0E\u9636\u6BB5\u4EA4\u63A5", concepts: ["debug", "branch"], do: [{ action: "code.locate", args: { line: 5, occurrence: 1 } }], say: "\u547D\u4E2D\u540E\u6267\u884C break\uFF0C\u63A7\u5236\u6D41\u8DF3\u5230 reset_probe\uFF0C\u800C\u4E0D\u662F\u56DE\u5230\u5FAA\u73AF\u5F00\u5934\u3002Debugger \u5C55\u793A\u63A7\u5236\u6D41\u8DF3\u8F6C\uFF0CWorld \u5C55\u793A\u72B6\u6001\u4ECE\u201C\u5DF2\u526A\u7EBF\u3001\u7B49\u5F85\u590D\u4F4D\u201D\u53D8\u5230\u4E0B\u4E00\u9636\u6BB5\u3002" },
+    { title: "\u89C4\u5219\u53D8\u5316\uFF0C\u9AA8\u67B6\u4FDD\u6301", concepts: ["loop", "branch"], stage: { panels: ["viz"] }, say: "\u5207\u6362\u7528\u4F8B\u65F6\uFF0C\u989C\u8272\u3001\u7535\u538B\u8303\u56F4\u548C\u9636\u6BB5\u6570\u91CF\u4F1A\u53D8\u5316\uFF1B\u9010\u6839\u641C\u7D22\u3001\u77ED\u8DEF\u5224\u65AD\u3001\u547D\u4E2D\u540E break\u3001\u9636\u6BB5\u95F4 reset \u7684\u7ED3\u6784\u4FDD\u6301\u7A33\u5B9A\u3002\u7A0B\u5E8F\u8BBE\u8BA1\u5C31\u662F\u8BC6\u522B\u54EA\u4E9B\u5173\u7CFB\u7A33\u5B9A\u3001\u54EA\u4E9B\u53C2\u6570\u6765\u81EA\u9700\u6C42\u3002" },
+    { title: "\u56DE\u987E\u72B6\u6001\u673A\u601D\u7EF4", concepts: ["loop", "branch"], say: "for \u8D1F\u8D23\u5BFB\u627E\u76EE\u6807\uFF0Cif \u8D1F\u8D23\u628A\u624B\u518C\u53D8\u6210\u6761\u4EF6\uFF0Cbreak \u7ED3\u675F\u5F53\u524D\u641C\u7D22\uFF0Creset_probe \u63A8\u8FDB\u9636\u6BB5\u3002\u52A8\u4F5C\u5FC5\u987B\u6309\u72B6\u6001\u987A\u5E8F\u53D1\u751F\uFF1BDebugger \u544A\u8BC9\u4F60\u6267\u884C\u5230\u4E86\u54EA\u91CC\uFF0CWorld \u544A\u8BC9\u4F60\u8FD9\u4E2A\u52A8\u4F5C\u5728\u89C4\u5219\u7CFB\u7EDF\u91CC\u9020\u6210\u4E86\u4EC0\u4E48\u3002" }
+  ]
+};
+
+// playgrounds/bomb/bomb.generated.tsx
+import { jsx, jsxs } from "../libs/react.js";
 var RESOURCE = "bomb";
-var layoutOptions = { open: ["world", "debug"], ratio: 0.4 };
+var layoutOptions = { open: ["viz", "debug"], ratio: 0.4 };
 var STARTER = `# \u9636\u6BB5\u4E00\uFF1A\u5207\u65AD\u5E26\u7535\u7684\u9EC4\u8272\u4E3B\u7535\u6E90\u7EBF
 for wire in range(1, 9):
     color = get_color(wire)
@@ -208,13 +360,13 @@ var CASES = [
   }
 ];
 function preludeFor(testCase) {
-  const stages = testCase.stages.map((stage) => ({
-    label: stage.label,
-    color: stage.color,
-    min: stage.min ?? null,
-    min_inclusive: stage.minInclusive === true,
-    max: stage.max ?? null,
-    max_inclusive: stage.maxInclusive === true
+  const stages = testCase.stages.map((stage2) => ({
+    label: stage2.label,
+    color: stage2.color,
+    min: stage2.min ?? null,
+    min_inclusive: stage2.minInclusive === true,
+    max: stage2.max ?? null,
+    max_inclusive: stage2.maxInclusive === true
   }));
   const literal = (value) => JSON.stringify(value).replace(/\btrue\b/g, "True").replace(/\bfalse\b/g, "False").replace(/\bnull\b/g, "None");
   return `def __make_bomb():
@@ -302,7 +454,7 @@ function preludeFor(testCase) {
 
 get_color, get_voltage, cut, reset_probe = __make_bomb()`;
 }
-var bomb = stateful("bomb", (source) => ({ source, caseIndex: 0 }), [
+var bomb = stateful("bomb", (source2) => ({ source: source2, caseIndex: 0 }), [
   on("editor.changed", edit, []),
   on("python.run", run, ["python.execute"]),
   on("bomb.case.changed", selectCase, ["python.clear", "python.run"])
@@ -326,10 +478,10 @@ function selectCase(state, event, { emit }) {
 function create(bus) {
   const course = bomb.create(STARTER, bus);
   const player = playback2.create({}, bus);
-  const execution = python3.create({}, bus);
+  const execution2 = python3.create({}, bus);
   bus.emit({ type: "python.run" });
   return () => {
-    execution.dispose();
+    execution2.dispose();
     player.dispose();
     course.dispose();
   };
@@ -382,20 +534,20 @@ function BombPanel({ testCase, world }) {
         /* @__PURE__ */ jsx("span", { children: "\u62C6\u5F39\u624B\u518C" }),
         /* @__PURE__ */ jsx("strong", { children: testCase.name })
       ] }),
-      /* @__PURE__ */ jsx("div", { className: "bomb-manual-sheet", "aria-label": "\u62C6\u5F39\u624B\u518C", children: /* @__PURE__ */ jsx("ol", { children: testCase.stages.map((stage, index) => /* @__PURE__ */ jsxs("li", { "data-state": stageState(index), children: [
+      /* @__PURE__ */ jsx("div", { className: "bomb-manual-sheet", "aria-label": "\u62C6\u5F39\u624B\u518C", children: /* @__PURE__ */ jsx("ol", { children: testCase.stages.map((stage2, index) => /* @__PURE__ */ jsxs("li", { "data-state": stageState(index), children: [
         /* @__PURE__ */ jsx("i", { children: index + 1 }),
         /* @__PURE__ */ jsxs("span", { children: [
-          /* @__PURE__ */ jsx("b", { children: stage.label }),
-          stage.rule
+          /* @__PURE__ */ jsx("b", { children: stage2.label }),
+          stage2.rule
         ] })
-      ] }, stage.label)) }) })
+      ] }, stage2.label)) }) })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "bomb-machine", children: [
       /* @__PURE__ */ jsx("div", { className: "bomb-machine-status", "data-mode": world.mode, children: world.mode === "defused" ? "DEFUSED" : world.mode === "failed" ? "DETONATED" : "ARMED" }),
-      /* @__PURE__ */ jsx("div", { className: "bomb-stage-lights", children: testCase.stages.map((stage, index) => /* @__PURE__ */ jsxs("span", { "data-state": stageState(index), children: [
+      /* @__PURE__ */ jsx("div", { className: "bomb-stage-lights", children: testCase.stages.map((stage2, index) => /* @__PURE__ */ jsxs("span", { "data-state": stageState(index), children: [
         /* @__PURE__ */ jsx("i", {}),
-        stage.label
-      ] }, stage.label)) }),
+        stage2.label
+      ] }, stage2.label)) }),
       /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 720 430", preserveAspectRatio: "xMidYMid meet", role: "img", "aria-label": world.mode === "defused" ? "\u70B8\u5F39\u5DF2\u89E3\u9664" : world.mode === "failed" ? "\u70B8\u5F39\u5DF2\u5F15\u7206" : "\u516B\u6839\u5F85\u68C0\u6D4B\u5BFC\u7EBF", children: [
         /* @__PURE__ */ jsx("rect", { className: "bomb-shell-shadow", x: "28", y: "27", width: "664", height: "378", rx: "28" }),
         /* @__PURE__ */ jsx("rect", { className: "bomb-shell", x: "24", y: "22", width: "672", height: "378", rx: "28" }),
@@ -497,36 +649,46 @@ var STYLE = `
 `;
 var mountOptions = { ...pythonOptions({ playback: { stepMs: 150, stepMsFor: paceOf } }), filename: "bomb.py", layout: layoutOptions, automatic: 500, start: [{ type: "python.run" }] };
 var starter = STARTER;
+var BOMB_SCRIPT = bomb_script_default;
+var courseState = provided2("bomb.state");
+var BOMB_SESSION = pythonSession({
+  world: { title: "\u63A7\u5236\u7BB1", render: (view) => {
+    const state = view.get(courseState);
+    const playing = view.get(playbackHost2);
+    return /* @__PURE__ */ jsxs("div", { className: "pico-scene", children: [
+      /* @__PURE__ */ jsx("style", { children: STYLE }),
+      /* @__PURE__ */ jsx(BombPanel, { testCase: CASES[state.caseIndex], world: readBombWorld(playing?.position ?? null, playing?.trace ?? null, state.caseIndex) })
+    ] });
+  } },
+  domain: [caseChoices({
+    id: "bomb.case",
+    label: "\u578B\u53F7",
+    state: courseState,
+    current: (state) => String(state.caseIndex),
+    choices: CASES.map((item, index) => ({ value: String(index), label: String(index + 1), title: item.name })),
+    event: (value) => ({ type: "bomb.case.changed", caseIndex: Number(value) })
+  })],
+  provide: (view) => [courseState.with(view.state)],
+  ai: courseAi({
+    explain: "\u8FD9\u4E00\u53E5\u5728\u6309\u624B\u518C\u7684\u67D0\u4E2A\u9636\u6BB5\u5904\u7406\u7EBF\u8DEF\uFF1A\u5FAA\u73AF\u9010\u6839\u68C0\u67E5\uFF0C\u6761\u4EF6\u5224\u65AD\u51B3\u5B9A\u526A\u4E0D\u526A\uFF1B\u5BF9\u7167\u53F3\u8FB9\u63A7\u5236\u7BB1\u4E0A\u8FD9\u6839\u7EBF\u7684\u989C\u8272\u548C\u72B6\u6001\u3002",
+    question: "\u5148\u8BFB\u624B\u518C\u7684\u6BCF\u4E2A\u9636\u6BB5\u8981\u6C42\u4EC0\u4E48\uFF0C\u518D\u770B\u4EE3\u7801\u91CC\u5BF9\u5E94\u7684\u5FAA\u73AF\u548C\u6761\u4EF6\u3002\u8FD0\u884C\u540E\u5728\u63A7\u5236\u7BB1\u4E0A\u9010\u6B65\u89C2\u5BDF\u54EA\u6839\u7EBF\u88AB\u526A\u3001\u4E3A\u4EC0\u4E48\u3002"
+  }),
+  scripts: [BOMB_SCRIPT]
+});
+var BOMB_COURSE = {
+  name: "\u62C6\u5F39\u4E13\u5BB6",
+  component: bomb,
+  starter: STARTER,
+  playground: mountOptions,
+  session: BOMB_SESSION
+};
 function Root(host = {}) {
-  const view = usePlayground(bomb, host.source ?? STARTER, { ...mountOptions, ...host.options });
-  if (!view) return null;
-  const world = readBombWorld(view.parts.playback.position, view.parts.playback.trace, view.state.caseIndex);
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx("style", { children: STYLE }),
-    /* @__PURE__ */ jsx(
-      PlaygroundShell,
-      {
-        name: "\u62C6\u5F39\u4E13\u5BB6",
-        layout: view.layout,
-        onEvent: view.send,
-        menu: view.menu,
-        toolbar: [...view.toolbar, { label: "\u70B8\u5F39", controls: [{ kind: "choices", label: "\u578B\u53F7", value: String(view.state.caseIndex), choices: CASES.map((item, caseIndex) => ({
-          value: String(caseIndex),
-          title: item.name,
-          label: String(caseIndex + 1),
-          event: { type: "bomb.case.changed", caseIndex }
-        })) }] }],
-        editor: /* @__PURE__ */ jsx(Widget, { widget: view.editor }),
-        panels: [
-          { key: "world", icon: "viz", title: "\u63A7\u5236\u7BB1", flush: true, content: /* @__PURE__ */ jsx(BombPanel, { testCase: CASES[view.state.caseIndex], world }) },
-          { key: "debug", icon: "debug", title: "\u8C03\u8BD5", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.debugger }) },
-          { key: "output", icon: "output", title: "\u7EC8\u7AEF", content: /* @__PURE__ */ jsx(Widget, { widget: view.parts.terminal }) }
-        ]
-      }
-    )
-  ] });
+  return /* @__PURE__ */ jsx(SessionPage, { course: BOMB_COURSE, host });
 }
 export {
+  BOMB_COURSE,
+  BOMB_SCRIPT,
+  BOMB_SESSION,
   CASE2_SOURCE,
   CASE3_SOURCE,
   CASES,

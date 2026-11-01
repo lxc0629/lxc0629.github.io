@@ -1,0 +1,140 @@
+{
+  "id": "24point",
+  "title": "从四张牌写出一棵运算树",
+  "from": "",
+  "mode": "instruction",
+  "auto": true,
+  "steps": [
+    {
+      "title": "先写最小的子问题","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz"
+        ]
+      },
+      "say": [
+        {
+          "say": "第一题是 3、8、6、5。先让 3 和 8 相乘，得到中间结果 24。",
+          "write": "3 * 8\n"
+        }
+      ]
+    },
+    {
+      "title": "构造另一支并组合","concepts":["recursion"],
+      "say": [
+        {
+          "say": "6 减 5 得到 1；括号把它声明为独立子表达式。最后把两个子结果相乘。",
+          "write": "(3 * 8) * (6 - 5)\n"
+        }
+      ]
+    },
+    {
+      "title": "运行正确表达式","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "viz"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "动画先消费 3、8，再消费 6、5，最后根节点算出 24。四张牌恰好从牌池消失。"
+    },
+    {
+      "title": "源码怎样变成树","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "debug"
+      },
+      "do": [
+        {
+          "action": "code.locate",
+          "args": {
+            "line": 1,
+            "occurrence": 1
+          }
+        }
+      ],
+      "say": "只有一行源码，但解析器先建立树，再按叶子和内部节点求值。Debugger 指向整条表达式，World 展开这一行内部的计算结构。"
+    },
+    {
+      "title": "括号不是装饰","concepts":["recursion"],
+      "say": [
+        {
+          "say": "去掉关键括号，写成连续乘法再减 5。优先级和结合方向让运算树发生变化。",
+          "write": "3 * 8 * 6 - 5\n"
+        }
+      ]
+    },
+    {
+      "title": "运行错误结构","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ],
+        "focus": "viz"
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "四张牌仍各用一次，但根节点不是 24。“输入合法”和“运算结构正确”是两条独立约束。"
+    },
+    {
+      "title": "制造重复用牌","concepts":["recursion"],
+      "say": [
+        {
+          "say": "把最后的 5 换成 3，会重复使用 3，同时遗漏 5。",
+          "write": "(3 * 8) * (6 - 3)\n"
+        }
+      ]
+    },
+    {
+      "title": "牌池记录输入约束","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz"
+        ]
+      },
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "第二个 3 无牌可取，5 仍留在牌池。World 用牌的身份补足了普通算术结果看不到的信息。"
+    },
+    {
+      "title": "恢复并回顾","concepts":["recursion"],
+      "stage": {
+        "panels": [
+          "viz",
+          "debug"
+        ]
+      },
+      "say": [
+        {
+          "say": "恢复正确运算树并再次运行。",
+          "write": "(3 * 8) * (6 - 5)\n"
+        }
+      ]
+    },
+    {
+      "title": "表达式就是程序结构","concepts":["recursion"],
+      "do": [
+        {
+          "action": "code.run"
+        }
+      ],
+      "say": "叶子选择输入，括号决定组合，内部节点保存局部结果，根节点给出答案。运行把隐含的语法树变成可观察事实。"
+    }
+  ]
+}
